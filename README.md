@@ -23,3 +23,14 @@ Open Data ideas:
 - [Kaggle datasets](https://www.kaggle.com/datasets?search=): A bunch of different datasets
 - [Meteorite landings (NASA)](https://data.nasa.gov/Space-Science/Meteorite-Landings/gh4g-9sfh): This comprehensive data set from The Meteoritical Society contains information on all of the known meteorite landings. (Pretty big)
 
+Ressources:
+- [Intro to Rmarkdown](https://www.dataquest.io/blog/r-markdown-guide-cheatsheet/)
+- [R: Basics (online - free - active coding - videos)](https://learn.datacamp.com/courses/free-introduction-to-r)
+- [Getting familiar with data wrangling and visualization (online - free - active coding - videos)](https://beanumber.github.io/sds192/schedule.html)
+- [Basic statistical inference course (online - free - active coding - videos)](https://campus.datacamp.com/courses/statistical-inference-and-data-analysis/)
+- [Git (Fork a repository)](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo)
+- [Git (don't be afraid to commit)](https://dont-be-afraid-to-commit.readthedocs.io/en/latest/git/commandlinegit.html)
+- [My workshop on data wrangling for neuroscience students](https://munoztd0.github.io/Data_Wrangling_NeuroMaster/)
+
+
+
