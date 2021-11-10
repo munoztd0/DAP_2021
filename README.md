@@ -14,6 +14,7 @@ What we expect from you (not exhaustive)
 - upload new documents by firday afternoon
 
 Open Data ideas:
+- [Open psychological datasets](https://docs.google.com/spreadsheets/d/1ejOJTNTL5ApCuGTUciV0REEEAqvhI2Rd2FCoj7afops/htmlview#gid=0)
 - [International Brain Laboratory Behavioral Data Portal (mice data)](https://data.internationalbrainlab.org/) : Behavioral data from a standardized training pipeline, implemented across 9 labs in 7 institutions. Mice learn to make decisions that combine incoming visual evidence with internal beliefs about the dynamic structure of the environment. Through this portal, users can view behavioral data from mice throughout their training, and see the transition from novice to expert behavior unfold.
 - [jpah2016 (Permuco Package in R)](https://cran.r-project.org/web/packages/permuco/permuco.pdf): A subset of a control experiment measuring the impulsive approach tendencies toward physical activity or sedentary behaviors.
 - [EmergencyCost (Permuco Package in R)](https://cran.r-project.org/web/packages/permuco/permuco.pdf): Observational data from 176 emergency patients with variables 
