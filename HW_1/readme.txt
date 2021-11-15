@@ -12,3 +12,9 @@ Make sure that the box Git executable points to the Git executable:
 C:/Program Files (x86)/Git/bin/git.exe -> for windows
 
 Create a project from a repository (here it will be: https://github.com/munoztd0/DAP_2021.git)
+
+Then create an Rmarkdown file in you folder.
+
+Finally, commmit your changes and push them to the github repo (watch out that you are up to date i.e. "git pull" before).
+
+There you are all done!
