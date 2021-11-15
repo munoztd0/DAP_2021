@@ -7,7 +7,7 @@ Setup Git in Rstudio -> https://www.geo.uzh.ch/microsite/reproducible_research/p
 
 Make sure that the box Git executable points to the Git executable:
 
-/usr/bin/git -> for mac
+/usr/local/bin/git -> for mac
 
 C:/Program Files (x86)/Git/bin/git.exe -> for windows
 
