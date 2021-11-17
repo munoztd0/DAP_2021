@@ -1,4 +1,4 @@
-#faire description du contexte et des variables
+
 
 This dataframe has been created for marketing analysis purposes. It assembles various perosnal information about 2239 customers, such as their education level, income, age, maritla status, number of children at home... 
 It also shows their consuming habits (amount spent on wine, on sweets...) and the number of purchases made on discounted products.
