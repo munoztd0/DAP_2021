@@ -1,5 +1,7 @@
 Dataset: https://www.kaggle.com/ruslankl/early-biomarkers-of-parkinsons-disease
 
+Original paper: Automated analysis of connected speech reveals early biomarkers of Parkinson’s disease in patients with rapid eye movement sleep behaviour disorder by Jan Hlavnička, Roman Čmejla, Tereza Tykalová, Karel Šonka, Evžen Růžička & Jan Rusz 
+
 
 We have 131 observations, including 30 patients with early PD, 50 with REM sleep behaviour disorder (RBD) and 50 healthy controls.
 
