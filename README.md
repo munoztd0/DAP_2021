@@ -1,5 +1,5 @@
 # DAP_2021
-Data Analysis Porject fo S&amp;P class 2021
+Data Analysis Project fo S&amp;P class 2021
 
 The DAP must contain:
 - an initial description of data set, sample sizes, types of variables

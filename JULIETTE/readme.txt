@@ -7,7 +7,7 @@ There is very few context concerning this dataframe, since the source is unknown
 It is not clear when these informations were registered, but probably by 2014 since "Dt_Customer" (Date of customer's enrollment with the company) doesn't go higher than 2014. So, by calculating age (2021 - data$Year_Birth) we would get their current age. It seems more correct to calculate "2014 - data$Year_Birth", although here we are only assuming that it was indeed registred in 2014.
 
 Aims :
-- To predict the customer's behavior depending on the most significant personal attributes
+- To predict the customer's behavior (Number of purchases made with a discount) depending on the most significant personal attributes
 - To categorize participants in a few typical profiles (probably with PCA)
 
 
