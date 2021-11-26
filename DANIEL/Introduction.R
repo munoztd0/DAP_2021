@@ -31,3 +31,7 @@ Data$gender<-as.factor(Data$gender)
 #The emotion factors are coded as 1=disgust, 2=fear and 3=neutral
 #The gender factors are coded as m=man and f=woman
 #The disgust and the fear variables are coded form 1 to 7, 1 being feeling "not at all" the emotion and 7 being feeling "very much" the emotion
+
+#data scanning 
+str(Data)
+summary(Data)
