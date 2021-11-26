@@ -34,4 +34,5 @@ Data$gender<-as.factor(Data$gender)
 
 #data scanning 
 str(Data)
-summary(Data)
+summary(Data) #emotion and gender not equal number of observations. Disgust and fear ok, but low means. 
+sum(is.na(Data)) #no NAs
