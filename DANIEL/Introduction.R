@@ -45,6 +45,7 @@ Data %>%
   ggplot(aes(value)) +
   facet_wrap(~ key, scales = "free") +
   geom_histogram()
+hist(sqrt(Data$disgust))
 hist(log10(max(Data$arousal+1) - Data$arousal))
 hist(1/(max(Data$arousal+1) - Data$arousal))
 
