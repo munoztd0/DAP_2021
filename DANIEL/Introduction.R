@@ -15,9 +15,10 @@ emotion<-Raw_data$emotion
 gender<-Raw_data$sex
 disgust<-Raw_data$disgust
 fear<-Raw_data$fear
+arousal<-Raw_data$arousal
 
 #Creating a dataset
-Data<-data.frame(subjects,wordpairs,emotion,gender,disgust,fear)
+Data<-data.frame(subjects,wordpairs,emotion,gender,disgust,fear,arousal)
 
 #Adapting the variables
 Data$emotion<-as.factor(Data$emotion)
@@ -36,3 +37,14 @@ Data$gender<-as.factor(Data$gender)
 str(Data)
 summary(Data) #emotion and gender not equal number of observations. Disgust and fear ok, but low means. 
 sum(is.na(Data)) #no NAs
+library(ggplot2)
+library(tidyverse)
+Data %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram()
+hist(log10(max(Data$arousal+1) - Data$arousal))
+hist(1/(max(Data$arousal+1) - Data$arousal))
+
