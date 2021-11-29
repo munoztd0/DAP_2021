@@ -44,7 +44,23 @@ data$AcceptedCmpTotal <-  as.factor(data$AcceptedCmpTotal)
 levels(data$Marital_Status) <- c("Other", "Single", "Single", "Married", "Single", "Together", "Single", "Other")
 levels(data$AcceptedCmpTotal)
 
+install.packages("moments")
+library(ggpubr)
+library(moments)
+#assymetric data
+skewness(data$NumDealsPurchases, na.rm = TRUE)
 
+data$InvNumDealsPurchases <- 1/data$NumDealsPurchases
+hist(data$InvNumDealsPurchases)
+
+data$LogNumDealsPurchases <- log10(data$NumDealsPurchases)
+hist(data$LogNumDealsPurchases)
+
+data$SQRTNumDealsPurchases <- sqrt(data$NumDealsPurchases)
+hist(data$SQRTNumDealsPurchases)
+skewness(data$SQRTNumDealsPurchases)
+
+hist(data$NumDealsPurchases)
 # 3) Hypotheses 
 
 library(ggplot2)
@@ -52,8 +68,11 @@ ggplot(data, aes(KidHome, MntSweetProducts)) + geom_point()
 ggplot(data, aes(MntWines, Marital_Status)) + geom_boxplot()
 
 
-m1 <- lm(data=data, NumStorePurchases ~ Kidhome + Income*Education)
+m1 <- lm(data=data, SQRTNumDealsPurchases ~ Kidhome + Income*Education + Recency)
 summary(m1)
 
-m2 <- lm(data=data, NumDealsPurchases ~ Income*Education + Kidhome + MntGoldProds)
+m2 <- lm(data=data, SQRTNumDealsPurchases ~ Income + Education + Kidhome + MntGoldProds)
 summary(m2)
+
+autoplot 
+MASS::stepAIC()
