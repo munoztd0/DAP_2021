@@ -44,9 +44,7 @@ AcceptedCmp3: 1 if customer accepted the offer in the 3rd campaign, 0 otherwise
 AcceptedCmp4: 1 if customer accepted the offer in the 4th campaign, 0 otherwise
 AcceptedCmp5: 1 if customer accepted the offer in the 5th campaign, 0 otherwise
 Response: 1 if customer accepted the offer in the last campaign, 0 otherwise
-Place
 
-NumWebPurchases: Number of purchases made through the company’s web site
-NumCatalogPurchases: Number of purchases made using a catalogue
+
 NumStorePurchases: Number of purchases made directly in stores
-NumWebVisitsMonth: Number of visits to company’s web site in the last month
+
