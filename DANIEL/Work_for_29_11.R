@@ -34,7 +34,24 @@ Data$emotion<-as.factor(Data$emotion)
 levels(Data$emotion) <- c("Disgust", "Fear","Neutral")
 Data$gender<-as.factor(Data$gender)
 levels(Data$gender) <- c("Women", "Men")
+Data$disgustOrd<-as.numeric(Data$disgust)
+Data$disgust<-as.factor(Data$disgust)
+Data$fear<-as.factor(Data$fear)
 
 str(Data)
 summary(Data)
+
+#Repeated measures anova
+install.packages("rstatix")
+library(rstatix)
+anov <- anova_test(data = Data, dv = disgustOrd, wid = emotion, within = subjects)
+get_anova_table(res.aov)
+
+
+
+#logistic ordinal regression
+install.packages("ordinal")
+library(ordinal)
+model = clmm(disgust ~ emotion + gender +  (emotion | subjects), data = Data)
+summary(model)
 
