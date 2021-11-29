@@ -7,7 +7,7 @@
 
 #Data description
 #Here is a description of the different variables:
-#subjects: the number subject of the experiment.
+#subjects: the subject's number in the experiment.
 #wordpairs: the wordpairs presented
 #emotion: the emotion elicited by the wordpairs (disgust, fear or neutral)
 #gender: the gender of the subjects (man or woman)
