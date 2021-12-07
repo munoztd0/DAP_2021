@@ -1,0 +1,232 @@
+---
+title: "ANALYSIS REPORT"
+author: "XXX"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    includes:
+    code_folding: "hide"
+    toc: true
+    toc_float: false
+    number_sections: false
+bibliography:
+- r-references.bib
+  # repro:
+#   data:
+#     data: data.csv
+#     
+#   #scripts: clean.R
+---
+
+### Setup {-}
+  
+```{r setup, results='hide', message=FALSE, warning=FALSE}
+
+#this is to check to see if package are installed and if not to install them or just load them if they are installed!
+if(!require(pacman)) {install.packages(c("pacman", "remotes"))}
+
+if(!require(papaja)) {remotes::install_github("crsh/papaja")}
+
+pacman::p_load(here, tinylabels, apaTables, tidyverse, gtsummary, car, GGally, MASS, rcompanion, moments, utils, sjPlot, interactions, kableExtra, report, papaja, bookdown)
+
+p_load_gh("crsh/papaja@devel")
+
+
+#get relative path
+path =  here("RESSOURCES") #this is really important ! you juste need to put the name of YOUR folder and here() will find the relative path for you !
+setwd(path) #set working directory
+
+# load data
+base  <- read.csv("data.csv")
+
+
+session = utils::sessionInfo() # get session informations
+
+#opts_chunk$set(echo = F, message=F, warning=F) # set echo F for all
+
+```
+
+<!-- This file was automatically created via `the Repro package (version 0.1.0)` using  `r session$R.version$version.string` -->
+
+
+
+```{r options, results='hide', message=FALSE, warning=FALSE}
+options(scipen = 666, warn=-1, contrasts=c("contr.sum","contr.poly"), knitr.kable.NA = '')  #remove scientific notation # remove warnings #set contrasts to sum ! 
+set.seed(666) #set random seed
+
+`%notin%` <- Negate(`%in%`)
+
+# panderOptions('knitr.auto.asis', FALSE) #remove auto styling
+```
+
+
+$~$
+$~$
+
+### Introduction
+Blabla citation in parentesis [@james_1890] blbabla, or citation in text @james_1890
+
+$~$
+$~$
+
+#### Clean up 
+
+$~$
+$~$
+```{r clean}
+base$Priming = as.factor(base$Priming); base$Product = as.factor(base$Product); 
+```
+
+$~$
+$~$
+
+#### Demographics
+
+$~$
+$~$
+```{r demographics}
+base[c("Age", "Gender", "Profession")] %>%  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{n} / {N} ({p}%)"),)  %>% modify_caption("**Table 1. Demographics **") %>%bold_labels()
+```
+$~$
+$~$
+
+### Inspections
+
+$~$
+$~$
+```{r plots, fig.align="center", message=FALSE, warning=FALSE}
+base %>% 
+  keep(is.numeric) %>%
+  gather() %>%
+  ggplot(aes(value)) +
+  facet_wrap(~key, scales = "free") + 
+  geom_histogram()
+
+#or GGally
+```
+$~$
+$~$
+
+### Statistics
+
+$~$
+$~$
+
+#### Reccomendation
+
+```{r Report_Regression}
+base_recco = filter(base, id %notin% c("13594")) #remove huge outliers, see appendix
+
+final_recco = lm(Reccomend ~Priming*Product + Behav_enviro + Product:Behav_enviro,  data = base_recco)
+
+apa_lm <- papaja::apa_print(anova(final_recco))
+papaja::apa_table(apa_lm$table,  caption = "Anova table for Reccomendation.", label =NULL)
+
+
+sjPlot::plot_model(final_recco)
+
+```
+$~$
+$~$
+```{r GLM int, fig.align = 'center'}
+interactions::interact_plot(final_recco, pred = Behav_enviro, modx = Product, interval = TRUE)
+```
+\
+
+$~$
+$~$
+
+### Conclusions
+
+$~$
+$~$
+
+Example for reporting :\
+
+Product (`r apa_lm$full_result$Product`) and Behav_enviro (`r apa_lm$full_result$Behav_enviro`) affected reccomendation. However, the effect of Behav_enviro differed by Product, `r apa_lm$full_result$Product_Behav_enviro`.
+
+$~$
+$~$
+
+
+### Appendix
+
+$~$
+$~$
+
+#### Visual check normality
+
+```{r annexes, fig.show="hold", out.width="50%", fig.align = 'center'}
+
+plotNormalHistogram(base$Reccomend, main = "Reccomendation", sub = paste("skewness =", round(skewness(base$Reccomend, na.rm = TRUE),2)))
+
+```
+
+$~$
+$~$
+
+
+#### Diagnostics Plots for GLM Reccomendation with outliers
+```{r diag GLM Recco, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
+
+modrecco = lm(Reccomend ~ Priming*Product*Decision_mode +Age+ Priming*Product*Behav_enviro, data = base)
+
+plot(modrecco, c(1:2,4), labels.id = base$id )
+```
+
+$~$
+$~$
+
+#### Diagnostics Plots for GLM Reccomendation with outliers
+```{r diag GLM Recco2, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
+
+modrecco = lm(Reccomend ~Priming*Product*Decision_mode +Age+ Priming*Product*Behav_enviro, data = base_recco)
+
+plot(modrecco, c(1:2,4), labels.id = base_recco$id )
+```
+
+$~$
+$~$
+
+#### Model selection for Reccomendation
+```{r diag GLM MSrecco, echo=FALSE, message=FALSE, warning=FALSE}
+
+MS = MASS::stepAIC(modrecco, direction = "both", trace = FALSE)
+
+x = kable(attributes(MS$anova)$heading, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') %>%  row_spec(5, bold=T)
+gsub("<thead>.*</thead>", "", x)
+
+
+kable(MS$anova, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(0, bold=T,align='c')
+
+# sjPlot::plot_model(final_recco, type = "pred")
+```
+$~$
+$~$
+
+# Packages
+
+$~$
+$~$
+```{r, comment=NA}
+report::report_packages()
+```
+
+$~$
+$~$
+
+# References
+$~$
+$~$
+```{r, include = F}
+r_refs(file = "r-references.bib")
+my_citation <- cite_r(file = "r-references.bib", )
+# `r_refs()` creates a BibTeX file containing citations for R and all currently loaded packages.
+# `cite_r()` takes these citations and turns them into readily reportable text.
+# `my_citation` now contains the following text that you can use in your document: `r my_citation`
+
+```
+$~$
+$~$
