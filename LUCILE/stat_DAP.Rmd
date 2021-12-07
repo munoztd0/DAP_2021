@@ -48,15 +48,28 @@ The aim is to **predict whether the cancer is benign or malignant**
 
 Load libraries
 ```{r}
-library(GGally)       # for ggpairs
-library(ggfortify)    # for autoplot
-library(ggplot2)      # for ggplot
-library('MASS')       # for the glm model selection 
+# library(GGally)       # for ggpairs
+# library(ggfortify)    # for autoplot
+# library(ggplot2)      # for ggplot
+# library('MASS')       # for the glm model selection 
+
+#this is to check to see if package are installed and if not to install them or just load them if they are installed!
+if(!require(pacman)) {install.packages(c("pacman", "remotes"))}
+
+pacman::p_load(GGally, ggfortify, ggplot2, MASS, here)
 ```
+
+
 
 Load data
 ```{r}
-df<-read.csv('/Users/lucile/Library/Mobile Documents/com~apple~CloudDocs/STUDY/NEURO/LECTURES/stat/data.csv',stringsAsFactors = 1)
+#get relative path
+path = here("LUCILE")
+setwd(path) #set working directory
+
+# df<-read.csv('/Users/lucile/Library/Mobile Documents/com~apple~CloudDocs/STUDY/NEURO/LECTURES/stat/data.csv',stringsAsFactors = 1)
+
+df<-read.csv('data.csv', stringsAsFactors = 1)
 ```
 
 

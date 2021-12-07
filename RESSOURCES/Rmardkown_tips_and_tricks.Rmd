@@ -33,7 +33,8 @@ p_load_gh("crsh/papaja@devel")
 
 
 #get relative path
-path =  here("RESSOURCES") #this is really important ! you juste need to put the name of YOUR folder and here() will find the relative path for you !
+path =  here("RESSOURCES") #this is really important ! you juste need to put the name of YOUR folder and here() will find the relative path for you ! 
+#or path =  dirname(rstudioapi::getActiveDocumentContext()$path) in R
 setwd(path) #set working directory
 
 # load data
@@ -94,6 +95,7 @@ $~$
 
 $~$
 $~$
+Inspect all distributions
 ```{r plots, fig.align="center", message=FALSE, warning=FALSE}
 base %>% 
   keep(is.numeric) %>%
@@ -104,6 +106,16 @@ base %>%
 
 #or GGally
 ```
+$~$
+$~$
+
+Inspect distributions by groups with violin plots!
+```{r violin, fig.align="center", message=FALSE, warning=FALSE}
+ggplot(base, aes(x=Priming, y=Age)) +
+  geom_violin(trim=FALSE, fill='#A4A4A4', color="darkred")+
+  geom_boxplot(width=0.1) + theme_minimal()
+```
+
 $~$
 $~$
 
