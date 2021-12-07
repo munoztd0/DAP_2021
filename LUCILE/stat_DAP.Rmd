@@ -10,15 +10,44 @@ output:
     toc: true
     toc_depth: 1
     number_sections: true
-fontfamily: libertine
+#fontfamily: libertine # j'ai du enlevé ca parce que j'avais pas la font
 fontsize: 11pt
 geometry: margin=1in
+urlcolor: blue
 ---
 
+## Setup 
+
+Load libraries
+```{r}
+# Specify directory for figure output in a temporary directory
+temppath <- tempdir()
+knitr::opts_chunk$set(fig.path = temppath)
+
+# library(GGally)       # for ggpairs
+# library(ggfortify)    # for autoplot
+# library(ggplot2)      # for ggplot
+# library('MASS')       # for the glm model selection 
+
+#this is to check to see if package are installed and if not to install them or just load them if they are installed!
+if(!require(pacman)) {install.packages(c("pacman", "remotes"))}
+
+pacman::p_load(GGally, ggfortify, ggplot2, MASS, here, kableExtra)
+```
+
 # Information about the dataset
-https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29
+
+[Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) \
+
+
 "Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
-![image of a fine needle aspirate (FNA) of a breast mass](a-b-Fine-needle-aspiration-cytology-of-the-breast-lesion-showed-singly-lying.png.jpeg){width=40%}
+\
+
+![image of a fine needle aspirate (FNA) of a breast mass](https://static-01.hindawi.com/articles/pri/volume-2011/547580/figures/547580.fig.001.jpg){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:40%;"}
+
+$~$
+$~$
+
 
 Ten real-valued features are computed for each cell nucleus:
 
@@ -44,22 +73,6 @@ The aim is to **predict whether the cancer is benign or malignant**
 
 # Preprocessing
 
-## Load 
-
-Load libraries
-```{r}
-# library(GGally)       # for ggpairs
-# library(ggfortify)    # for autoplot
-# library(ggplot2)      # for ggplot
-# library('MASS')       # for the glm model selection 
-
-#this is to check to see if package are installed and if not to install them or just load them if they are installed!
-if(!require(pacman)) {install.packages(c("pacman", "remotes"))}
-
-pacman::p_load(GGally, ggfortify, ggplot2, MASS, here)
-```
-
-
 
 Load data
 ```{r}
@@ -69,17 +82,11 @@ setwd(path) #set working directory
 
 # df<-read.csv('/Users/lucile/Library/Mobile Documents/com~apple~CloudDocs/STUDY/NEURO/LECTURES/stat/data.csv',stringsAsFactors = 1)
 
-df<-read.csv('data.csv', stringsAsFactors = 1)
+df<-read.csv('data.csv', stringsAsFactors = 1) # j'ai  ajouté le dataset sur github
 ```
-
 
 
 ## First look into the data
-```{r}
-str(df)
-head(df)
-summary(df)
-```
 
 There are a lot of variables, we should pick the most relevant ones. 
 
@@ -89,31 +96,8 @@ df<-df[,-33]
 df<-df[,-1]
 ```
 
-
-Proportion of benign vs malignant cancer 
-```{r}
-prop.table(table(df$diagnosis))   #  B : 0.6274165  M: 0.3725835 
-```
-
-The two types of cancer are not represented in the same proportion, this can lead to a bias. Is this proportion representative of the reality ?
-
-> "The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"   [2]
-
-## 2. Selection of variables of interest 
-
-According to the description of the data, some variables are likely to be correlated.
-We will address this correlation with the mean group of variable.
-
-Hypothesis about the correlation between variables :
-*radius and smoothness should be correlated
-*radius, perimeter, area and compactness should be perfectly correlated since
-  it exists a formula between these variables
-* concavity and symmetry should be correlated
-* texture and fractal_dimension should not have any correlation 
-
-
 Let's create a new frame for a the variables of type mean.
-```{r, echo = FALSE}
+```{r, echo = FALSE, comment=NA}
 df_mean <-data.frame("diagnosis"          = df$diagnosis,
                      "radius"             = df$radius_mean,
                      "texture"            = df$texture_mean, 
@@ -126,6 +110,39 @@ df_mean <-data.frame("diagnosis"          = df$diagnosis,
                      "symmetry"           = df$symmetry_mean,
                      "fractal_dimension"  = df$fractal_dimension_mean) 
 str(df_mean)
+
+
+kable(head(df_mean), "latex", booktabs = T) %>%
+kable_styling(latex_options = c("striped", "scale_down"))
+
+summary(df_mean)
+```
+
+
+
+
+Proportion of benign vs malignant cancer 
+```{r, comment=NA}
+prop.table(table(df_mean$diagnosis))   
+```
+
+The two types of cancer are not represented in the same proportion, this can lead to a bias. Is this proportion representative of the reality ?
+
+> "The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"   [2]
+
+## Selection of variables of interest 
+
+According to the description of the data, some variables are likely to be correlated.
+We will address this correlation with the mean group of variable.
+
+Hypothesis about the correlation between variables :
+*radius and smoothness should be correlated
+*radius, perimeter, area and compactness should be perfectly correlated since
+  it exists a formula between these variables
+* concavity and symmetry should be correlated
+* texture and fractal_dimension should not have any correlation 
+
+```{r, echo = FALSE, warning=F, message=F}
 ggpairs(data = df_mean,aes(color = diagnosis,alpha =0.5))
 levels(df_mean$diagnosis)
 ```
@@ -209,7 +226,7 @@ ftp ftp.cs.wisc.edu cd math-prog/cpo-dataset/machine-learn/WDBC/
 
 ## Correlation in the 'standard deviation' and 'worst' group
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, cache=T}
 # create a new frame for a the variable of type extreme
 df_se <-data.frame("diagnosis"          = df$diagnosis,
                         "radius"             = df$radius_se,
