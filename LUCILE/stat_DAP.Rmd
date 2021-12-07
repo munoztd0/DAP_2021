@@ -14,15 +14,14 @@ output:
 fontsize: 11pt
 geometry: margin=1in
 urlcolor: blue
+bibliography:
+- r-references.bib
 ---
 
 ## Setup 
 
 Load libraries
 ```{r}
-# Specify directory for figure output in a temporary directory
-temppath <- tempdir()
-knitr::opts_chunk$set(fig.path = temppath)
 
 # library(GGally)       # for ggpairs
 # library(ggfortify)    # for autoplot
@@ -31,8 +30,9 @@ knitr::opts_chunk$set(fig.path = temppath)
 
 #this is to check to see if package are installed and if not to install them or just load them if they are installed!
 if(!require(pacman)) {install.packages(c("pacman", "remotes"))}
+if(!require(papaja)) {remotes::install_github("crsh/papaja")}
 
-pacman::p_load(GGally, ggfortify, ggplot2, MASS, here, kableExtra)
+pacman::p_load(GGally, ggfortify, ggplot2, MASS, here, kableExtra, papaja)
 ```
 
 # Information about the dataset
@@ -43,7 +43,7 @@ pacman::p_load(GGally, ggfortify, ggplot2, MASS, here, kableExtra)
 "Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
 \
 
-![image of a fine needle aspirate (FNA) of a breast mass](https://static-01.hindawi.com/articles/pri/volume-2011/547580/figures/547580.fig.001.jpg){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:40%;"}
+![image of a fine needle aspirate (FNA) of a breast mass](fig1.jpg){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:40%;"}
 
 $~$
 $~$
@@ -128,7 +128,9 @@ prop.table(table(df_mean$diagnosis))
 
 The two types of cancer are not represented in the same proportion, this can lead to a bias. Is this proportion representative of the reality ?
 
-> "The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"   [2]
+"The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"   [2]
+
+Blabla citation in parentesis [@james_1890] blbabla, or citation in text @james_1890
 
 ## Selection of variables of interest 
 
@@ -272,4 +274,15 @@ We get the same results as for the mean group.
 ```{r echo = FALSE}
 sessionInfo()
 ```
-  
+
+# References
+$~$
+$~$
+```{r, include = F}
+papaja::r_refs(file = "r-references.bib")
+my_citation <- cite_r(file = "r-references.bib", )
+# `r_refs()` creates a BibTeX file containing citations for R and all currently loaded packages.
+# `cite_r()` takes these citations and turns them into readily reportable text.
+# `my_citation` now contains the following text that you can use in your document: `r my_citation`
+
+```

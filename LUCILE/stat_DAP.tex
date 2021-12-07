@@ -132,6 +132,26 @@
 \ifluatex
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
+  % set entry spacing
+  \ifnum #2 > 0
+  \setlength{\parskip}{#2\baselineskip}
+  \fi
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 \title{Breast Cancer Wisconsin (Diagnostic)}
 \author{L. Favero}
@@ -152,10 +172,6 @@ Load libraries
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Specify directory for figure output in a temporary directory}
-\NormalTok{temppath }\OtherTok{\textless{}{-}} \FunctionTok{tempdir}\NormalTok{()}
-\NormalTok{knitr}\SpecialCharTok{::}\NormalTok{opts\_chunk}\SpecialCharTok{$}\FunctionTok{set}\NormalTok{(}\AttributeTok{fig.path =}\NormalTok{ temppath)}
-
 \CommentTok{\# library(GGally)       \# for ggpairs}
 \CommentTok{\# library(ggfortify)    \# for autoplot}
 \CommentTok{\# library(ggplot2)      \# for ggplot}
@@ -172,7 +188,17 @@ Load libraries
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{pacman}\SpecialCharTok{::}\FunctionTok{p\_load}\NormalTok{(GGally, ggfortify, ggplot2, MASS, here, kableExtra)}
+\ControlFlowTok{if}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{require}\NormalTok{(papaja)) \{remotes}\SpecialCharTok{::}\FunctionTok{install\_github}\NormalTok{(}\StringTok{"crsh/papaja"}\NormalTok{)\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: papaja
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pacman}\SpecialCharTok{::}\FunctionTok{p\_load}\NormalTok{(GGally, ggfortify, ggplot2, MASS, here, kableExtra, papaja)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -189,7 +215,7 @@ present in the image.''\\
 
 \begin{figure}
 \centering
-\includegraphics{https://static-01.hindawi.com/articles/pri/volume-2011/547580/figures/547580.fig.001.jpg}
+\includegraphics{fig1.jpg}
 \caption{image of a fine needle aspirate (FNA) of a breast mass}
 \end{figure}
 
@@ -329,11 +355,12 @@ Proportion of benign vs malignant cancer
 The two types of cancer are not represented in the same proportion, this
 can lead to a bias. Is this proportion representative of the reality ?
 
-\begin{quote}
 ``The benign to malignant ratio (B:M ratio) among breast biopsies
 (number of benign breast lesions divided by number of breast cancers) is
 widely believed to be around 4:1 or 5:1'' {[}2{]}
-\end{quote}
+
+Blabla citation in parentesis (James 1890) blbabla, or citation in text
+James (1890)
 
 \hypertarget{selection-of-variables-of-interest}{%
 \subsection{Selection of variables of
@@ -349,7 +376,7 @@ should be perfectly correlated since it exists a formula between these
 variables * concavity and symmetry should be correlated * texture and
 fractal\_dimension should not have any correlation
 
-\includegraphics{/tmp/RtmpTdjpUkunnamed-chunk-6-1.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-6-1.pdf}
 
 \begin{verbatim}
 ## [1] "B" "M"
@@ -383,8 +410,8 @@ The following function permit to see better the correlation :
 ## TRUE, : data in column(s) 'diagnosis' are not numeric and were ignored
 \end{verbatim}
 
-\includegraphics{/tmp/RtmpTdjpUkunnamed-chunk-7-1.pdf} Even if
-compactness is define as \(perimeter^2 / area - 1.0\) the correlation
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-7-1.pdf} Even
+if compactness is define as \(perimeter^2 / area - 1.0\) the correlation
 between this variable and area or perimeter is not 1 because the
 correlation show only the linear dependency. The correlation between
 radius perimeter and area is 1. We will only keep radius.
@@ -781,7 +808,7 @@ group}\label{correlation-in-the-standard-deviation-and-worst-group}}
 ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 \end{verbatim}
 
-\includegraphics{/tmp/RtmpTdjpUkunnamed-chunk-14-1.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-14-1.pdf}
 
 \begin{verbatim}
 ## 'data.frame':    569 obs. of  11 variables:
@@ -811,7 +838,7 @@ group}\label{correlation-in-the-standard-deviation-and-worst-group}}
 ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 \end{verbatim}
 
-\includegraphics{/tmp/RtmpTdjpUkunnamed-chunk-14-2.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-14-2.pdf}
 
 We get the same results as for the mean group.
 
@@ -829,7 +856,7 @@ We get the same results as for the mean group.
   {[}2{]} \url{https://pubmed.ncbi.nlm.nih.gov/7091922/}
 \item
   {[}3{]} K. P. Bennett and O. L. Mangasarian: ``Robust Linear
-  Programming Discrimination of Two Linearly Inseparable Sets'',
+  Programming Discrimination of Two Linearly Inseparable Sets,''
   Optimization Methods and Software 1, 1992, 23-34
 \end{itemize}
 
@@ -857,12 +884,12 @@ We get the same results as for the mean group.
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] kableExtra_1.3.4 here_1.0.1       MASS_7.3-51.6    ggfortify_0.4.11
-## [5] GGally_2.1.1     ggplot2_3.3.3    pacman_0.5.1    
+## [1] kableExtra_1.3.4  here_1.0.1        MASS_7.3-51.6     ggfortify_0.4.11 
+## [5] GGally_2.1.1      ggplot2_3.3.3     papaja_0.1.0.9997 pacman_0.5.1     
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] tidyselect_1.1.1   xfun_0.23          purrr_0.3.4        colorspace_2.0-1  
-##  [5] vctrs_0.3.8        generics_0.1.0     htmltools_0.5.1.1  viridisLite_0.4.0 
+##  [5] vctrs_0.3.8        generics_0.1.0     viridisLite_0.4.0  htmltools_0.5.1.1 
 ##  [9] yaml_2.2.1         utf8_1.2.1         rlang_0.4.11       pillar_1.6.1      
 ## [13] glue_1.4.2         withr_2.4.2        DBI_1.1.1          RColorBrewer_1.1-2
 ## [17] lifecycle_1.0.0    plyr_1.8.6         stringr_1.4.0      munsell_0.5.0     
@@ -876,5 +903,18 @@ We get the same results as for the mean group.
 ## [49] rmarkdown_2.8      reshape_0.8.8      svglite_2.0.0      httr_1.4.2        
 ## [53] rstudioapi_0.13    R6_2.5.0           compiler_4.0.1
 \end{verbatim}
+
+\hypertarget{references-1}{%
+\section{References}\label{references-1}}
+
+\(~\) \(~\)
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode\hypertarget{ref-james_1890}{}%
+James, William. 1890. {``The Perception of Reality.''} \emph{Principles
+of Psychology} 2: 283--324.
+
+\end{CSLReferences}
 
 \end{document}
