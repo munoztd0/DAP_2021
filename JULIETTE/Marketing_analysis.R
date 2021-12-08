@@ -50,29 +50,36 @@ library(moments)
 #assymetric data
 skewness(data$NumDealsPurchases, na.rm = TRUE)
 
-data$InvNumDealsPurchases <- 1/data$NumDealsPurchases
-hist(data$InvNumDealsPurchases)
+# data$InvNumDealsPurchases <- 1/data$NumDealsPurchases
+# hist(data$InvNumDealsPurchases)
 
-data$LogNumDealsPurchases <- log10(data$NumDealsPurchases)
-hist(data$LogNumDealsPurchases)
+#data$LogNumDealsPurchases <- log10(data$NumDealsPurchases)
+# hist(data$LogNumDealsPurchases)
 
 data$SQRTNumDealsPurchases <- sqrt(data$NumDealsPurchases)
 hist(data$SQRTNumDealsPurchases)
 skewness(data$SQRTNumDealsPurchases)
+str(data$SQRTNumDealsPurchases)
+hist(data$SQRTNumDealsPurchases)
+boxplot(data$SQRTNumDealsPurchases)
+max(data$SQRTNumDealsPurchases)
 
-hist(data$NumDealsPurchases)
+
 # 3) Hypotheses 
 
 library(ggplot2)
-ggplot(data, aes(KidHome, MntSweetProducts)) + geom_point()
+ggplot(data, aes(Kidhome, MntSweetProducts)) + geom_point()
 ggplot(data, aes(MntWines, Marital_Status)) + geom_boxplot()
 
 
-m1 <- lm(data=data, SQRTNumDealsPurchases ~ Kidhome + Income*Education + Recency)
-summary(m1)
+m1 <- lm(data=data, SQRTNumDealsPurchases ~ Income + Education + Kidhome + MntGoldProds + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
+summary(m1) #not satisfying
 
-m2 <- lm(data=data, SQRTNumDealsPurchases ~ Income + Education + Kidhome + MntGoldProds)
+m2 <- lm(data=data, Income ~ Education + Marital_Status + NumDealsPurchases + Kidhome + MntGoldProds + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
 summary(m2)
+
+m3 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
+summary(m3)
 
 autoplot 
 MASS::stepAIC()
