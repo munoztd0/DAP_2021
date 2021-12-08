@@ -14,12 +14,25 @@
 #disgust: a Likert scale (1 to 7) of the subjects’ emotional subjective feeling of disgust 
 #fear: a Likert scale (1 to 7) of the subjects’ emotional subjective feeling of fear
 
+
+#this is to check to see if package are installed and if not to install them or just load them if they are installed!
+if(!require(pacman)) {install.packages("pacman")}
+
+pacman::p_load(here, rstatix, ordinal)
+
+
+#get relative path
+path =  here("DANIEL") #this is really important ! you juste need to put the name of YOUR folder and here() will find the relative path for you ! 
+#or path =  dirname(rstudioapi::getActiveDocumentContext()$path) in R
+setwd(path) #set working directory
+
+
 #data scanning 
-Raw_data <- read.csv2("C:/Users/dsg96/OneDrive - unige.ch/Uni/Neuro M2 & Psycho M1/Automne/SP - Statistics and Probability/DAP_2021/DAP_2021/DANIEL/Raw_data.csv")
+Raw_data <- read.csv2("Raw_data.csv")
 
 #Creating a working dataset
 #Giving nice names to variables
-subjects<-Raw_data$ï..code
+subjects<-Raw_data$code
 wordpairs<-Raw_data$wordpair
 emotion<-Raw_data$emotion
 gender<-Raw_data$sex
@@ -42,16 +55,17 @@ str(Data)
 summary(Data)
 
 #Repeated measures anova
-install.packages("rstatix")
-library(rstatix)
-anov <- anova_test(data = Data, dv = disgustOrd, wid = emotion, within = subjects)
-get_anova_table(res.aov)
+# anov <- anova_test(data = Data, dv = disgustOrd, wid = emotion, within = subjects)
+# get_anova_table(res.aov)
 
 
 
 #logistic ordinal regression
-install.packages("ordinal")
-library(ordinal)
-model = clmm(disgust ~ emotion + gender +  (emotion | subjects), data = Data)
+m1 = MASS::polr(disgust ~ emotion + gender, data = Data)
+m2 = clmm(disgust ~ emotion + gender + (1|subjects), data = Data)
+m3 = clmm(disgust ~ emotion + gender + (emotion | subjects), data = Data)
 summary(model)
 
+
+RVAideMemoire::Anova.clmm(m2, type = "II") #or type = "III" depending on the context
+RVAideMemoire::Anova.clmm(m3, type = "II") #or type = "III" depending on the context
