@@ -55,7 +55,7 @@ ggpairs(d, aes(color=gvhd, alpha = 0.3))
 # Modelization 
 
 ```{r}
-surv<-Surv(d$time,d$dead==1)
+surv<-Surv(d$time,d$dead=="yes")
 ```
 
 ## A simple model
