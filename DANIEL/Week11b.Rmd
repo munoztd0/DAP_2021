@@ -3,8 +3,8 @@ title: "Week11"
 author: "Daniel Granja"
 date: "08/12/2021"
 output: 
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -32,8 +32,8 @@ d[c(1,2,6)]<-NULL
 ##Data explanation
 > This data aims to find the variables that explain bone marrow transplant survival times in relation with graft versus host disease (GHVD). 
 
- ```{r}
- str(d)
+```{r}
+str(d)
 summary(d)
 ```
 
@@ -58,7 +58,7 @@ ggpairs(d, aes(color=gvhd, alpha = 0.3))
 
 #Modelization
 ```{r}
-m1<-lm( time~ gvhd,data=d)
+m1<-lm(time~ gvhd,data=d)
 summary(m1)
 ```
 > The p-value is significant for this model
