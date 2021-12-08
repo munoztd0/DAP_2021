@@ -1,0 +1,106 @@
+---
+title: "Week11"
+author: "Daniel Granja"
+date: "08/12/2021"
+output: 
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Aim
+**Report how bone marrow transplant survival times relates to graft versus host disease (GHVD)**
+
+#Preprocessing
+##Load library and Data
+```{r}
+library(GGally)       # for ggpairs
+library(ggfortify)    # for autoplot
+library(ggplot2)      # for ggplot
+library(ISwR)         # for the dataset
+
+d<-graft.vs.host
+
+#Select variables of interest
+d[c(1,2,6)]<-NULL
+
+```
+
+##Data explanation
+> This data aims to find the variables that explain bone marrow transplant survival times in relation with graft versus host disease (GHVD). 
+
+ ```{r}
+ str(d)
+summary(d)
+```
+
+Transform into factor the variables : type, preg, gvhd, dead
+
+```{r}
+d$type <-as.factor(d$type) #type of leukaemia coded 1: AML, 2: ALL, 3: CML for acute myeloid, acute lymphatic, and chronic myeloid leukaemia.
+d$preg<-as.factor(d$preg) # indicating whether donor has been pregnant. 0: no, 1: yes.
+levels(d$preg)<-c("no","yes")
+d$gvhd<-as.factor(d$gvhd)# graft-versus-host disease, 0: no, 1: yes
+levels(d$gvhd)<-c("no","yes")
+d$dead <- as.factor(d$dead) # a numeric vector code, 0: no (censored), 1: yes
+levels(d$dead)<-c("no","yes")
+str(d)
+summary(d)
+```
+
+#Plot the ggpairs
+```{r}
+ggpairs(d, aes(color=gvhd, alpha = 0.3))
+```
+
+#Modelization
+```{r}
+m1<-lm( time~ gvhd,data=d)
+summary(m1)
+```
+> The p-value is significant for this model
+
+#Adding other variables
+
+```{r}
+m2<-lm( time~ gvhd+preg, data=d)
+summary(m2)
+anova(m1,m2)
+m3<-lm( time~ gvhd+type, data=d)
+summary(m3)
+anova(m1,m3)
+m4<-lm( time~ gvhd+donage, data=d)
+summary(m4)
+anova(m1,m4)
+```
+> Only the addition of the type IV brings something more to the model as per the anova tests' significance. 
+
+#Adding interaction
+```{r}
+m31<-lm( time~ gvhd*type, data=d)
+summary(m31)
+anova(m3,m31)
+```
+> The interaction doesn't bring much (p =< 0.75).
+> The best model is m3: " Y = 747.6 + (-636.7)*gvhdyes + 145.8*type2 + 561.2*type3 ".
+
+#Controling the postulates
+```{r}
+autoplot(m3)
+```
+> The postulates seem ok, even if we can discuss some bortherline observations.
+
+#Representation
+```{r}
+ggplot(data=d, aes(x=gvhd,y=time, colour=type))+geom_violin()
+```
+
+>In conclusion, we can predict that the graft-versus-host desease reduce survival time when it's present, and the acute lymphatic leukaemia (type 2) and the chronic myeloid leukaemia (type 3) are associated with a better survival time than acute myeloid leukaemia.
+
+# Version of R used 
+```{r, echo = FALSE}
+sessionInfo()
+```

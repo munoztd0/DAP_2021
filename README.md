@@ -1,4 +1,7 @@
 # DAP_2021
+
+[Link to the example](https://munoztd0.github.io/DAP_2021/RESOURCES/Rmardkown_tips_and_tricks.html) 
+
 Data Analysis Project fo S&amp;P class 2021
 
 The DAP must contain:

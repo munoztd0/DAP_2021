@@ -1,0 +1,60 @@
+---
+title: "Exercise Week 11 - R Markdown"
+author: "Anja Probst"
+date: "3 12 2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(vtable)
+library(GGally)
+library(ggfortify)
+library(stargazer)
+```
+
+## R Markdown
+```{r echo=FALSE}
+knitr::include_graphics('./iris.jpg')
+```
+
+```{r, results='asis'}
+iris$Species <- as.factor(iris$Species)
+sumtable(iris)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE, results='hide', fig.keep='all'}
+# Suppress binwidth warnings adapted from https://github.com/ggobi/ggally/issues/184
+ggpairs(iris, progress=FALSE, lower=list(combo=wrap("facethist", binwidth=0.8)))
+```
+
+## Model
+
+```{r}
+m1 <- lm (data=iris, Sepal.Length ~ Species)
+m2 <- lm (data=iris, Petal.Length ~ Species)
+```
+
+```{r, echo=FALSE, results='asis'}
+#stargazer(m1, m2)
+```
+### Autoplot for species as predictor for petal length
+```{r, echo=FALSE, results='hide', fig.keep='all'}
+autoplot(m2)
+```
+
+# Report
+In this analysis I wanted to see, if Species is a good predictor for Sepal.Length and Petal.Length.
+First I produces a table to get a good summary of my variables. After that I generated a ggpairs plot, to see if there are any correlating variables. After that I generated linear model to see, if the factor species is indeed a good predictor for both of the variables.
+As seen in the first linear model, the prediction for sepal length shows an R^2 of 0.619 and the second model for the prediction of petal lenth shows an R^2 of 0.941. Both have a good p-value.
+As the prediction of Petal.legth with Species as a predictor is even better, I here generated an autoplot to confirm. Here the residuals are radnomly distributed around the horizontal line and the Normal Q-Q plot doesnt show any extreme outliers. So it seems we have a good model.
+
+
+
+
