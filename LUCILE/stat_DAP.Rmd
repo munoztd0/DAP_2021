@@ -32,7 +32,7 @@ Load libraries
 if(!require(pacman)) {install.packages(c("pacman", "remotes"))}
 if(!require(papaja)) {remotes::install_github("crsh/papaja")}
 
-pacman::p_load(GGally, ggfortify, ggplot2, MASS, here, kableExtra, papaja)
+pacman::p_load(GGally, ggfortify, ggplot2, MASS, here, kableExtra, papaja, glmnet)
 ```
 
 # Information about the dataset
@@ -196,6 +196,12 @@ summary(m)
 751.44/153.35
 ```
 Overdistribution ? 
+```{r}
+  library(boot)
+  diag <- glm.diag(m)
+  glm.diag.plots(m, diag)
+```
+
 
 Let's see with an anova test if we can remove symmetry,concavity,concave.points and fractal_dimension 
 ```{r}
@@ -212,9 +218,54 @@ anova(m2,m3,test="Chisq")
 ```
 
 ## Visualization 
+( to see)
+## glm with glmnet
+Let's separate the dataset into train and test set
+```{r}
+## 75% of the sample size
+prop_train_test <- floor(0.75 * nrow(df_mean))
 
+## set the seed to make your partition reproducible
+set.seed(123)
+train_ind <- sample(seq_len(nrow(df_mean)), size = prop_train_test)
+#sample = sample.split(data$num, SplitRatio = .75)
+#train = subset(data, sample == TRUE)
+#test  = subset(data, sample == FALSE)
+train <- df_mean[train_ind, ]
+test <- df_mean[-train_ind, ]
+
+x_train <- train[,-1]
+y_train <- train$diagnosis
+x_test <-  test[,-1]
+y_test <- test$diagnosis
+```
+
+
+```{r}
+tol_length=length(levels(y_train))
+
+# run glm : train and test with cross validation
+cvfit<-cv.glmnet(as.matrix(x_train), y_train,family = "binomial", type.measure="class")
+plot(cvfit)
+cvfit$lambda.min
+assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.min')
+confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.min')
+as.numeric(1-assess$class)
+coef(cvfit, s="lambda.min")
+```
+
+Let's look with the first lambda:
+```{r}
+cvfit$lambda.1se
+assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.1se')
+confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.1se')
+as.numeric(1-assess$class)
+coef(cvfit, s="lambda.1se")
+```
 
 # PCA
+(to do next week)
+
 
 *******************************************************************************
 
