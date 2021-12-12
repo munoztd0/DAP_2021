@@ -1,3 +1,11 @@
+#this is to check to see if package are installed and if not to install them or just load them if they are installed!
+if(!require(pacman)) {
+  install.packages("pacman")
+  library(pacman)
+}
+pacman::p_load(tidyverse, gtsummary, rcompanion, moments) #this is all the packages with need here
+
+
 
 # 1) Overview
 
@@ -5,8 +13,7 @@ data <- read.table("marketing_campaign.csv", header=T, sep="\t")
 View(data)
 summary(data)
 str(data)
-mean(data$age)
-mean(data$income)
+
 
 #plot tout
 data %>% 
@@ -17,8 +24,8 @@ data %>%
   geom_histogram()
 
 
-library(gtsummary)
-data[c("Marital_Status")] %>% tbl_summary()
+
+data[c("Marital_Status")] %>% gtsummary::tbl_summary()
 
 
 
@@ -44,16 +51,68 @@ data$AcceptedCmpTotal <-  as.factor(data$AcceptedCmpTotal)
 levels(data$Marital_Status) <- c("Other", "Single", "Single", "Married", "Single", "Together", "Single", "Other")
 levels(data$AcceptedCmpTotal)
 
+install.packages("moments")
+library(ggpubr)
+library(moments)
+#assymetric data
+skewness(data$NumDealsPurchases, na.rm = TRUE)
+
+# data$InvNumDealsPurchases <- 1/data$NumDealsPurchases
+# hist(data$InvNumDealsPurchases)
+
+#data$LogNumDealsPurchases <- log10(data$NumDealsPurchases)
+# hist(data$LogNumDealsPurchases)
+
+data$SQRTNumDealsPurchases <- sqrt(data$NumDealsPurchases)
+hist(data$SQRTNumDealsPurchases)
+skewness(data$SQRTNumDealsPurchases)
+str(data$SQRTNumDealsPurchases)
+hist(data$SQRTNumDealsPurchases)
+boxplot(data$SQRTNumDealsPurchases)
+max(data$SQRTNumDealsPurchases)
+
 
 # 3) Hypotheses 
 
+<<<<<<< HEAD
 library(ggplot2)
-ggplot(data, aes(KidHome, MntSweetProducts)) + geom_point()
+ggplot(data, aes(Kidhome, MntSweetProducts)) + geom_point()
 ggplot(data, aes(MntWines, Marital_Status)) + geom_boxplot()
 
 
+m1 <- lm(data=data, SQRTNumDealsPurchases ~ Income + Education + Kidhome + MntGoldProds + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
+summary(m1) #not satisfying
+
+m2 <- lm(data=data, Income ~ Education + Marital_Status + NumDealsPurchases + Kidhome + MntGoldProds + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
+=======
+ggplot(data, aes(Kidhome, MntSweetProducts))+ geom_boxplot(outlier.colour =  "red") #+  geom_point(position = position_jitter()) 
+
+ggplot(data, aes(MntWines, Marital_Status)) + geom_boxplot(outlier.colour =  "red")
+
+#alternative with violin plots
+ggplot(data, aes(x=MntWines, y=Marital_Status)) +
+  geom_violin(trim=FALSE, fill='#A4A4A4', color="darkred")+
+  geom_boxplot(width=0.05) + theme_minimal()
+
+
+#### Visual check normality
+rcompanion::plotNormalHistogram(data$NumStorePurchases, main = "Purchases", sub = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2))) # for NumStorePurchases
+
+rcompanion::plotNormalHistogram(data$NumDealsPurchases, main = "Deals", sub = paste("skewness =", round(moments::skewness(data$NumDealsPurchases, na.rm = TRUE),2))) # for NumDealsPurchases -> Bad!
+
+rcompanion::plotNormalHistogram(sqrt(data$NumDealsPurchases), main = "Deals", sub = paste("skewness =", round(moments::skewness(sqrt(data$NumDealsPurchases), na.rm = TRUE),2))) # for NumDealsPurchases -> Much better!
+
+
+#### Modeling
 m1 <- lm(data=data, NumStorePurchases ~ Kidhome + Income*Education)
 summary(m1)
 
-m2 <- lm(data=data, NumDealsPurchases ~ Income*Education + Kidhome + MntGoldProds)
+m2 <- lm(data=data, sqrt(NumDealsPurchases) ~ Income*Education + Kidhome + MntGoldProds)
+>>>>>>> 252db36a6679c6372f27dc017b18e764aa51e595
 summary(m2)
+
+m3 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
+summary(m3)
+
+autoplot 
+MASS::stepAIC()
