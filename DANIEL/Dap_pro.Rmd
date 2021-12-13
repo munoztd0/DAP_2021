@@ -89,5 +89,14 @@ ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()
 ```
 
 ```{r}
+#logistic ordinal regression
+m1 = MASS::polr(disgust ~ emotion + gender, data = Data)
+m2 = clmm(disgust ~ emotion + gender + (1|subjects), data = Data)
+m3 = clmm(disgust ~ emotion + gender + (emotion | subjects), data = Data)
+summary(model)
+
+
+RVAideMemoire::Anova.clmm(m2, type = "II") #or type = "III" depending on the context
+RVAideMemoire::Anova.clmm(m3, type = "II") #or type = "III" depending on the context
 
 ```
