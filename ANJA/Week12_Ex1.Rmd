@@ -1,0 +1,145 @@
+---
+title: "Week 12_Markdown and survival exercise"
+author: "Anja Probst"
+date: "6 12 2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Aim
+How does bone marrow transplant survival times relate to graft versus host disease (GHVD)?
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+install.packages("survminer", repos = "http://cran.us.r-project.org")
+install.packages("patchwork", repos = "http://cran.us.r-project.org")
+
+library('MASS')
+library(ISwR)
+library(survival)
+library(survminer)
+library(vtable)
+library(stargazer)
+library(ggplot2)
+library(GGally)
+library(ggfortify)
+library(patchwork)
+```
+
+# Data
+```{r, }
+GH <- graft.vs.host
+str(GH)
+```
+
+# Data transformation
+```{r}
+GH$type <- as.factor(GH$type)
+GH$preg <- as.factor(GH$preg)
+GH$gvhd <- as.factor(GH$gvhd)
+GH$dead <- as.factor(GH$dead)
+
+str(GH)
+```
+
+## Transformation of numeric levels into "No" or "Yes" answers
+```{r}
+levels(GH$preg)<-c("no","yes")
+levels(GH$gvhd)<-c("no","yes")
+levels(GH$dead)<-c("no","yes")
+
+str(GH)
+summary(GH)
+```
+
+# Summary in form of table:
+```{r, results='asis'}
+sumtable(GH, out="latex")
+```
+
+# Plot to look at correlations
+```{r}
+ggpairs(GH, aes(color=gvhd, alpha=0.2))
+```
+# Models
+## survival ~ gvhd
+```{r}
+survival <- Surv(GH$time, GH$dead == "yes")
+m1 <- coxph(data=GH, survival ~ gvhd)
+summary(m1)
+```
+With a p-value = 0.0158 for the Wald test, it is significant. The Hazard ratio (exp(coef)) is 3.45 for patients with host vs graft disease.
+
+### Visualising the model
+```{r}
+ggsurv(survfit(m1)) + ylim(0,1)
+```
+Left the plot based on the cox proportional hazard model, right the standard kaplan meier plot of survival stratified by gvhd.
+
+```{r}
+GH.new <- with(GH, data.frame(gvhd = c("no", "yes")))
+plot(survfit(
+    m1, 
+    data=GH, 
+    newdata=GH.new),
+  col=c("red", "blue"),
+  xlab = "Days",
+  ylab = "Survival",
+  main = "GVHD Effects Under Assumption of Proportional Hazard"
+) + ylim(0,1)
+```
+Under the assumption of hazard proportionality, the two survival curves according to the coxph model, would look like this.
+
+### Test the proportional-hazards assumption
+```{r}
+m1.diag <- cox.zph(m1)
+m1.diag
+```
+The test isn't statistically significant for gvhd (>>0.05). Hence, we can assume proportional hazards.
+
+```{r}
+ggcoxzph(m1.diag)
+```
+There is no obvious pattern with time. This supports the assumption of proportional hazards.
+
+```{r, warning=FALSE, message=FALSE, results=FALSE}
+p1 <- ggcoxdiagnostics(m1, type="deviance", linear.predictions = FALSE) + geom_smooth()
+p2 <- ggcoxdiagnostics(m1, type="score") + geom_smooth()
+p1 | p2
+```
+The check for influential observations (outliers). They should be distributed symmetrically around 0. This is not really the case, but it isn't extreme either. It seems like there is another variable influencing the observations.
+
+## Stratify by Leukaemia Type and Include Pregnancy
+```{r}
+m2 <- coxph(data = graft.vs.host, survival ~ gvhd + preg + strata(type))
+summary(m2)
+```
+### Visualising the model
+```{r}
+# For some reason, the function below gives an error when GH$type is a factor 
+# and defined as strata in the model... Hence graft.vs.host is used in the model
+# definition above
+ggsurv(survfit(m2)) + ylim(0,1)
+```
+As suspected from the inital data analysis, survival differs by type of leukaemia.
+
+### Test the proportional-hazards assumption
+```{r}
+m2.diag <- cox.zph(m2)
+m2.diag
+```
+The test isn't statistically significant for gvhd (>>0.05) at all. Hence, we can assume proportional hazards.
+
+```{r}
+ggcoxzph(m2.diag)
+```
+There is no obvious pattern with time. This supports the assumption of proportional hazards.
+
+```{r, warning=FALSE, message=FALSE, results=FALSE}
+p1 <- ggcoxdiagnostics(m2, type="deviance", linear.predictions = FALSE) + geom_smooth()
+p2 <- ggcoxdiagnostics(m2, type="score") + geom_smooth()
+p1 | p2
+```
+The residuals (type=Score) still don't look too good, for gvhd, however, generally, the assumption seep to hold and gvhd has an influential effect on hazard.
