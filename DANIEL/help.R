@@ -76,3 +76,5 @@ library("effects")
 Effect(focal.predictors = "emotion", model)
 plot(Effect(focal.predictors = "emotion",model))
 plot(Effect(focal.predictors = c("emotion", "gender"),model))
+
+#check this out #https://jakec007.github.io/2021-06-23-R-likert/
