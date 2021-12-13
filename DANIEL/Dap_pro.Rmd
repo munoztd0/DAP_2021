@@ -35,6 +35,7 @@ It's believed that the neurobiological systems sustaining high emotional arousal
 In the study the dataset came from, Riegel et al. (2020) used words to elicit emotions (disgust, fear or neutral). Each pair displayed the same emotion and when showed together, they had to imagine an interaction between them, forcing the creation of a meaningful association. To be sure that the displayed words showed the correct emotion, affective ratings were asked as controls. Each participant had to rate each pair on a Likert scale (1 to 7) of disgust and fear.
 In this project, we are going to use this dataset to analyse and compare three statistical methods. We will compare a repeated measures ANOVA, a ordinal polytomous logistic regression and a linear mixed model. 
 
+
 Data description
 ----------------
 Here is a description of the different variables:
@@ -50,6 +51,7 @@ Here is a description of the different variables:
 * **Disgust**: a Likert scale (1 to 7) of the subjects’ emotional subjective feeling of disgust.
 
 * **Fear**: a Likert scale (1 to 7) of the subjects’ emotional subjective feeling of fear.
+
 
 ```{r, echo=FALSE}
 #Creating a working dataset
@@ -83,5 +85,9 @@ summary(Data)
 
 
 ```{r}
-ggplot(Data, aes(emotion,disgust,colours=gender))+geom_point()
+ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()
+```
+
+```{r}
+
 ```
