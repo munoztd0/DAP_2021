@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #this is to check to see if package are installed and if not to install them or just load them if they are installed!
 if(!require(pacman)) {install.packages("pacman")}
 
-pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire)
+pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire,sjPlot)
 
 
 #get relative path
@@ -106,6 +106,7 @@ anova(m3.0,m3.1)#not better
 anova(m1.2,m2.2)#problem
 anova(m2.2,m3.0)#better
 
+sjPlot::tab_model(m2.2) 
 ```
 
 ```{r best model analysis}
