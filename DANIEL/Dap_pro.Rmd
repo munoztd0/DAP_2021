@@ -109,6 +109,6 @@ anova(m2.2,m3.0)#better
 ```
 
 ```{r best model analysis}
-
+summary(m3.0)
 RVAideMemoire::Anova.clmm(m3.0, type = "II") #or type = "III" depending on the context
 ```
