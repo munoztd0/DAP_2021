@@ -1,0 +1,146 @@
+---
+title: "Exercise 1 Week 13"
+author: "Anja Probst"
+date: "14 12 2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggfortify)
+library(MASS)
+```
+```{r}
+df <- read.table("C:/Users/anjap/OneDrive/Desktop/Neuroscience Semester III/Statistics and Probability/Datasets/worldwide-HLA-A-1st-field.data", sep=";", header = TRUE)
+```
+# Q1
+## Calculate PCA without first two columns (because only numeric ones)
+```{r}
+df.pca <- prcomp(df[,-c(1, 2)])
+```
+PCA now creates a projection of the data on different axis, and orders these axes according to the variance they describe
+
+```{r}
+summary(df.pca)
+autoplot(df.pca, data=df, colour="region")
+```
+It needs 7 PCs to account for just over 90% of the total variance
+
+# Q2
+## PCA scaled and centered
+```{r}
+df.pca.scaled <- prcomp(df[,-c(1, 2)], scale. = TRUE, center = TRUE)
+summary(df.pca.scaled)
+
+autoplot(df.pca.scaled, data=df, colour="region")
+```
+It needs 33 PCs. However there is a weird outlier on the PC1 axis.
+
+# Q3
+See question 1 (same?)
+
+# Q4
+## isoMDS requires a distance matrix 
+### 1. create a matrix from the data frame
+```{r}
+df.matrix <- as.matrix(df[,-c(1, 2)])
+```
+
+### 2. we can use dist to create a distance matrix from a matrix
+```{r}
+df.dist <- dist(df.matrix)
+```
+
+### 3. calculate MDS (Multidimensional Scaling) positions
+```{r}
+df.mds <- isoMDS(df.dist)
+```
+After 20 iterations the stress is 10.803806.
+
+# Q5
+# Add the x and y coordinates of MDS to our data frame df
+```{r}
+df <- cbind(df, mds.x = df.mds$points[,1])
+df <- cbind(df, mds.y = df.mds$points[,2])
+```
+
+## Plot of MDS
+```{r}
+ggplot(df, aes(x=mds.x, y=mds.y, colour=region)) + geom_point() +
+  labs(title="MDS of differences between alleles")
+```
+By looking at the 3 plots, the non-scaled and non-centered PCA, the scaled and centered PCA as well as the MDS, we see, that the non-scaled and non-centered PCA is most compatible with the MDS. Meanwhile, in the scaled and centered PCA an outlier becomes visible and groups are further divided (e.g. the subsaharan africa group).
+
+# Q6
+## Generate vector of 30 random uniformly distributed numbers
+```{r}
+v1 <- rnorm(30)
+```
+
+## Create another random vector that is different from all the others
+```{r}
+v2 <- -20 * v1 + rnorm(30)
+```
+
+## Create a new data frame from the two vectors
+```{r}
+vs <- data.frame(cbind(v1, v2))
+```
+
+## Add additional random vectors to the data frame, named v3, v4, ..., v20
+```{r}
+for (i in 3:20) {
+  vector.name <- paste("v", i, sep="")
+  vs[vector.name] <- rnorm(30)
+}
+```
+
+## Create MDS coordinates
+```{r}
+vs.matrix <- as.matrix(vs)
+vs.dist <- dist(vs.matrix)
+vs.mds <- isoMDS(vs.dist)
+```
+
+### Plot of MDS
+```{r}
+autoplot(vs.mds) + labs(title="MDS of random vectors", x="mds.1", y="mds.2")
+```
+
+### Plotting v1 against v2
+```{r}
+ggplot(vs, aes(x=v1, y=v2)) + geom_point() +
+  labs(title="Random vectors v1 and v2")
+```
+
+### PCA with no scaling and no centering
+```{r}
+vs.pca <- prcomp(vs)
+autoplot(vs.pca) + labs(title="PCA of random vectors")
+```
+Most of the variance is explained by PC1 (~93%). This probably means that this PC is almost equal to V2.
+
+### PCA with scaling
+```{r}
+vs.pca_scaled <- prcomp(vs, scale. = TRUE)
+autoplot(vs.pca_scaled) + labs(title="PCA of random vectors (scaled)")
+```
+After scaling, the influence of V2 diminishes, and PC1 explains only ~15% of the variance.
+
+### PCA with scaling and centering
+```{r}
+vs.pca_scaled_centered <- prcomp(vs, scale. = TRUE, center = TRUE)
+autoplot(vs.pca_scaled_centered) + labs(title="PCA of random vectors (scaled, centered)")
+```
+
+# Conclusion
+The better PCA is the one with no scaling nor centering. Centering doesn't seem to have any additional effect. This conclusion also applies to the previous HLA
+
+
+
+
+
+
+
