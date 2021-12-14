@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #this is to check to see if package are installed and if not to install them or just load them if they are installed!
 if(!require(pacman)) {install.packages("pacman")}
 
-pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer)
+pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire,sjPlot)
 
 
 #get relative path
@@ -35,6 +35,7 @@ It's believed that the neurobiological systems sustaining high emotional arousal
 In the study the dataset came from, Riegel et al. (2020) used words to elicit emotions (disgust, fear or neutral). Each pair displayed the same emotion and when showed together, they had to imagine an interaction between them, forcing the creation of a meaningful association. To be sure that the displayed words showed the correct emotion, affective ratings were asked as controls. Each participant had to rate each pair on a Likert scale (1 to 7) of disgust and fear.
 In this project, we are going to use this dataset to analyse and compare three statistical methods. We will compare a repeated measures ANOVA, a ordinal polytomous logistic regression and a linear mixed model. 
 
+
 Data description
 ----------------
 Here is a description of the different variables:
@@ -50,6 +51,7 @@ Here is a description of the different variables:
 * **Disgust**: a Likert scale (1 to 7) of the subjects’ emotional subjective feeling of disgust.
 
 * **Fear**: a Likert scale (1 to 7) of the subjects’ emotional subjective feeling of fear.
+
 
 ```{r, echo=FALSE}
 #Creating a working dataset
@@ -83,5 +85,31 @@ summary(Data)
 
 
 ```{r}
-ggplot(Data, aes(emotion,disgust,colours=gender))+geom_point()
+ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()
+```
+
+```{r modeling}
+#logistic ordinal regression
+m1.1 = MASS::polr(disgust ~ emotion + gender, data = Data)
+m1.2 = MASS::polr(disgust ~ emotion * gender, data = Data)
+
+m2.1 = clmm(disgust ~ emotion + gender + (1|subjects), data = Data)
+m2.2 = clmm(disgust ~ emotion * gender + (1|subjects), data = Data)
+
+m3.0 = clmm(disgust ~ emotion + (emotion | subjects), data = Data)
+m3.1 = clmm(disgust ~ emotion + gender + (emotion | subjects), data = Data)
+m3.2 = clmm(disgust ~ emotion * gender + (emotion | subjects), data = Data)
+
+anova(m1.1,m1.2)#better
+anova(m2.1,m2.2)#better
+anova(m3.0,m3.1)#not better
+anova(m1.2,m2.2)#problem
+anova(m2.2,m3.0)#better
+
+sjPlot::tab_model(m2.2) 
+```
+
+```{r best model analysis}
+summary(m3.0)
+RVAideMemoire::Anova.clmm(m3.0, type = "II") #or type = "III" depending on the context
 ```

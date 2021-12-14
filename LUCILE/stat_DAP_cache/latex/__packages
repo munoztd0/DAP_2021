@@ -7,3 +7,6 @@ MASS
 here
 kableExtra
 papaja
+Matrix
+glmnet
+boot

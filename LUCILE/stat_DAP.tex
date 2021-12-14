@@ -1,15 +1,19 @@
 % Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
-\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
   11pt,
 ]{article}
+\title{Breast Cancer Wisconsin (Diagnostic)}
+\author{L. Favero}
+\date{}
+
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{ifxetex,ifluatex}
-\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage{iftex}
+\ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
@@ -41,10 +45,10 @@
   pdftitle={Breast Cancer Wisconsin (Diagnostic)},
   pdfauthor={L. Favero},
   colorlinks=true,
-  linkcolor=Maroon,
-  filecolor=Maroon,
-  citecolor=Blue,
-  urlcolor=blue,
+  linkcolor={Maroon},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={blue},
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
 \usepackage[margin=1in]{geometry}
@@ -115,6 +119,29 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{5}
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
+  \fi
+  % set entry spacing
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -129,33 +156,9 @@
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
 \usepackage{xcolor}
-\ifluatex
+\ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
-\newlength{\cslhangindent}
-\setlength{\cslhangindent}{1.5em}
-\newlength{\csllabelwidth}
-\setlength{\csllabelwidth}{3em}
-\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
- {% don't indent paragraphs
-  \setlength{\parindent}{0pt}
-  % turn on hanging indent if param 1 is 1
-  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
-  % set entry spacing
-  \ifnum #2 > 0
-  \setlength{\parskip}{#2\baselineskip}
-  \fi
- }%
- {}
-\usepackage{calc}
-\newcommand{\CSLBlock}[1]{#1\hfill\break}
-\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
-\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
-\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
-
-\title{Breast Cancer Wisconsin (Diagnostic)}
-\author{L. Favero}
-\date{}
 
 \begin{document}
 \maketitle
@@ -198,7 +201,7 @@ Load libraries
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{pacman}\SpecialCharTok{::}\FunctionTok{p\_load}\NormalTok{(GGally, ggfortify, ggplot2, MASS, here, kableExtra, papaja)}
+\NormalTok{pacman}\SpecialCharTok{::}\FunctionTok{p\_load}\NormalTok{(GGally, ggfortify, ggplot2, MASS, here, kableExtra, papaja, glmnet)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -594,6 +597,16 @@ them.
 
 Overdistribution ?
 
+\begin{Shaded}
+\begin{Highlighting}[]
+  \FunctionTok{library}\NormalTok{(boot)}
+\NormalTok{  diag }\OtherTok{\textless{}{-}} \FunctionTok{glm.diag}\NormalTok{(m)}
+  \FunctionTok{glm.diag.plots}\NormalTok{(m, diag)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-13-1.pdf}
+
 Let's see with an anova test if we can remove
 symmetry,concavity,concave.points and fractal\_dimension
 
@@ -759,8 +772,166 @@ Resid. Df & Resid. Dev & Df & Deviance & Pr(>Chi)\\
 \hypertarget{visualization}{%
 \subsection{Visualization}\label{visualization}}
 
+( to see) \#\# glm with glmnet Let's separate the dataset into train and
+test set
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# 75\% of the sample size}
+\NormalTok{prop\_train\_test }\OtherTok{\textless{}{-}} \FunctionTok{floor}\NormalTok{(}\FloatTok{0.75} \SpecialCharTok{*} \FunctionTok{nrow}\NormalTok{(df\_mean))}
+
+\DocumentationTok{\#\# set the seed to make your partition reproducible}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{train\_ind }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(}\FunctionTok{seq\_len}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(df\_mean)), }\AttributeTok{size =}\NormalTok{ prop\_train\_test)}
+\CommentTok{\#sample = sample.split(data$num, SplitRatio = .75)}
+\CommentTok{\#train = subset(data, sample == TRUE)}
+\CommentTok{\#test  = subset(data, sample == FALSE)}
+\NormalTok{train }\OtherTok{\textless{}{-}}\NormalTok{ df\_mean[train\_ind, ]}
+\NormalTok{test }\OtherTok{\textless{}{-}}\NormalTok{ df\_mean[}\SpecialCharTok{{-}}\NormalTok{train\_ind, ]}
+
+\NormalTok{x\_train }\OtherTok{\textless{}{-}}\NormalTok{ train[,}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{]}
+\NormalTok{y\_train }\OtherTok{\textless{}{-}}\NormalTok{ train}\SpecialCharTok{$}\NormalTok{diagnosis}
+\NormalTok{x\_test }\OtherTok{\textless{}{-}}\NormalTok{  test[,}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{]}
+\NormalTok{y\_test }\OtherTok{\textless{}{-}}\NormalTok{ test}\SpecialCharTok{$}\NormalTok{diagnosis}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tol\_length}\OtherTok{=}\FunctionTok{length}\NormalTok{(}\FunctionTok{levels}\NormalTok{(y\_train))}
+
+\CommentTok{\# run glm : train and test with cross validation}
+\NormalTok{cvfit}\OtherTok{\textless{}{-}}\FunctionTok{cv.glmnet}\NormalTok{(}\FunctionTok{as.matrix}\NormalTok{(x\_train), y\_train,}\AttributeTok{family =} \StringTok{"binomial"}\NormalTok{, }\AttributeTok{type.measure=}\StringTok{"class"}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(cvfit)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cvfit}\SpecialCharTok{$}\NormalTok{lambda.min}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.01890567
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{assess}\OtherTok{\textless{}{-}}\FunctionTok{assess.glmnet}\NormalTok{(cvfit,}\AttributeTok{newx=}\FunctionTok{as.matrix}\NormalTok{(x\_test), }\AttributeTok{newy=}\NormalTok{y\_test, }\AttributeTok{s=}\StringTok{\textquotesingle{}lambda.min\textquotesingle{}}\NormalTok{)}
+\FunctionTok{confusion.glmnet}\NormalTok{(cvfit, }\AttributeTok{newx =}\FunctionTok{as.matrix}\NormalTok{(x\_test), }\AttributeTok{newy =}\NormalTok{ y\_test, }\AttributeTok{s =} \StringTok{\textquotesingle{}lambda.min\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          True
+## Predicted  B  M Total
+##     B     79 11    90
+##     M      1 52    53
+##     Total 80 63   143
+## 
+##  Percent Correct:  0.9161
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{as.numeric}\NormalTok{(}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{assess}\SpecialCharTok{$}\NormalTok{class)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.9160839
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{coef}\NormalTok{(cvfit, }\AttributeTok{s=}\StringTok{"lambda.min"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 11 x 1 sparse Matrix of class "dgCMatrix"
+##                            s1
+## (Intercept)       -11.9549638
+## radius              0.3363175
+## texture             0.1750409
+## perimeter           .        
+## area                .        
+## smoothness          .        
+## compactness         .        
+## concavity           .        
+## concave.points     63.6306102
+## symmetry            .        
+## fractal_dimension   .
+\end{verbatim}
+
+Let's look with the first lambda:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cvfit}\SpecialCharTok{$}\NormalTok{lambda}\FloatTok{.1}\NormalTok{se}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.05773519
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{assess}\OtherTok{\textless{}{-}}\FunctionTok{assess.glmnet}\NormalTok{(cvfit,}\AttributeTok{newx=}\FunctionTok{as.matrix}\NormalTok{(x\_test), }\AttributeTok{newy=}\NormalTok{y\_test, }\AttributeTok{s=}\StringTok{\textquotesingle{}lambda.1se\textquotesingle{}}\NormalTok{)}
+\FunctionTok{confusion.glmnet}\NormalTok{(cvfit, }\AttributeTok{newx =}\FunctionTok{as.matrix}\NormalTok{(x\_test), }\AttributeTok{newy =}\NormalTok{ y\_test, }\AttributeTok{s =} \StringTok{\textquotesingle{}lambda.1se\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          True
+## Predicted  B  M Total
+##     B     80 13    93
+##     M      0 50    50
+##     Total 80 63   143
+## 
+##  Percent Correct:  0.9091
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{as.numeric}\NormalTok{(}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{assess}\SpecialCharTok{$}\NormalTok{class)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.9090909
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{coef}\NormalTok{(cvfit, }\AttributeTok{s=}\StringTok{"lambda.1se"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 11 x 1 sparse Matrix of class "dgCMatrix"
+##                            s1
+## (Intercept)       -6.87636978
+## radius             0.01235359
+## texture            0.06882308
+## perimeter          0.02960914
+## area               .         
+## smoothness         .         
+## compactness        .         
+## concavity          .         
+## concave.points    40.52201326
+## symmetry           .         
+## fractal_dimension  .
+\end{verbatim}
+
 \hypertarget{pca}{%
 \section{PCA}\label{pca}}
+
+(to do next week)
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -808,7 +979,7 @@ group}\label{correlation-in-the-standard-deviation-and-worst-group}}
 ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 \end{verbatim}
 
-\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-14-1.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-18-1.pdf}
 
 \begin{verbatim}
 ## 'data.frame':    569 obs. of  11 variables:
@@ -838,7 +1009,7 @@ group}\label{correlation-in-the-standard-deviation-and-worst-group}}
 ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 \end{verbatim}
 
-\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-14-2.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-18-2.pdf}
 
 We get the same results as for the mean group.
 
@@ -864,44 +1035,41 @@ We get the same results as for the mean group.
 \section{Version of R used}\label{version-of-r-used}}
 
 \begin{verbatim}
-## R version 4.0.1 (2020-06-06)
-## Platform: x86_64-pc-linux-gnu (64-bit)
-## Running under: Pop!_OS 21.04
+## R version 4.1.1 (2021-08-10)
+## Platform: x86_64-apple-darwin17.0 (64-bit)
+## Running under: macOS Big Sur 10.16
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
-## LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.13.so
+## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
 ## 
 ## locale:
-##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
-##  [3] LC_TIME=fr_CH.UTF-8        LC_COLLATE=en_US.UTF-8    
-##  [5] LC_MONETARY=fr_CH.UTF-8    LC_MESSAGES=en_US.UTF-8   
-##  [7] LC_PAPER=fr_CH.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-## [11] LC_MEASUREMENT=fr_CH.UTF-8 LC_IDENTIFICATION=C       
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 ## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] kableExtra_1.3.4  here_1.0.1        MASS_7.3-51.6     ggfortify_0.4.11 
-## [5] GGally_2.1.1      ggplot2_3.3.3     papaja_0.1.0.9997 pacman_0.5.1     
+##  [1] boot_1.3-28       glmnet_4.1-3      Matrix_1.3-4      kableExtra_1.3.4 
+##  [5] here_1.0.1        MASS_7.3-54       ggfortify_0.4.12  GGally_2.1.2     
+##  [9] ggplot2_3.3.5     papaja_0.1.0.9997 pacman_0.5.1     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_1.1.1   xfun_0.23          purrr_0.3.4        colorspace_2.0-1  
-##  [5] vctrs_0.3.8        generics_0.1.0     viridisLite_0.4.0  htmltools_0.5.1.1 
-##  [9] yaml_2.2.1         utf8_1.2.1         rlang_0.4.11       pillar_1.6.1      
-## [13] glue_1.4.2         withr_2.4.2        DBI_1.1.1          RColorBrewer_1.1-2
-## [17] lifecycle_1.0.0    plyr_1.8.6         stringr_1.4.0      munsell_0.5.0     
-## [21] gtable_0.3.0       rvest_1.0.0        codetools_0.2-16   evaluate_0.14     
-## [25] labeling_0.4.2     knitr_1.33         fansi_0.5.0        highr_0.9         
-## [29] Rcpp_1.0.6         scales_1.1.1       webshot_0.5.2      farver_2.1.0      
-## [33] systemfonts_1.0.2  gridExtra_2.3      digest_0.6.27      stringi_1.6.2     
-## [37] dplyr_1.0.6        grid_4.0.1         rprojroot_2.0.2    tools_4.0.1       
-## [41] magrittr_2.0.1     tibble_3.1.2       crayon_1.4.1       tidyr_1.1.3       
-## [45] pkgconfig_2.0.3    ellipsis_0.3.2     xml2_1.3.2         assertthat_0.2.1  
-## [49] rmarkdown_2.8      reshape_0.8.8      svglite_2.0.0      httr_1.4.2        
-## [53] rstudioapi_0.13    R6_2.5.0           compiler_4.0.1
+##  [1] Rcpp_1.0.7         svglite_2.0.0      lattice_0.20-44    tidyr_1.1.4       
+##  [5] rprojroot_2.0.2    digest_0.6.28      foreach_1.5.1      utf8_1.2.2        
+##  [9] R6_2.5.1           plyr_1.8.6         evaluate_0.14      httr_1.4.2        
+## [13] highr_0.9          pillar_1.6.3       rlang_0.4.11       rstudioapi_0.13   
+## [17] rmarkdown_2.11     labeling_0.4.2     splines_4.1.1      webshot_0.5.2     
+## [21] stringr_1.4.0      munsell_0.5.0      compiler_4.1.1     xfun_0.26         
+## [25] pkgconfig_2.0.3    systemfonts_1.0.3  shape_1.4.6        htmltools_0.5.2   
+## [29] tidyselect_1.1.1   tibble_3.1.5       gridExtra_2.3      codetools_0.2-18  
+## [33] reshape_0.8.8      fansi_0.5.0        viridisLite_0.4.0  crayon_1.4.1      
+## [37] dplyr_1.0.7        withr_2.4.2        grid_4.1.1         gtable_0.3.0      
+## [41] lifecycle_1.0.1    magrittr_2.0.1     scales_1.1.1       stringi_1.7.5     
+## [45] farver_2.1.0       xml2_1.3.3         ellipsis_0.3.2     generics_0.1.0    
+## [49] vctrs_0.3.8        RColorBrewer_1.1-2 iterators_1.0.13   tools_4.1.1       
+## [53] glue_1.4.2         purrr_0.3.4        fastmap_1.1.0      survival_3.2-11   
+## [57] yaml_2.2.1         colorspace_2.0-2   rvest_1.0.2        knitr_1.36
 \end{verbatim}
 
 \hypertarget{references-1}{%
@@ -911,7 +1079,7 @@ We get the same results as for the mean group.
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{1}{0}
-\leavevmode\hypertarget{ref-james_1890}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-james_1890}{}}%
 James, William. 1890. {``The Perception of Reality.''} \emph{Principles
 of Psychology} 2: 283--324.
 
