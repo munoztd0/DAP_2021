@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #this is to check to see if package are installed and if not to install them or just load them if they are installed!
 if(!require(pacman)) {install.packages("pacman")}
 
-pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire,sjPlot)
+pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire,sjPlot, HH, likert, dplyr)
 
 
 #get relative path
@@ -86,6 +86,24 @@ summary(Data)
 
 ```{r}
 ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()
+
+## Prepare data <- **need to specify emotion$disgust + the other ratings**
+a=9349
+Item <- "Disgust"
+one <- (6611/a)*100
+two <- (972/a)*100
+three <- (706/a)*100
+four <- (432/a)*100
+five <- (288/a)*100
+six <- (174/a)*100
+seven <- (166/a)*100
+df <- data.frame(Item, one, two, three, four, five, six, seven)
+## Rename Cols
+df <- df %>%
+rename("1 (low)" = one, "2" = two, "3" = three, "4" = four, "5" = five, "6"= six, "7 (high)"= seven)
+
+## Pretty Plot
+plot(likert(summary = df),legend.position="top")+ guides (fill = guide_legend(title="Subjective evaluation"))
 ```
 
 ```{r modeling}
@@ -106,7 +124,13 @@ anova(m3.0,m3.1)#not better
 anova(m1.2,m2.2)#problem
 anova(m2.2,m3.0)#better
 
-sjPlot::tab_model(m2.2) 
+sjPlot::tab_model(m2.2)
+sjPlot::tab_model(m3.0) 
+sjPlot::plot_model(m2.2, type="diag")
+
+extractAIC(m1.2)
+extractAIC(m2.2)
+extractAIC(m3.0)
 ```
 
 ```{r best model analysis}
