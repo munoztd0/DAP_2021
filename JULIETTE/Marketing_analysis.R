@@ -74,7 +74,7 @@ max(data$SQRTNumDealsPurchases)
 
 # 3) Hypotheses 
 
-<<<<<<< HEAD
+
 library(ggplot2)
 ggplot(data, aes(Kidhome, MntSweetProducts)) + geom_point()
 ggplot(data, aes(MntWines, Marital_Status)) + geom_boxplot()
@@ -84,7 +84,8 @@ m1 <- lm(data=data, SQRTNumDealsPurchases ~ Income + Education + Kidhome + MntGo
 summary(m1) #not satisfying
 
 m2 <- lm(data=data, Income ~ Education + Marital_Status + NumDealsPurchases + Kidhome + MntGoldProds + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
-=======
+summary(m2)
+
 ggplot(data, aes(Kidhome, MntSweetProducts))+ geom_boxplot(outlier.colour =  "red") #+  geom_point(position = position_jitter()) 
 
 ggplot(data, aes(MntWines, Marital_Status)) + geom_boxplot(outlier.colour =  "red")
@@ -107,12 +108,11 @@ rcompanion::plotNormalHistogram(sqrt(data$NumDealsPurchases), main = "Deals", su
 m1 <- lm(data=data, NumStorePurchases ~ Kidhome + Income*Education)
 summary(m1)
 
-m2 <- lm(data=data, sqrt(NumDealsPurchases) ~ Income*Education + Kidhome + MntGoldProds)
->>>>>>> 252db36a6679c6372f27dc017b18e764aa51e595
+m3 <- lm(data=data, sqrt(NumDealsPurchases) ~ Income*Education + Kidhome + MntGoldProds)
 summary(m2)
 
-m3 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
-summary(m3)
+m4 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
+summary(m4)
 
 autoplot 
 MASS::stepAIC()
