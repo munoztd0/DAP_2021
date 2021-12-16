@@ -129,7 +129,7 @@ sjPlot::plot_model(finalm1, type = "pred", terms = "Kidhome", show.data  = T, ji
 sjPlot::plot_model(finalm1, type = "pred", terms = "Income", show.data  = T, jitter = 1) # to plot only one term
 sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Kidhome"), show.data  = T, jitter = 1) # to plot interactions
 
-sjPlot::tab_model(finalm1, rm.terms = c("Education.Q", "Education^4", "Income:Education.C"))
+sjPlot::tab_model(finalm1, rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"))
 
 #try to do the same for the other ones !
 
@@ -155,10 +155,9 @@ summary(m4)
 # le R2 est une taille d'effet pour tout le modèle. Intervalle de confiance pour le taille d'effet 
 # 
 
-autoplot 
+
 ms <- MASS::stepAIC(m4) #il choisit la meilleure façon de faire le modèle m4
 
-install.packages("rmarkdown")
 
 install.packages("sjPlot")
 sjPlot::plot_model(m4, type = "diag")
