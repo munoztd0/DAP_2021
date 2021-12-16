@@ -15,14 +15,6 @@ summary(data)
 str(data)
 
 
-#plot tout
-data %>% 
-  keep(is.numeric) %>%
-  gather() %>%
-  ggplot(aes(value)) +
-  facet_wrap(~key, scales = "free") + 
-  geom_histogram()
-
 
 
 data[c("Marital_Status")] %>% gtsummary::tbl_summary()
@@ -50,6 +42,15 @@ data$Teenhome <-  as.factor(data$Teenhome)
 data$AcceptedCmpTotal <-  as.factor(data$AcceptedCmpTotal)
 levels(data$Marital_Status) <- c("Other", "Single", "Single", "Married", "Single", "Together", "Single", "Other")
 levels(data$AcceptedCmpTotal)
+
+
+#plot tout
+data %>% 
+  keep(is.numeric) %>%
+  gather() %>%
+  ggplot(aes(value)) +
+  facet_wrap(~key, scales = "free") + 
+  geom_histogram()
 
 install.packages("moments")
 library(ggpubr)
@@ -97,6 +98,7 @@ ggplot(data, aes(x=MntWines, y=Marital_Status)) +
 
 
 #### Visual check normality
+
 rcompanion::plotNormalHistogram(data$NumStorePurchases, main = "Purchases", sub = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2))) # for NumStorePurchases
 
 rcompanion::plotNormalHistogram(data$NumDealsPurchases, main = "Deals", sub = paste("skewness =", round(moments::skewness(data$NumDealsPurchases, na.rm = TRUE),2))) # for NumDealsPurchases -> Bad!
@@ -113,6 +115,31 @@ summary(m2)
 
 m4 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
 summary(m4)
+ 
+
+faire : 
+  plot assumptions (autoplot pour regarder les résidus) car summary n'est pas suffisant'
+déplacer sur Rmarkdown dès maintenant et y rester 
+PCA 
+p value + des intervalles de confiance pour les tailles d'effet
+la taille d'effet montre l'ampleur de l'effet, au delà de la p value
+le R2 est une taille d'effet pour tout le modèle. Intervalle de confiance pour le taille d'effet 
+
 
 autoplot 
-MASS::stepAIC()
+ms <- MASS::stepAIC(m4) #il choisit la meilleure façon de faire le modèle m4
+
+install.packages("rmarkdown")
+
+install.packages("sjPlot")
+sjPlot::plot_model(m4, type = "diag")
+# point a enlever
+
+
+plot(m4, c(1:2,4), labels.id = data$ID)
+
+data <- data[data$ID!=6168,] 
+data <- data[data$ID!=3850,] 
+m4 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
+summary(m4)
+
