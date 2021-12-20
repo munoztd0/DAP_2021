@@ -166,8 +166,10 @@ sjPlot::plot_model(m4, type = "diag")
 
 plot(m4, c(1:2,4), labels.id = data$ID)
 
+
 data <- data[data$ID!=6168,] 
 data <- data[data$ID!=3850,] 
+
 m4 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
 summary(m4)
 
