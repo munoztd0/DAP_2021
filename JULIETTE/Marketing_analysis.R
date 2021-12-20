@@ -3,7 +3,7 @@ if(!require(pacman)) {
   install.packages("pacman")
   library(pacman)
 }
-pacman::p_load(tidyverse, gtsummary, ggpubr, moments, here, sjPlot, parameters, effectsize) #this is all the packages with need here
+pacman::p_load(tidyverse, gtsummary, ggpubr, ggplot, moments, here, sjPlot, parameters, effectsize) #this is all the packages with need here
 
 #get relative path
 path =  here("JULIETTE") #this is really important ! you juste need to put the name of YOUR folder and here() will find the relative path for you ! 
@@ -101,17 +101,18 @@ m1 <- lm(data=data, NumStorePurchases ~ Kidhome*Income*Education*age) #what abou
 plot(m1, c(1:2,4), ask=F)
 
 #check income outliers in more details
-plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data=newdf)
-text(Income ~NumStorePurchases, labels=ID,data=newdf, cex=0.9, font=1)
+
+plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data)
+text(Income ~NumStorePurchases, labels=ID,data, cex=0.9, font=1)
 
 #2) check assumptions  and assess outliers -> for example
-data[c(2234),] #huge outlier and weird income = 666666 ? + weird effect after (Income > 150000 ) people dont respond !
+data[c(2234),] # a enlever aussi des le debut. huge outlier and weird income = 666666 ? + weird effect after (Income > 150000 ) people dont respond !
 
 newdf = data %>%
   filter(!ID %in% c(9432, 5555, 4619, 5336, 1501, 1503, 8475, 4931, 11181) ) #remove outliers
-
+plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data=newdf)
 #3) reassess
-m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education) # without outlier
+m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age) # without outlier
 plot(m1, c(1:2,4), ask=F)
 
 #4) choose variables/interactions to keep
@@ -119,11 +120,13 @@ ms <- MASS::stepAIC(m1, direction = "both", trace = FALSE) #il choisit le meille
 ms$anova
 
 #5) compute final model
-finalm1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education) #copier coller le model final
+finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age + Kidhome:Income + 
+                Kidhome:Education + Income:Education + Kidhome:age + Income:age + 
+                Kidhome:Income:Education) #copier coller le model final
 
 #5) and only then check inferences
 parameters::model_parameters(anova(finalm1))
-effectsize::eta_squared(finalm1) #everything that had 0.00 on the left og the 90% CI column has a "meaningless" effect size
+effectsize::eta_squared(finalm1,ci = 0.9) #everything that had 0.00 on the left og the 90% CI column has a "meaningless" effect size, but we keep them on the model still
 sjPlot::plot_model(finalm1) #to plot all the estimates
 sjPlot::plot_model(finalm1, type = "pred", terms = "Kidhome", show.data  = T, jitter = 1) # to plot only one term
 sjPlot::plot_model(finalm1, type = "pred", terms = "Income", show.data  = T, jitter = 1) # to plot only one term
@@ -139,11 +142,6 @@ sjPlot::tab_model(finalm1, rm.terms = c("*Education.Q", "Education^4", "Income:E
 # m2 <- lm(data=data, Income ~ Education + Marital_Status + NumDealsPurchases + Kidhome + MntGoldProds + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
 # summary(m2)
 
-m3 <- lm(data=data, sqrt(NumDealsPurchases) ~ Income*Education + Kidhome + MntGoldProds)
-summary(m2)
-
-m4 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
-summary(m4)
  
 
 # faire : 
@@ -172,4 +170,20 @@ data <- data[data$ID!=3850,]
 
 m4 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
 summary(m4)
+
+
+
+# filter on non-missing values
+  pm1 <- prcomp(~ "ID"        ,  "Year_Birth"    ,   "Education"     ,   "Marital_Status"  ,    "Income"   ,           "Kidhome"    ,  "Teenhome"     ,       "Dt_Customer"     ,    "Recency"     ,       
+                "MntWines"       ,     "MntFruits"        ,   "MntMeatProducts"  ,  
+                "MntFishProducts"  ,   "MntSweetProducts" ,   "MntGoldProds"    ,   
+                "NumDealsPurchases"  , "NumWebPurchases" ,    "NumCatalogPurchases",
+                 "NumStorePurchases"  , "NumWebVisitsMonth"  , "AcceptedCmp3" ,      
+                 "AcceptedCmp4"    ,    "AcceptedCmp5"   ,     "AcceptedCmp1"  ,     
+                 "AcceptedCmp2"  ,      "Complain"     ,       "Z_CostContact"  ,    
+                 "Z_Revenue"    ,       "Response"    ,        "age"                , data, na.action=na.omit, scale=TRUE) #scale= standardise tout
+summary(pm1)
+
+names(data)
+
 
