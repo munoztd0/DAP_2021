@@ -12,7 +12,6 @@ if(!require(pacman)) {install.packages("pacman")}
 
 pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire,sjPlot, HH, likert, dplyr,sure)
 
-
 #get relative path
 path =  here("DANIEL") #You put the name of YOUR folder and here() will find the relative path for you ! 
 setwd(path) #set working directory
@@ -74,6 +73,7 @@ Data$gender<-as.factor(Data$gender)
 levels(Data$gender) <- c("Women", "Men")
 Data$disgust<-as.factor(Data$disgust)
 Data$fear<-as.factor(Data$fear)
+disgust2<-as.numeric(disgust)
 ```
 
 Data exploration (Dataset)
@@ -92,7 +92,7 @@ Data exploration (Graphs)
 
 ## Prepare data <- **need to specify emotion$disgust + the other ratings**
 a=9349
-Item <- "Disgust"
+Item <- Data$emotion
 one <- (6611/a)*100
 two <- (972/a)*100
 three <- (706/a)*100
@@ -104,7 +104,7 @@ df <- data.frame(Item, one, two, three, four, five, six, seven)
 ## Rename Cols
 df <- df %>%
 rename("1 (low)" = one, "2" = two, "3" = three, "4" = four, "5" = five, "6"= six, "7 (high)"= seven)
-
+df
 ## Pretty Plot
 plot(likert(summary = df))+ guides (fill = guide_legend(title="Subjective evaluation")) + labs(title = "Subjective evaluation of disgust across all pairs of words")+ labs(y = "Percentage of Likert answers") + theme(plot.title = element_text(hjust = 0.5))+ theme(plot.title = element_text(size = rel(1.5))) + theme( legend.box.background = element_rect(), legend.box.margin = margin(6, 6, 6, 6),legend.position = "top")
 
@@ -113,36 +113,55 @@ ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()+
   labs(title = "Distribution of disgust evaluation", x = "Pairs of words' emotions", y = "Likert scale of subjective disgust feeling") + theme(plot.title = element_text(hjust = 0.75)) + labs(colour = "Gender")+ theme(plot.title = element_text(size = rel(2)))
 ```
 
-```{r modeling}
-#logistic ordinal regression
-m1.1 = MASS::polr(disgust ~ emotion + gender, data = Data)
-m1.2 = MASS::polr(disgust ~ emotion * gender, data = Data)
+Modelisation
+============
+```{r}
+m1.0 = lm(disgust2~emotion*gender, data=Data)
+plot(m1.0)
+sjPlot::plot_model(m1.0,type = "diag")[[3]]
+```
 
-m2.1 = clmm(disgust ~ emotion + gender + (1|subjects), data = Data)
+```{r}
+#best method
+
+m1.2 = clm(disgust ~ emotion * gender, data = Data)
 m2.2 = clmm(disgust ~ emotion * gender + (1|subjects), data = Data)
-
-m3.0 = clmm(disgust ~ emotion + (emotion | subjects), data = Data)
-m3.1 = clmm(disgust ~ emotion + gender + (emotion | subjects), data = Data)
 m3.2 = clmm(disgust ~ emotion * gender + (emotion | subjects), data = Data)
-
-anova(m1.1,m1.2)#better
-anova(m2.1,m2.2)#better
-anova(m3.0,m3.1)#not better
-
-
 extractAIC(m1.2)
 extractAIC(m2.2)
-extractAIC(m3.0)
+extractAIC(m3.2)
+
+# --> m3.2
 ```
+
+```{r}
+#best model
+m3.2 = clmm(disgust ~ emotion * gender + (emotion | subjects), data = Data)
+m3.1 = clmm(disgust ~ emotion + gender + (emotion | subjects), data = Data)
+m3.0 = clmm(disgust ~ emotion + (emotion | subjects), data = Data)
+
+extractAIC(m3.2)
+extractAIC(m3.1)
+extractAIC(m3.0)
+
+#--> m3.0
+
+```
+
 
 ```{r best model analysis}
 summary(m3.0)
 
 RVAideMemoire::Anova.clmm(m3.0, type = "II") #or type = "III" depending on the context
 ```
-Diagnostic of the moddel
+Diagnostic of the model
 =======================
 ```{r}
+#plot(m3.0) #do not work
 #autoplot.resid(m3.0) ##do not work
 #read this : David W.. Hosmer, Lemeshow, S., & Rodney X.. Sturdivant. (2000). Applied logistic regression. New York: Wiley. --> §5
+
+sjPlot::tab_model(m3.0)
+autoplot.clm(m1.2, what="qq")
+plot(m1.0, which = 2)
 ```
