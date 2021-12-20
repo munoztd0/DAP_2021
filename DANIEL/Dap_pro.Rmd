@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #this is to check to see if package are installed and if not to install them or just load them if they are installed!
 if(!require(pacman)) {install.packages("pacman")}
 
-pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire,sjPlot, HH, likert, dplyr)
+pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire,sjPlot, HH, likert, dplyr,sure)
 
 
 #get relative path
@@ -76,16 +76,19 @@ Data$disgust<-as.factor(Data$disgust)
 Data$fear<-as.factor(Data$fear)
 ```
 
-
+Data exploration (Dataset)
+----------------
 
 ```{r basic explor, comment = NA}
 str(Data)
+
+
 summary(Data)
 ```
-
+Data exploration (Graphs) 
+-------------------------
 
 ```{r}
-ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()
 
 ## Prepare data <- **need to specify emotion$disgust + the other ratings**
 a=9349
@@ -103,7 +106,11 @@ df <- df %>%
 rename("1 (low)" = one, "2" = two, "3" = three, "4" = four, "5" = five, "6"= six, "7 (high)"= seven)
 
 ## Pretty Plot
-plot(likert(summary = df),legend.position="top")+ guides (fill = guide_legend(title="Subjective evaluation"))
+plot(likert(summary = df))+ guides (fill = guide_legend(title="Subjective evaluation")) + labs(title = "Subjective evaluation of disgust across all pairs of words")+ labs(y = "Percentage of Likert answers") + theme(plot.title = element_text(hjust = 0.5))+ theme(plot.title = element_text(size = rel(1.5))) + theme( legend.box.background = element_rect(), legend.box.margin = margin(6, 6, 6, 6),legend.position = "top")
+
+##Disgust depending on emotion presented
+ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()+
+  labs(title = "Distribution of disgust evaluation", x = "Pairs of words' emotions", y = "Likert scale of subjective disgust feeling") + theme(plot.title = element_text(hjust = 0.75)) + labs(colour = "Gender")+ theme(plot.title = element_text(size = rel(2)))
 ```
 
 ```{r modeling}
@@ -121,12 +128,7 @@ m3.2 = clmm(disgust ~ emotion * gender + (emotion | subjects), data = Data)
 anova(m1.1,m1.2)#better
 anova(m2.1,m2.2)#better
 anova(m3.0,m3.1)#not better
-anova(m1.2,m2.2)#problem
-anova(m2.2,m3.0)#better
 
-sjPlot::tab_model(m2.2)
-sjPlot::tab_model(m3.0) 
-sjPlot::plot_model(m2.2, type="diag")
 
 extractAIC(m1.2)
 extractAIC(m2.2)
@@ -135,5 +137,12 @@ extractAIC(m3.0)
 
 ```{r best model analysis}
 summary(m3.0)
+
 RVAideMemoire::Anova.clmm(m3.0, type = "II") #or type = "III" depending on the context
+```
+Diagnostic of the moddel
+=======================
+```{r}
+#autoplot.resid(m3.0) ##do not work
+#read this : David W.. Hosmer, Lemeshow, S., & Rodney X.. Sturdivant. (2000). Applied logistic regression. New York: Wiley. --> §5
 ```
