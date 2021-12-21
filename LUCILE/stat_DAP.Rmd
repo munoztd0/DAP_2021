@@ -183,6 +183,9 @@ m_compactness <-lm(data = df_mean, compactness~ radius+texture+ perimeter+smooth
 summary(m_compactness)
 ```
 The variables area, perimeter and compactness are well explained by the other variables ( Adjusted R-squared very close to 1). So we discard them.
+```{r}
+df_mean_reduc <-df_mean[-c(4,5,7)]
+```
 
 # GLM
 
@@ -218,6 +221,7 @@ anova(m2,m3,test="Chisq")
 ```
 
 ## Visualization 
+
 ( to see)
 ## glm with glmnet
 Let's separate the dataset into train and test set
@@ -265,21 +269,35 @@ coef(cvfit, s="lambda.1se")
 
 # PCA
 ```{r}
-p1 <-prcomp(df_mean[-1])
+p1 <-prcomp(df_mean_reduc[-1])
 summary(p1)
 #str(p1)
 p1
-autoplot(p1,x=1, y=4,data=df_mean,colour = "diagnosis", loadings = TRUE, loadings.colour = "blue",
+autoplot(p1,x=1, y=2,data=df_mean,colour = "diagnosis", loadings = TRUE, loadings.colour = "blue",
+         loadings.label = TRUE)
+autoplot(p1,x=1, y=2,data=df_mean,colour = "diagnosis", loadings = TRUE, loadings.colour = "blue",
          loadings.label = TRUE)
 ```
 The first PCA component explain the 99% of the data. Interpretation distribution ? 
 k nearst ? 
+pas interpretable
 ```{r}
-df_mean_pca <- cbind(df_mean, p1$x)
+#install.packages('FNN')
+#install.packages('crosstable')
+library(crosstable)
+library('FNN')
+dat_pred <- FNN :: knn(train =x_train,test=  x_test,cl= y_train, k =10)
+table(x = y_test, y = dat_pred)
+```
+
+```{r}
+df_mean_pca <- cbind(df_mean_reduc, p1$x)
 summary(df_mean_pca)
-glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2+PC3+PC4+PC5+PC6, family = binomial)
+glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2, family = binomial)
 summary(glm_pca)
 autoplot(glm_pca,1:4)
+ggplot(data = df_mean_pca, aes(x= PC1))+ geom_density()
+ggplot(data = df_mean_pca, aes(x= PC2))+ geom_density()
 ```
 
 *******************************************************************************

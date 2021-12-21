@@ -539,6 +539,12 @@ The variables area, perimeter and compactness are well explained by the
 other variables ( Adjusted R-squared very close to 1). So we discard
 them.
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_mean\_reduc }\OtherTok{\textless{}{-}}\NormalTok{df\_mean[}\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{7}\NormalTok{)]}
+\end{Highlighting}
+\end{Shaded}
+
 \hypertarget{glm}{%
 \section{GLM}\label{glm}}
 
@@ -605,7 +611,7 @@ Overdistribution ?
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-13-1.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-14-1.pdf}
 
 Let's see with an anova test if we can remove
 symmetry,concavity,concave.points and fractal\_dimension
@@ -806,7 +812,7 @@ test set
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-16-1.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-17-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -933,21 +939,17 @@ Let's look with the first lambda:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{p1 }\OtherTok{\textless{}{-}}\FunctionTok{prcomp}\NormalTok{(df\_mean[}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{])}
+\NormalTok{p1 }\OtherTok{\textless{}{-}}\FunctionTok{prcomp}\NormalTok{(df\_mean\_reduc[}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{])}
 \FunctionTok{summary}\NormalTok{(p1)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
 ## Importance of components:
-##                             PC1     PC2     PC3    PC4     PC5     PC6     PC7
-## Standard deviation     352.7496 4.20290 3.86547 0.2281 0.03302 0.02246 0.01498
-## Proportion of Variance   0.9997 0.00014 0.00012 0.0000 0.00000 0.00000 0.00000
-## Cumulative Proportion    0.9997 0.99988 1.00000 1.0000 1.00000 1.00000 1.00000
-##                           PC8      PC9     PC10
-## Standard deviation     0.0107 0.006723 0.002738
-## Proportion of Variance 0.0000 0.000000 0.000000
-## Cumulative Proportion  1.0000 1.000000 1.000000
+##                           PC1    PC2     PC3     PC4     PC5      PC6      PC7
+## Standard deviation     4.6080 3.1126 0.06442 0.02211 0.01231 0.006858 0.003604
+## Proportion of Variance 0.6866 0.3133 0.00013 0.00002 0.00000 0.000000 0.000000
+## Cumulative Proportion  0.6866 0.9998 0.99998 0.99999 1.00000 1.000000 1.000000
 \end{verbatim}
 
 \begin{Shaded}
@@ -958,121 +960,108 @@ Let's look with the first lambda:
 \end{Shaded}
 
 \begin{verbatim}
-## Standard deviations (1, .., p=10):
-##  [1] 3.527496e+02 4.202899e+00 3.865469e+00 2.280785e-01 3.302431e-02
-##  [6] 2.246078e-02 1.498314e-02 1.070032e-02 6.723036e-03 2.737508e-03
+## Standard deviations (1, .., p=7):
+## [1] 4.608016307 3.112559143 0.064418475 0.022112044 0.012308580 0.006858361
+## [7] 0.003603551
 ## 
-## Rotation (n x k) = (10 x 10):
-##                             PC1           PC2           PC3          PC4
-## radius            -9.865063e-03  0.0771733355  0.1024301301  0.952456868
-## texture           -3.916220e-03  0.7783081363 -0.6278541228  0.004445528
-## perimeter         -6.796386e-02  0.6213843010  0.7698582420 -0.121414104
-## area              -9.976313e-01 -0.0461513749 -0.0509958616 -0.001113681
-## smoothness        -7.064044e-06  0.0001775170  0.0007770653 -0.034043607
-## compactness       -7.468080e-05  0.0037175357  0.0035919739 -0.164145250
-## concavity         -1.550715e-04  0.0039201536  0.0027419692 -0.201758030
-## concave.points    -9.058071e-05  0.0015036949  0.0016864113 -0.069072812
-## symmetry          -1.177025e-05  0.0009092201  0.0010449234 -0.062495480
-## fractal_dimension  5.664885e-06  0.0001237651  0.0001339522 -0.024038634
-##                             PC5           PC6           PC7           PC8
-## radius            -2.595576e-01  1.773711e-02 -8.169307e-02 -4.256383e-02
-## texture            1.634922e-04  5.052041e-04 -3.071585e-04  3.820028e-04
-## perimeter          3.993975e-02 -2.997531e-03  1.355597e-02  6.738197e-03
-## area               2.176553e-05  5.861401e-05 -7.944077e-05 -5.039876e-05
-## smoothness        -1.179914e-01  1.872529e-01 -3.601308e-01  5.742689e-01
-## compactness       -2.583014e-01  2.297613e-01 -7.553151e-01 -4.991668e-01
-## concavity         -8.333273e-01 -4.220235e-01  2.369160e-01 -8.406286e-02
-## concave.points    -2.625501e-01  5.965391e-02 -2.037723e-01  6.355082e-01
-## symmetry          -2.905607e-01  8.537795e-01  4.208549e-01 -7.454169e-02
-## fractal_dimension -5.099665e-02  3.493464e-02 -1.348186e-01 -5.193119e-02
-##                             PC9          PC10
-## radius            -9.842129e-03 -3.726245e-03
-## texture            1.432045e-04  5.680747e-05
-## perimeter          2.186348e-03  1.117907e-03
-## area              -9.791094e-06 -2.263191e-05
-## smoothness         6.966649e-01 -7.094988e-02
-## compactness       -1.077020e-01 -1.491696e-01
-## concavity          1.528201e-01 -1.352082e-02
-## concave.points    -6.903978e-01  2.626377e-02
-## symmetry          -2.043042e-03  6.930804e-03
-## fractal_dimension  5.430797e-02  9.857884e-01
+## Rotation (n x k) = (7 x 7):
+##                             PC1           PC2          PC3           PC4
+## radius            -0.4865963393  0.8734572836 -0.016247190 -0.0031190341
+## texture           -0.8735719432 -0.4866917945 -0.001638412 -0.0004536868
+## smoothness        -0.0001358489  0.0008343083  0.138357483 -0.1766861095
+## concavity         -0.0086261840  0.0119427069  0.895567786  0.3358335663
+## concave.points    -0.0045939326  0.0076849313  0.311838508 -0.0748932182
+## symmetry          -0.0006740182  0.0008657321  0.272281127 -0.9218545572
+## fractal_dimension  0.0002730890 -0.0005821752  0.084667728 -0.0237293409
+##                             PC5           PC6           PC7
+## radius             0.0019645044  0.0039955704 -1.689040e-03
+## texture           -0.0005006787  0.0001269227 -1.471877e-05
+## smoothness        -0.7077017950  0.6470590176  1.735261e-01
+## concavity          0.2427338224  0.1491793036  6.150564e-02
+## concave.points    -0.5944022366 -0.7373962794  5.449565e-04
+## symmetry           0.2750833675 -0.0129430718  1.440754e-02
+## fractal_dimension -0.1060635323  0.1229771787 -9.827996e-01
 \end{verbatim}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{autoplot}\NormalTok{(p1,}\AttributeTok{x=}\DecValTok{1}\NormalTok{, }\AttributeTok{y=}\DecValTok{4}\NormalTok{,}\AttributeTok{data=}\NormalTok{df\_mean,}\AttributeTok{colour =} \StringTok{"diagnosis"}\NormalTok{, }\AttributeTok{loadings =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{loadings.colour =} \StringTok{"blue"}\NormalTok{,}
+\FunctionTok{autoplot}\NormalTok{(p1,}\AttributeTok{x=}\DecValTok{1}\NormalTok{, }\AttributeTok{y=}\DecValTok{2}\NormalTok{,}\AttributeTok{data=}\NormalTok{df\_mean,}\AttributeTok{colour =} \StringTok{"diagnosis"}\NormalTok{, }\AttributeTok{loadings =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{loadings.colour =} \StringTok{"blue"}\NormalTok{,}
          \AttributeTok{loadings.label =} \ConstantTok{TRUE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-18-1.pdf} The
-first PCA component explain the 99\% of the data. Interpretation
-distribution ? k nearst ?
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-19-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{df\_mean\_pca }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(df\_mean, p1}\SpecialCharTok{$}\NormalTok{x)}
+\FunctionTok{autoplot}\NormalTok{(p1,}\AttributeTok{x=}\DecValTok{1}\NormalTok{, }\AttributeTok{y=}\DecValTok{2}\NormalTok{,}\AttributeTok{data=}\NormalTok{df\_mean,}\AttributeTok{colour =} \StringTok{"diagnosis"}\NormalTok{, }\AttributeTok{loadings =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{loadings.colour =} \StringTok{"blue"}\NormalTok{,}
+         \AttributeTok{loadings.label =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-19-2.pdf} The
+first PCA component explain the 99\% of the data. Interpretation
+distribution ? k nearst ? pas interpretable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#install.packages(\textquotesingle{}FNN\textquotesingle{})}
+\CommentTok{\#install.packages(\textquotesingle{}crosstable\textquotesingle{})}
+\FunctionTok{library}\NormalTok{(crosstable)}
+\FunctionTok{library}\NormalTok{(}\StringTok{\textquotesingle{}FNN\textquotesingle{}}\NormalTok{)}
+\NormalTok{dat\_pred }\OtherTok{\textless{}{-}}\NormalTok{ FNN }\SpecialCharTok{::} \FunctionTok{knn}\NormalTok{(}\AttributeTok{train =}\NormalTok{x\_train,}\AttributeTok{test=}\NormalTok{  x\_test,}\AttributeTok{cl=}\NormalTok{ y\_train, }\AttributeTok{k =}\DecValTok{10}\NormalTok{)}
+\FunctionTok{table}\NormalTok{(}\AttributeTok{x =}\NormalTok{ y\_test, }\AttributeTok{y =}\NormalTok{ dat\_pred)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    y
+## x    B  M
+##   B 78  2
+##   M 14 49
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_mean\_pca }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(df\_mean\_reduc, p1}\SpecialCharTok{$}\NormalTok{x)}
 \FunctionTok{summary}\NormalTok{(df\_mean\_pca)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-##  diagnosis     radius          texture        perimeter           area       
-##  B:357     Min.   : 6.981   Min.   : 9.71   Min.   : 43.79   Min.   : 143.5  
-##  M:212     1st Qu.:11.700   1st Qu.:16.17   1st Qu.: 75.17   1st Qu.: 420.3  
-##            Median :13.370   Median :18.84   Median : 86.24   Median : 551.1  
-##            Mean   :14.127   Mean   :19.29   Mean   : 91.97   Mean   : 654.9  
-##            3rd Qu.:15.780   3rd Qu.:21.80   3rd Qu.:104.10   3rd Qu.: 782.7  
-##            Max.   :28.110   Max.   :39.28   Max.   :188.50   Max.   :2501.0  
-##    smoothness       compactness        concavity       concave.points   
-##  Min.   :0.05263   Min.   :0.01938   Min.   :0.00000   Min.   :0.00000  
-##  1st Qu.:0.08637   1st Qu.:0.06492   1st Qu.:0.02956   1st Qu.:0.02031  
-##  Median :0.09587   Median :0.09263   Median :0.06154   Median :0.03350  
-##  Mean   :0.09636   Mean   :0.10434   Mean   :0.08880   Mean   :0.04892  
-##  3rd Qu.:0.10530   3rd Qu.:0.13040   3rd Qu.:0.13070   3rd Qu.:0.07400  
-##  Max.   :0.16340   Max.   :0.34540   Max.   :0.42680   Max.   :0.20120  
-##     symmetry      fractal_dimension      PC1               PC2          
-##  Min.   :0.1060   Min.   :0.04996   Min.   :-1848.3   Min.   :-24.6830  
-##  1st Qu.:0.1619   1st Qu.:0.05770   1st Qu.: -128.4   1st Qu.: -2.4398  
-##  Median :0.1792   Median :0.06154   Median :  103.9   Median : -0.4213  
-##  Mean   :0.1812   Mean   :0.06280   Mean   :    0.0   Mean   :  0.0000  
-##  3rd Qu.:0.1957   3rd Qu.:0.06612   3rd Qu.:  235.2   3rd Qu.:  2.5400  
-##  Max.   :0.3040   Max.   :0.09744   Max.   :  513.5   Max.   : 16.8702  
-##       PC3                PC4                PC5                 PC6            
-##  Min.   :-24.0804   Min.   :-1.26579   Min.   :-0.307819   Min.   :-0.0887264  
-##  1st Qu.: -1.8838   1st Qu.:-0.11037   1st Qu.:-0.010592   1st Qu.:-0.0142114  
-##  Median :  0.4681   Median : 0.02708   Median : 0.003205   Median : 0.0002414  
-##  Mean   :  0.0000   Mean   : 0.00000   Mean   : 0.000000   Mean   : 0.0000000  
-##  3rd Qu.:  2.3750   3rd Qu.: 0.15251   3rd Qu.: 0.015512   3rd Qu.: 0.0131804  
-##  Max.   : 12.0763   Max.   : 0.58826   Max.   : 0.148701   Max.   : 0.0979141  
-##       PC7                  PC8                  PC9            
-##  Min.   :-0.0756378   Min.   :-0.0491463   Min.   :-3.214e-02  
-##  1st Qu.:-0.0091623   1st Qu.:-0.0060271   1st Qu.:-3.923e-03  
-##  Median : 0.0004192   Median : 0.0004688   Median : 3.682e-05  
-##  Mean   : 0.0000000   Mean   : 0.0000000   Mean   : 0.000e+00  
-##  3rd Qu.: 0.0087381   3rd Qu.: 0.0066076   3rd Qu.: 3.991e-03  
-##  Max.   : 0.0577082   Max.   : 0.0485694   Max.   : 2.320e-02  
-##       PC10           
-##  Min.   :-9.149e-03  
-##  1st Qu.:-1.727e-03  
-##  Median :-6.735e-05  
-##  Mean   : 0.000e+00  
-##  3rd Qu.: 1.448e-03  
-##  Max.   : 1.195e-02
+##  diagnosis     radius          texture        smoothness        concavity      
+##  B:357     Min.   : 6.981   Min.   : 9.71   Min.   :0.05263   Min.   :0.00000  
+##  M:212     1st Qu.:11.700   1st Qu.:16.17   1st Qu.:0.08637   1st Qu.:0.02956  
+##            Median :13.370   Median :18.84   Median :0.09587   Median :0.06154  
+##            Mean   :14.127   Mean   :19.29   Mean   :0.09636   Mean   :0.08880  
+##            3rd Qu.:15.780   3rd Qu.:21.80   3rd Qu.:0.10530   3rd Qu.:0.13070  
+##            Max.   :28.110   Max.   :39.28   Max.   :0.16340   Max.   :0.42680  
+##  concave.points       symmetry      fractal_dimension      PC1          
+##  Min.   :0.00000   Min.   :0.1060   Min.   :0.04996   Min.   :-19.0853  
+##  1st Qu.:0.02031   1st Qu.:0.1619   1st Qu.:0.05770   1st Qu.: -3.0771  
+##  Median :0.03350   Median :0.1792   Median :0.06154   Median :  0.7017  
+##  Mean   :0.04892   Mean   :0.1812   Mean   :0.06280   Mean   :  0.0000  
+##  3rd Qu.:0.07400   3rd Qu.:0.1957   3rd Qu.:0.06612   3rd Qu.:  3.3618  
+##  Max.   :0.20120   Max.   :0.3040   Max.   :0.09744   Max.   :  9.9883  
+##       PC2               PC3                PC4                  PC5            
+##  Min.   :-9.6077   Min.   :-0.12749   Min.   :-9.817e-02   Min.   :-0.0501920  
+##  1st Qu.:-1.9337   1st Qu.:-0.04061   1st Qu.:-1.222e-02   1st Qu.:-0.0075599  
+##  Median :-0.2382   Median :-0.01005   Median :-5.951e-05   Median :-0.0002641  
+##  Mean   : 0.0000   Mean   : 0.00000   Mean   : 0.000e+00   Mean   : 0.0000000  
+##  3rd Qu.: 1.7827   3rd Qu.: 0.02810   3rd Qu.: 1.368e-02   3rd Qu.: 0.0076599  
+##  Max.   :12.6158   Max.   : 0.39962   Max.   : 8.102e-02   Max.   : 0.0632631  
+##       PC6                  PC7            
+##  Min.   :-3.044e-02   Min.   :-0.0175097  
+##  1st Qu.:-4.134e-03   1st Qu.:-0.0017616  
+##  Median :-8.956e-05   Median : 0.0002342  
+##  Mean   : 0.000e+00   Mean   : 0.0000000  
+##  3rd Qu.: 4.320e-03   3rd Qu.: 0.0024175  
+##  Max.   : 2.505e-02   Max.   : 0.0108129
 \end{verbatim}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{glm\_pca }\OtherTok{\textless{}{-}}\FunctionTok{glm}\NormalTok{(}\AttributeTok{data=}\NormalTok{ df\_mean\_pca, df\_mean\_pca}\SpecialCharTok{$}\NormalTok{diagnosis }\SpecialCharTok{\textasciitilde{}}\NormalTok{PC1}\SpecialCharTok{+}\NormalTok{PC2}\SpecialCharTok{+}\NormalTok{PC3}\SpecialCharTok{+}\NormalTok{PC4}\SpecialCharTok{+}\NormalTok{PC5}\SpecialCharTok{+}\NormalTok{PC6, }\AttributeTok{family =}\NormalTok{ binomial)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
+\NormalTok{glm\_pca }\OtherTok{\textless{}{-}}\FunctionTok{glm}\NormalTok{(}\AttributeTok{data=}\NormalTok{ df\_mean\_pca, df\_mean\_pca}\SpecialCharTok{$}\NormalTok{diagnosis }\SpecialCharTok{\textasciitilde{}}\NormalTok{PC1}\SpecialCharTok{+}\NormalTok{PC2, }\AttributeTok{family =}\NormalTok{ binomial)}
 \FunctionTok{summary}\NormalTok{(glm\_pca)}
 \end{Highlighting}
 \end{Shaded}
@@ -1080,32 +1069,28 @@ distribution ? k nearst ?
 \begin{verbatim}
 ## 
 ## Call:
-## glm(formula = df_mean_pca$diagnosis ~ PC1 + PC2 + PC3 + PC4 + 
-##     PC5 + PC6, family = binomial, data = df_mean_pca)
+## glm(formula = df_mean_pca$diagnosis ~ PC1 + PC2, family = binomial, 
+##     data = df_mean_pca)
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -2.3325  -0.1995  -0.0565   0.0168   3.3065  
+## -2.1460  -0.3791  -0.1203   0.1265   2.8447  
 ## 
 ## Coefficients:
-##               Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)  -0.264462   0.480395  -0.551  0.58197    
-## PC1          -0.018446   0.002775  -6.647 2.99e-11 ***
-## PC2           0.343023   0.105645   3.247  0.00117 ** 
-## PC3          -0.112416   0.119567  -0.940  0.34712    
-## PC4          -6.524728   1.671987  -3.902 9.53e-05 ***
-## PC5         -31.829078   7.097893  -4.484 7.32e-06 ***
-## PC6          27.805384   9.323062   2.982  0.00286 ** 
+##             Estimate Std. Error z value Pr(>|z|)    
+## (Intercept) -0.70749    0.15181  -4.660 3.16e-06 ***
+## PC1         -0.70531    0.06545 -10.777  < 2e-16 ***
+## PC2          0.81767    0.08602   9.506  < 2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 751.44  on 568  degrees of freedom
-## Residual deviance: 174.12  on 562  degrees of freedom
-## AIC: 188.12
+## Residual deviance: 290.97  on 566  degrees of freedom
+## AIC: 296.97
 ## 
-## Number of Fisher Scoring iterations: 8
+## Number of Fisher Scoring iterations: 7
 \end{verbatim}
 
 \begin{Shaded}
@@ -1114,7 +1099,23 @@ distribution ? k nearst ?
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-19-1.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-21-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =}\NormalTok{ df\_mean\_pca, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{ PC1))}\SpecialCharTok{+} \FunctionTok{geom\_density}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-21-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(}\AttributeTok{data =}\NormalTok{ df\_mean\_pca, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{ PC2))}\SpecialCharTok{+} \FunctionTok{geom\_density}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-21-3.pdf}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -1162,7 +1163,7 @@ group}\label{correlation-in-the-standard-deviation-and-worst-group}}
 ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 \end{verbatim}
 
-\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-20-1.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-22-1.pdf}
 
 \begin{verbatim}
 ## 'data.frame':    569 obs. of  11 variables:
@@ -1192,7 +1193,7 @@ group}\label{correlation-in-the-standard-deviation-and-worst-group}}
 ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 \end{verbatim}
 
-\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-20-2.pdf}
+\includegraphics{stat_DAP_files/figure-latex/unnamed-chunk-22-2.pdf}
 
 We get the same results as for the mean group.
 
@@ -1233,26 +1234,30 @@ We get the same results as for the mean group.
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] boot_1.3-28       glmnet_4.1-3      Matrix_1.3-4      kableExtra_1.3.4 
-##  [5] here_1.0.1        MASS_7.3-54       ggfortify_0.4.12  GGally_2.1.2     
-##  [9] ggplot2_3.3.5     papaja_0.1.0.9997 pacman_0.5.1     
+##  [1] FNN_1.1.3         crosstable_0.3.2  boot_1.3-28       glmnet_4.1-3     
+##  [5] Matrix_1.3-4      kableExtra_1.3.4  here_1.0.1        MASS_7.3-54      
+##  [9] ggfortify_0.4.12  GGally_2.1.2      ggplot2_3.3.5     papaja_0.1.0.9997
+## [13] pacman_0.5.1     
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_1.0.7         svglite_2.0.0      lattice_0.20-44    tidyr_1.1.4       
 ##  [5] rprojroot_2.0.2    digest_0.6.28      foreach_1.5.1      utf8_1.2.2        
-##  [9] R6_2.5.1           plyr_1.8.6         evaluate_0.14      httr_1.4.2        
-## [13] highr_0.9          pillar_1.6.3       rlang_0.4.11       rstudioapi_0.13   
-## [17] rmarkdown_2.11     labeling_0.4.2     splines_4.1.1      webshot_0.5.2     
-## [21] stringr_1.4.0      munsell_0.5.0      compiler_4.1.1     xfun_0.26         
-## [25] pkgconfig_2.0.3    systemfonts_1.0.3  shape_1.4.6        htmltools_0.5.2   
-## [29] tidyselect_1.1.1   tibble_3.1.5       gridExtra_2.3      codetools_0.2-18  
-## [33] reshape_0.8.8      fansi_0.5.0        viridisLite_0.4.0  crayon_1.4.1      
-## [37] dplyr_1.0.7        withr_2.4.2        grid_4.1.1         gtable_0.3.0      
-## [41] lifecycle_1.0.1    magrittr_2.0.1     scales_1.1.1       stringi_1.7.5     
-## [45] farver_2.1.0       xml2_1.3.3         ellipsis_0.3.2     generics_0.1.0    
-## [49] vctrs_0.3.8        RColorBrewer_1.1-2 iterators_1.0.13   tools_4.1.1       
-## [53] glue_1.4.2         purrr_0.3.4        fastmap_1.1.0      survival_3.2-11   
-## [57] yaml_2.2.1         colorspace_2.0-2   rvest_1.0.2        knitr_1.36
+##  [9] R6_2.5.1           plyr_1.8.6         backports_1.2.1    evaluate_0.14     
+## [13] httr_1.4.2         highr_0.9          pillar_1.6.3       gdtools_0.2.3     
+## [17] rlang_0.4.11       uuid_1.0-3         data.table_1.14.2  rstudioapi_0.13   
+## [21] flextable_0.6.10   checkmate_2.0.0    rmarkdown_2.11     labeling_0.4.2    
+## [25] splines_4.1.1      webshot_0.5.2      stringr_1.4.0      munsell_0.5.0     
+## [29] compiler_4.1.1     xfun_0.26          base64enc_0.1-3    pkgconfig_2.0.3   
+## [33] systemfonts_1.0.3  shape_1.4.6        htmltools_0.5.2    tidyselect_1.1.1  
+## [37] tibble_3.1.5       gridExtra_2.3      codetools_0.2-18   reshape_0.8.8     
+## [41] fansi_0.5.0        viridisLite_0.4.0  crayon_1.4.1       dplyr_1.0.7       
+## [45] withr_2.4.2        grid_4.1.1         gtable_0.3.0       lifecycle_1.0.1   
+## [49] magrittr_2.0.1     scales_1.1.1       zip_2.2.0          stringi_1.7.5     
+## [53] farver_2.1.0       xml2_1.3.3         ellipsis_0.3.2     generics_0.1.0    
+## [57] vctrs_0.3.8        RColorBrewer_1.1-2 forcats_0.5.1      iterators_1.0.13  
+## [61] tools_4.1.1        glue_1.4.2         officer_0.4.1      purrr_0.3.4       
+## [65] fastmap_1.1.0      survival_3.2-11    yaml_2.2.1         colorspace_2.0-2  
+## [69] rvest_1.0.2        knitr_1.36
 \end{verbatim}
 
 \hypertarget{references-1}{%
