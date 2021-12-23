@@ -10,3 +10,5 @@ papaja
 Matrix
 glmnet
 boot
+crosstable
+FNN
