@@ -56,7 +56,7 @@ Here is a description of the different variables:
 #Creating a working dataset
 #Giving nice names to variables
 
-subjects<-Raw_data$ï..code
+subjects<-Raw_data$code
 wordpairs<-Raw_data$wordpair
 emotion<-Raw_data$emotion
 gender<-Raw_data$sex
@@ -106,6 +106,7 @@ df <- df %>%
 rename("1 (low)" = one, "2" = two, "3" = three, "4" = four, "5" = five, "6"= six, "7 (high)"= seven)
 df
 ## Pretty Plot
+
 plot(likert(summary = df))+ guides (fill = guide_legend(title="Subjective evaluation")) + labs(title = "Subjective evaluation of disgust across all pairs of words")+ labs(y = "Percentage of Likert answers") + theme(plot.title = element_text(hjust = 0.5))+ theme(plot.title = element_text(size = rel(1.5))) + theme( legend.box.background = element_rect(), legend.box.margin = margin(6, 6, 6, 6),legend.position = "top")
 
 ##Disgust depending on emotion presented

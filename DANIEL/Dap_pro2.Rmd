@@ -56,7 +56,7 @@ Here is a description of the different variables:
 #Creating a working dataset
 #Giving nice names to variables
 
-subjects<-Raw_data$ï..code
+subjects<-Raw_data$code
 wordpairs<-Raw_data$wordpair
 emotion<-Raw_data$emotion
 gender<-Raw_data$sex
@@ -91,51 +91,64 @@ Data exploration (Graphs)
 
 ## Prepare data <- **need to specify emotion$disgust + the other ratings**
 Newdata<-data.frame(Data$emotion,Data$disgust)
-q<-c(which(Newdata$Data.emotion=="Disgust"))
-w<-Newdata[q,]
-summary(w)
-p<-c(which(Newdata$Data.emotion=="Fear"))
-v<-Newdata[p,]
-summary(v)
-o<-c(which(Newdata$Data.emotion=="Neutral"))
-u<-Newdata[o,]
-summary(u)
-Lkrt<-as.data.frame(rbind(cbind("Emotion","1 (low)","2","3","4","5","6","7 (high)"),cbind("Disgust",1256/3116*100,543/3116*100,482/3116*100,326/3116*100,229/3116*100,148/3116*100,132/3116*100),cbind("Fear",2357/3116*100,369/3116*100,192/3116*100,92/3116*100,52/3116*100,22/3116*100,32/3116*100), cbind("Neutral",2998/3117*100,60/3117*100,32/3117*100,14/3117*100,7/3117*100,4/3117*100,2/3117*100)))
-names(Lkrt) <- as.matrix(Lkrt[1, ])
-Lkrt <- Lkrt[-1, ]
-Lkrt[] <- lapply(Lkrt, function(x) type.convert(as.character(x)))
 
-Lkrt2<-as.data.frame(Lkrt[,c(1,2,3,4,5,6,7,8)])
-str(Lkrt2)
-HH::likert(Lkrt~.,Lkrt2, positive.order=TRUE,as.percent = TRUE, 
-           main="Subjective evluation of disgust depending on the wordpairs emotion",
-           xlab="Percentage",ylab="Emotion")
+df = prop.table(table(Newdata$Data.emotion, Newdata$Data.disgust), margin = 1)*100 # simpler way but great work!
+
+#this is just ot make it fit into Likert
+df = as.data.frame.matrix(df)
+df$Item <- row.names(df)
+rownames(df) = NULL
+df = df[,c(8,1,2,3,4,5,6,7)]
+colnames(df) = c("Item", "1 (low)","2","3","4","5","6","7 (high)") # important that the name is "Item" and its first!
+
+# q<-c(which(Newdata$Data.emotion=="Disgust"))
+# w<-Newdata[q,]
+# summary(w)
+# p<-c(which(Newdata$Data.emotion=="Fear"))
+# v<-Newdata[p,]
+# summary(v)
+# o<-c(which(Newdata$Data.emotion=="Neutral"))
+# u<-Newdata[o,]
+# summary(u)
+# Lkrt<-as.data.frame(rbind(cbind("Emotion","1 (low)","2","3","4","5","6","7 (high)"),cbind("Disgust",1256/3116*100,543/3116*100,482/3116*100,326/3116*100,229/3116*100,148/3116*100,132/3116*100),cbind("Fear",2357/3116*100,369/3116*100,192/3116*100,92/3116*100,52/3116*100,22/3116*100,32/3116*100), cbind("Neutral",2998/3117*100,60/3117*100,32/3117*100,14/3117*100,7/3117*100,4/3117*100,2/3117*100)))
+# names(Lkrt) <- as.matrix(Lkrt[1, ])
+# Lkrt <- Lkrt[-1, ]
+# Lkrt[] <- lapply(Lkrt, function(x) type.convert(as.character(x)))
+# 
+# Lkrt2<-as.data.frame(Lkrt[,c(1,2,3,4,5,6,7,8)])
+
+
+# HH::likert(Item~.,Lkrt2, positive.order=TRUE, as.percent = F,
+#            main="Subjective evluation of disgust depending on the wordpairs emotion",
+#            xlab="Percentage",ylab="Emotion")
 ```
 
 ```{r}
-a=9349
-Item <- rev(sort(unique(Data$emotion)))
-one <- (6611/a)*100
-two <- (972/a)*100
-three <- (706/a)*100
-four <- (432/a)*100
-five <- (288/a)*100
-six <- (174/a)*100
-seven <- (166/a)*100
-df <- data.frame(Item, one, two, three, four, five, six, seven)
-## Rename Cols
-df <- df %>%
-rename("1 (low)" = one, "2" = two, "3" = three, "4" = four, "5" = five, "6"= six, "7 (high)"= seven)
-summary(df)
-## Pretty Plot
-plot(likert(summary = df))
-+ guides(fill = guide_legend(title="Subjective evaluation"))
-+ labs(title = "Subjective evaluation of disgust across all pairs of words")
-+ labs(y = "Percentage of Likert answers")
-+ labs(x="Word pairs' emotions")
-+ theme(plot.title = element_text(hjust = 0.5))
-+ theme(plot.title = element_text(size = rel(1.5)))
-+ theme( legend.box.background = element_rect(), legend.box.margin = margin(6, 6, 6, 6), legend.position = "top")
+# a=9349
+# Item <- rev(sort(unique(Data$emotion)))
+# one <- (6611/a)*100
+# two <- (972/a)*100
+# three <- (706/a)*100
+# four <- (432/a)*100
+# five <- (288/a)*100
+# six <- (174/a)*100
+# seven <- (166/a)*100
+# df <- data.frame(Item, one, two, three, four, five, six, seven)
+# ## Rename Cols
+# df <- df %>%
+# rename("1 (low)" = one, "2" = two, "3" = three, "4" = four, "5" = five, "6"= six, "7 (high)"= seven)
+# summary(df)
+
+
+## Pretty Plot # + sign at the end ! not at begiging of new linw
+plot(likert(summary = Lkrt2))+ 
+  guides(fill = guide_legend(name="Subjective evaluation"))+ 
+  labs(title = "Subjective evaluation of disgust across all pairs of words")+
+  labs(y = "Percentage of Likert answers") +
+  labs(x="Word pairs' emotions") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.title = element_text(size = rel(1.5))) +
+  theme( legend.box.background = element_rect(), legend.box.margin = margin(6, 6, 6, 6), legend.position = "right")
 ```
 
 ```{r alternate graph, include=FALSE}
@@ -153,7 +166,7 @@ plot(m1.0)
 sjPlot::plot_model(m1.0,type = "diag")[[3]]
 ```
 
-```{r}
+```{r, cache=TRUE}
 #best method
 
 m1.2 = clm(disgust ~ emotion * gender, data = Data)
