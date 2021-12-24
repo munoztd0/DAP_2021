@@ -1,0 +1,199 @@
+---
+title: "DAP Project"
+author: "Daniel Granja"
+date: "10/12/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#this is to check to see if package are installed and if not to install them or just load them if they are installed!
+if(!require(pacman)) {install.packages("pacman")}
+
+pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire,sjPlot, HH, likert, dplyr,sure,vtable)
+
+#get relative path
+path =  here("DANIEL") #You put the name of YOUR folder and here() will find the relative path for you ! 
+setwd(path) #set working directory
+
+ 
+#data scanning 
+Raw_data <- read.csv2("Raw_data.csv")
+```
+
+
+Introduction
+============
+
+Context of the project
+----------------------
+
+According to the American Psychological Association (APA), emotion is defined as “a complex reaction pattern, involving experiential, behavioral and physiological elements.”
+Researchers have been studying the impact of emotions on cognitive functions, such as memory. Studies have shown that emotional activation, and specifically emotions of negative valence, favours the retrieval processes of associative memory for single items, but impairs it for associated items or contexts (Schmidt, Patnaik & Kensinger, 2010).
+It's believed that the neurobiological systems sustaining high emotional arousal and memory are linked, especially through the adrenal stress hormones, itself mediated by the amygdala activity (McGaugh, 2013).
+In the study the dataset came from, Riegel et al. (2020) used words to elicit emotions (disgust, fear or neutral). Each pair displayed the same emotion and when showed together they had to imagine an interaction between them, forcing the creation of a meaningful association. To be sure that the displayed words showed the correct emotion, affective ratings were asked as controls. Each participant had to rate each pair on a Likert scale (1 to 7) of disgust and fear.
+In this project, we are going to use part of this dataset to analyse and compare three statistical methods. We will compare (a) a logitic model, (b) an ordinal polytomous logistic regression without random effects and (c) an ordinal polytomous logistic regression with random effects. 
+
+
+Data description
+----------------
+Here is a description of the different variables:
+
+* **Subjects**: the subject's number in the experiment.
+
+* **Wordpairs**: the word pairs presented.
+
+* **Emotion**: the emotion elicited by the word pairs (disgust, fear or neutral).
+
+* **Gender**: the gender of the subjects (man or woman).
+
+* **Disgust**: a Likert scale (1 to 7) of the subjects’ emotional subjective feeling of disgust.
+
+* **Fear**: a Likert scale (1 to 7) of the subjects’ emotional subjective feeling of fear.
+
+
+```{r, echo=FALSE}
+#Creating a working dataset
+#Giving nice names to variables
+
+subjects<-Raw_data$ï..code
+wordpairs<-Raw_data$wordpair
+emotion<-Raw_data$emotion
+gender<-Raw_data$sex
+disgust<-Raw_data$disgust
+fear<-Raw_data$fear
+
+#Creating a dataset
+Data<-data.frame(subjects,wordpairs,emotion,gender,disgust,fear)
+
+#Adapting the variables
+Data$emotion<-as.factor(Data$emotion)
+levels(Data$emotion) <- c("Disgust", "Fear","Neutral")
+Data$gender<-as.factor(Data$gender)
+levels(Data$gender) <- c("Women", "Men")
+Data$disgust<-as.factor(Data$disgust)
+Data$fear<-as.factor(Data$fear)
+
+```
+
+Data exploration (Dataset)
+----------------
+
+```{r basic explor, comment = NA}
+str(Data)
+st(Data) #use "vtable"
+```
+
+Data exploration (Graphs) 
+-------------------------
+
+```{r}
+
+## Prepare data <- **need to specify emotion$disgust + the other ratings**
+Newdata<-data.frame(Data$emotion,Data$disgust)
+q<-c(which(Newdata$Data.emotion=="Disgust"))
+w<-Newdata[q,]
+summary(w)
+p<-c(which(Newdata$Data.emotion=="Fear"))
+v<-Newdata[p,]
+summary(v)
+o<-c(which(Newdata$Data.emotion=="Neutral"))
+u<-Newdata[o,]
+summary(u)
+Lkrt<-as.data.frame(rbind(cbind("Emotion","1 (low)","2","3","4","5","6","7 (high)"),cbind("Disgust",1256/3116*100,543/3116*100,482/3116*100,326/3116*100,229/3116*100,148/3116*100,132/3116*100),cbind("Fear",2357/3116*100,369/3116*100,192/3116*100,92/3116*100,52/3116*100,22/3116*100,32/3116*100), cbind("Neutral",2998/3117*100,60/3117*100,32/3117*100,14/3117*100,7/3117*100,4/3117*100,2/3117*100)))
+names(Lkrt) <- as.matrix(Lkrt[1, ])
+Lkrt <- Lkrt[-1, ]
+Lkrt[] <- lapply(Lkrt, function(x) type.convert(as.character(x)))
+
+Lkrt2<-as.data.frame(Lkrt[,c(1,2,3,4,5,6,7,8)])
+str(Lkrt2)
+HH::likert(Lkrt~.,Lkrt2, positive.order=TRUE,as.percent = TRUE, 
+           main="Subjective evluation of disgust depending on the wordpairs emotion",
+           xlab="Percentage",ylab="Emotion")
+```
+
+```{r}
+a=9349
+Item <- rev(sort(unique(Data$emotion)))
+one <- (6611/a)*100
+two <- (972/a)*100
+three <- (706/a)*100
+four <- (432/a)*100
+five <- (288/a)*100
+six <- (174/a)*100
+seven <- (166/a)*100
+df <- data.frame(Item, one, two, three, four, five, six, seven)
+## Rename Cols
+df <- df %>%
+rename("1 (low)" = one, "2" = two, "3" = three, "4" = four, "5" = five, "6"= six, "7 (high)"= seven)
+summary(df)
+## Pretty Plot
+plot(likert(summary = df))
++ guides(fill = guide_legend(title="Subjective evaluation"))
++ labs(title = "Subjective evaluation of disgust across all pairs of words")
++ labs(y = "Percentage of Likert answers")
++ labs(x="Word pairs' emotions")
++ theme(plot.title = element_text(hjust = 0.5))
++ theme(plot.title = element_text(size = rel(1.5)))
++ theme( legend.box.background = element_rect(), legend.box.margin = margin(6, 6, 6, 6), legend.position = "top")
+```
+
+```{r alternate graph, include=FALSE}
+##Disgust depending on emotion presented
+ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()+
+  labs(title = "Distribution of disgust evaluation", x = "Pairs of words' emotions", y = "Likert scale of subjective disgust feeling") + theme(plot.title = element_text(hjust = 0.75)) + labs(colour = "Gender")+ theme(plot.title = element_text(size = rel(2)))
+```
+
+Modelisation
+============
+```{r}
+disgust2<-as.numeric(disgust)
+m1.0 = lm(disgust2~emotion*gender, data=Data)
+plot(m1.0)
+sjPlot::plot_model(m1.0,type = "diag")[[3]]
+```
+
+```{r}
+#best method
+
+m1.2 = clm(disgust ~ emotion * gender, data = Data)
+m2.2 = clmm(disgust ~ emotion * gender + (1|subjects), data = Data)
+m3.2 = clmm(disgust ~ emotion * gender + (emotion | subjects), data = Data)
+extractAIC(m1.2)
+extractAIC(m2.2)
+extractAIC(m3.2)
+
+# --> m3.2
+```
+
+```{r}
+#best model
+m3.2 = clmm(disgust ~ emotion * gender + (emotion | subjects), data = Data)
+m3.1 = clmm(disgust ~ emotion + gender + (emotion | subjects), data = Data)
+m3.0 = clmm(disgust ~ emotion + (emotion | subjects), data = Data)
+
+extractAIC(m3.2)
+extractAIC(m3.1)
+extractAIC(m3.0)
+
+#--> m3.0
+
+```
+
+
+```{r best model analysis}
+summary(m3.0)
+
+RVAideMemoire::Anova.clmm(m3.0, type = "II") #or type = "III" depending on the context
+```
+Diagnostic of the model
+=======================
+```{r}
+#plot(m3.0) #do not work
+#autoplot.resid(m3.0) ##do not work
+#read this : David W.. Hosmer, Lemeshow, S., & Rodney X.. Sturdivant. (2000). Applied logistic regression. New York: Wiley. --> §5
+
+sjPlot::tab_model(m3.0)
+autoplot.clm(m1.2, what="qq")
+plot(m1.0, which = 2)
+```
