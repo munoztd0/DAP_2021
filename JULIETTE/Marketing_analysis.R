@@ -17,7 +17,7 @@ data <- read.table("marketing_campaign.csv", header=T, sep="\t")
 #View(data)
 summary(data)
 str(data)
-
+plot(data$age)
 
 
 # 2) Clearing
@@ -28,9 +28,18 @@ data$AcceptedCmpTotal <- data$AcceptedCmp1 + data$AcceptedCmp2 + data$AcceptedCm
 data$AcceptedCmp1 <- data$AcceptedCmp2 <- data$AcceptedCmp3 <- data$AcceptedCmp4 <- data$AcceptedCmp5 <- data$Response <- NULL
 
 data$age <- 2014 - data$Year_Birth
+summary(data$age)
 max(data$age)
-which(data$age==121)
+range(data$age)
+which(data$age>100)
+data<-data[!(which(data$age>100))]
+plot(data$age)
 data$Year_Birth[240] <- 1993
+data <- data[-c(193, 240, 340),]
+View(data)
+str(data$Marital_Status)
+data$Marital_Status <- as.factor(data$Marital_Status)
+levels(data$Marital_Status)
 # data$Marital_Status[data$Marital_Status=="Absurd"] <- NA
 # which(is.na(data))
 
@@ -62,12 +71,9 @@ data %>%
       filter(!is.na(Marital_Status)) %>% # filter on non-missing values
       ggplot(aes(MntWines, Marital_Status)) + geom_boxplot(na.rm = TRUE)
 
+ggplot(data, aes(Kidhome, MntSweetProducts))+ geom_boxplot(outlier.colour =  "red") +  geom_point(position = position_jitter()) 
 
-
-
-ggplot(data, aes(Kidhome, MntSweetProducts))+ geom_boxplot(outlier.colour =  "red") #+  geom_point(position = position_jitter()) 
-
-ggplot(data, aes(MntWines, Marital_Status)) + geom_boxplot(outlier.colour =  "red")
+ggplot(data, aes(MntWines, Marital_Status)) + geom_boxplot(outlier.colour =  "red") +  geom_point(position = position_jitter()) 
 
 #alternative with violin plots
 ggplot(data, aes(x=MntWines, y=Marital_Status)) +
@@ -97,7 +103,7 @@ ggplot(data, aes(x = sqrt(NumDealsPurchases))) +
 #### Modeling
 
 #1) creer full model
-m1 <- lm(data=data, NumStorePurchases ~ Kidhome*Income*Education*age) #what about age ??
+m1 <- lm(data=data, NumStorePurchases ~ Kidhome*Income*Education*age) 
 plot(m1, c(1:2,4), ask=F)
 
 #check income outliers in more details
@@ -174,14 +180,14 @@ summary(m4)
 
 
 # filter on non-missing values
-  pm1 <- prcomp(~ "ID"        ,  "Year_Birth"    ,   "Education"     ,   "Marital_Status"  ,    "Income"   ,           "Kidhome"    ,  "Teenhome"     ,       "Dt_Customer"     ,    "Recency"     ,       
-                "MntWines"       ,     "MntFruits"        ,   "MntMeatProducts"  ,  
-                "MntFishProducts"  ,   "MntSweetProducts" ,   "MntGoldProds"    ,   
-                "NumDealsPurchases"  , "NumWebPurchases" ,    "NumCatalogPurchases",
-                 "NumStorePurchases"  , "NumWebVisitsMonth"  , "AcceptedCmp3" ,      
-                 "AcceptedCmp4"    ,    "AcceptedCmp5"   ,     "AcceptedCmp1"  ,     
-                 "AcceptedCmp2"  ,      "Complain"     ,       "Z_CostContact"  ,    
-                 "Z_Revenue"    ,       "Response"    ,        "age"                , data, na.action=na.omit, scale=TRUE) #scale= standardise tout
+  pm1 <- prcomp(~ "ID"  + "Year_Birth"  +  "Education"  +  "Marital_Status"  +  "Income"   +        "Kidhome"   + "Teenhome"+   "Dt_Customer"   +     "Recency" 
+               + "MntWines"       +    "MntFruits" + "MntMeatProducts"  
+                + "MntFishProducts"  +  "MntSweetProducts" +  "MntGoldProds"   
+               + "NumDealsPurchases" +  "NumWebPurchases" +   "NumCatalogPurchases" 
+               +  "NumStorePurchases"+ "NumWebVisitsMonth" + "AcceptedCmp3"    
+                + "AcceptedCmp4" +    "AcceptedCmp5" +  "AcceptedCmp1"    
+                 +  "AcceptedCmp2"  +   "Complain" +     "Z_CostContact"  
+                 +  "Z_Revenue"  +    "Response" +      "age"        , data, na.action=na.omit, scale=TRUE) #scale= standardise tout
 summary(pm1)
 
 names(data)
