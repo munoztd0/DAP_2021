@@ -203,37 +203,22 @@ We first use the effectsize function : everything that has 0.00 on the left of t
 We also call the sjPlot function to plot all the estimates or to plot only one term at a time.
 ```{r}
 parameters::model_parameters(anova(finalm1))
-effectsize::eta_squared(finalm1,ci = 0.9) #everything that had 0.00 on the left og the 90% CI column has a "meaningless" effect size, but we keep them on the model still
-sjPlot::plot_model(finalm1) #to plot all the estimates
-sjPlot::plot_model(finalm1, type = "pred", terms = "Kidhome", show.data  = T, jitter = 1) # to plot only one term
+effectsize::eta_squared(finalm1,ci = 0.9) 
+sjPlot::plot_model(finalm1) 
+sjPlot::plot_model(finalm1, type = "pred", terms = "Kidhome", show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = "Income", show.data  = T, jitter = 1) 
-sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Kidhome"), show.data  = T, jitter = 1) # to plot interactions
-
+sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Kidhome"), show.data  = T, jitter = 1) 
+ sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Education"), show.data  = T, jitter = 1) 
+ sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "age"), show.data  = T, jitter = 1) 
+ sjPlot::plot_model(finalm1, type = "pred", terms = c("age", "Kidhome"), show.data  = T, jitter = 1) 
 #what is this for?
 sjPlot::tab_model(finalm1, rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"))
 ```
-#try to do the same for the other ones !
 
-# install.packages("sjPlot")
-# sjPlot::plot_model(m4, type = "diag")
-# plot(m4, c(1:2,4), labels.id = data$ID)
+# Another method : PCA 
+
 ```{r}
-
-data <- data[data$ID!=6168,] 
-data <- data[data$ID!=3850,] 
-
-m4 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
-summary(m4)
-
-
-  pm1 <- prcomp(~ "ID"  + "Year_Birth"  +  "Education"  +  "Marital_Status"  +  "Income"                + "Kidhome"   + "Teenhome"+   "Dt_Customer"   +     "Recency" 
-               + "MntWines"       +    "MntFruits" + "MntMeatProducts"  
-                + "MntFishProducts"  +  "MntSweetProducts" +  "MntGoldProds"   
-               + "NumDealsPurchases" +  "NumWebPurchases" +   "NumCatalogPurchases" 
-               +  "NumStorePurchases"+ "NumWebVisitsMonth" + "AcceptedCmp3"    
-                + "AcceptedCmp4" +    "AcceptedCmp5" +  "AcceptedCmp1"    
-                 +  "AcceptedCmp2"  +   "Complain" +     "Z_CostContact"  
-                 +  "Z_Revenue"  +    "Response" +      "age", data, na.action=na.omit , scale=TRUE) 
+  pm1 <- prcomp(~ + "Year_Birth"  +  "Education"  +  "Marital_Status"  +  "Income" + "Kidhome"   + "Teenhome"+ "Recency" + "MntWines" + "MntFruits" + "MntMeatProducts" + "MntFishProducts"  + "MntSweetProducts" +  "MntGoldProds" + "NumDealsPurchases" +  "NumStorePurchases" +  "age", data, na.action=na.omit , scale=TRUE) 
 summary(pm1)
 
 names(data)
