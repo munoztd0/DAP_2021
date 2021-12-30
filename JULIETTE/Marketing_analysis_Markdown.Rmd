@@ -199,46 +199,25 @@ ms$anova
 finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age + Kidhome:Income + Kidhome:Education + Income:Education + Kidhome:age + Income:age + Education:age + Kidhome:Income:Education + Income:Education:age)
 ```
 **6. Checking for interferences**
+We first use the effectsize function : everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
+We also call the sjPlot function to plot all the estimates or to plot only one term at a time.
 ```{r}
 parameters::model_parameters(anova(finalm1))
 effectsize::eta_squared(finalm1,ci = 0.9) #everything that had 0.00 on the left og the 90% CI column has a "meaningless" effect size, but we keep them on the model still
 sjPlot::plot_model(finalm1) #to plot all the estimates
 sjPlot::plot_model(finalm1, type = "pred", terms = "Kidhome", show.data  = T, jitter = 1) # to plot only one term
-sjPlot::plot_model(finalm1, type = "pred", terms = "Income", show.data  = T, jitter = 1) # to plot only one term
+sjPlot::plot_model(finalm1, type = "pred", terms = "Income", show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Kidhome"), show.data  = T, jitter = 1) # to plot interactions
 
+#what is this for?
 sjPlot::tab_model(finalm1, rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"))
-
+```
 #try to do the same for the other ones !
-
-# m1 <- lm(data=data, SQRTNumDealsPurchases ~ Income + Education + Kidhome + MntGoldProds + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
-# summary(m1) #not satisfying
-# 
-# m2 <- lm(data=data, Income ~ Education + Marital_Status + NumDealsPurchases + Kidhome + MntGoldProds + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
-# summary(m2)
-
- 
-
-# faire : 
-#   plot assumptions (autoplot pour regarder les résidus) car summary n'est pas suffisant'
-# déplacer sur Rmarkdown dès maintenant et y rester 
-# PCA 
-# p value + des intervalles de confiance pour les tailles d'effet
-# la taille d'effet montre l'ampleur de l'effet, au delà de la p value
-# le R2 est une taille d'effet pour tout le modèle. Intervalle de confiance pour le taille d'effet 
-# 
-
-
-# ms <- MASS::stepAIC(m4) #il choisit la meilleure façon de faire le modèle m4
-
 
 # install.packages("sjPlot")
 # sjPlot::plot_model(m4, type = "diag")
-# point a enlever
-
-
 # plot(m4, c(1:2,4), labels.id = data$ID)
-
+```{r}
 
 data <- data[data$ID!=6168,] 
 data <- data[data$ID!=3850,] 
@@ -247,8 +226,6 @@ m4 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines 
 summary(m4)
 
 
-
-# filter on non-missing values
   pm1 <- prcomp(~ "ID"  + "Year_Birth"  +  "Education"  +  "Marital_Status"  +  "Income"                + "Kidhome"   + "Teenhome"+   "Dt_Customer"   +     "Recency" 
                + "MntWines"       +    "MntFruits" + "MntMeatProducts"  
                 + "MntFishProducts"  +  "MntSweetProducts" +  "MntGoldProds"   
@@ -256,9 +233,10 @@ summary(m4)
                +  "NumStorePurchases"+ "NumWebVisitsMonth" + "AcceptedCmp3"    
                 + "AcceptedCmp4" +    "AcceptedCmp5" +  "AcceptedCmp1"    
                  +  "AcceptedCmp2"  +   "Complain" +     "Z_CostContact"  
-                 +  "Z_Revenue"  +    "Response" +      "age", data, na.action=na.omit , scale=TRUE) #scale= standardise tout, car certains var. ont des échelles très différentes
+                 +  "Z_Revenue"  +    "Response" +      "age", data, na.action=na.omit , scale=TRUE) 
 summary(pm1)
 
 names(data)
-
+```
+#scale= standardise tout, car certains var. ont des échelles très différentes
 
