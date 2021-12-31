@@ -1,8 +1,3 @@
----
-title: "Data Analysis Project_Anja Probst"
-output: html_notebook
----
-
 ```{r, setup, include=FALSE}
 # Install libraries
 r_lib_user <- Sys.getenv("R_LIBS_USER")
@@ -13,18 +8,37 @@ install.packages("GGally", lib = r_lib_user, repos = repo)
 install.packages("vtable", lib = r_lib_user, repos = repo)
 install.packages("captioner", lib = r_lib_user, repos = repo)
 install.packages("reshape2", lib = r_lib_user, repos = repo)
+install.packages("ggpubr", lib = r_lib_user, repos = repo)
+install.packages("nnet", lib = r_lib_user, repos = repo)
+install.packages("patchwork", lib = r_lib_user, repos = repo)
+install.packages("car", lib = r_lib_user, repos = repo)
 
 # Loading libraries
+library(ggfortify)
 library(GGally)
 library(vtable)
 library(captioner)
 library(reshape2)
+library(ggpubr)
+library(nnet)
+library(patchwork)
+library(car)
+
 
 # Setting up captions
 table.nums <- captioner(prefix = "Table")
 table.nums(name = "summary.statistics", caption = "Blablabla.")
 summary.statistics <- table.nums("summary.statistics")
 ```
+
+# DRAFT
+In this current draft I outline my general approach.
+
+As it seems to be a rather hard problem that I chose, I first only look at
+the healthy controls and Parkinson's disease patients, discarding the third group
+(REM sleep behaviour disorder patients). In a next step, I try to solve what seems
+to be a problem of collinearity between the experimental variables in the data set
+using PCA. Finally, I try to create a multinomial model where I include all three groups.
 
 # Early Biomarkers of Parkinson's Disease Based on Natural Connected Speech
 ## Introduction
@@ -57,10 +71,10 @@ rename.cols.to <- c(
   "Participant_code",
   "Age",
   "Gender",
-  "Rate_Of_Speech_Timing_Reading",
-  "Rate_Of_Speech_Timing_Monologue",
-  "Duration_Of_Pause_Intervals_Reading",
-  "Duration_Of_Pause_Intervals_Monologue"
+  "Speech.Timing.Rate.Reading",
+  "Speech.Timing.Rate.Monologue",
+  "Pause.Interval.Duration.Reading",
+  "Pause.Interval.Duration.Monologue"
 )
 
 csv.path <- "BiomarkersPD.csv"
@@ -121,24 +135,243 @@ st(df)
 ## Data Pre-Processing
 
 
-```{R, echo=FALSE,warning=FALSE,results='hide',fig.fullwidth=TRUE}
+```{R, echo=FALSE,warning=FALSE,results='hide',fig.width=10,fig.height=5,fig.fullwidth=TRUE}
 ggpairs(df, aes(color=Group, alpha=0.5), lower=list(combo=wrap("facethist", binwidth=10.0)))
 ```
 
 Plot
-```{R}
+```{R,fig.width=10,fig.height=5,fig.fullwidth=TRUE}
 df.melted <- melt(
   subset(df, select=-c(Age, Gender)),
   id="Group"
 )
 
-ggplot(df.melted, aes(x=variable, y=value, colour=Group)) +
-  geom_boxplot()
+comparisons <- list(c("HC", "PD"), c("PD", "RBD"), c("HC", "RBD"))
+
+ggplot(df.melted, aes(x=Group, y=value)) +
+  geom_boxplot() +
+  facet_grid(cols = vars(variable)) +
+  stat_compare_means(
+    method = "t.test", 
+    comparisons = comparisons,
+    label = "p.signif"
+  )
 ```
 
-Run tests
-```{R}
-t.test(Rate_Of_Speech_Timing_Reading ~ Group, data=df[df$Group != "RBD",])
-t.test(Rate_Of_Speech_Timing_Reading ~ Group, data=df[df$Group != "HC",])
-```
+
 ## Data Analysis
+### Binomial Regression
+Above, we have seen that there are almost no differences between the groups PD and RBD, so in a first step, we will limit our investigation to creating a binomial model predicting the group HC or PD. Indeed, the paper from which the data was extracted discusses the hard problem of differentiating PD from RBD, which might very well be impossible with generalised linear models. We will revisit this problem in the section Multinomial Regression.
+```{R, include=FALSE}
+
+# Move to appendix as example of how to do this "manually"
+# df.binom <- data.frame(df[df$Group != "RBD",])
+
+# model.binom.all <- glm(
+#   Group ~ Speech.Timing.Rate.Monologue, 
+#   data=df.binom, family="binomial"
+# )
+
+# new.data <- data.frame(
+#   Speech.Timing.Rate.Monologue=seq(
+#     min(df.binom$Speech.Timing.Rate.Monologue),
+#     max(df.binom$Speech.Timing.Rate.Monologue),
+#     len=100
+#   )
+# )
+
+# new.data$Group = predict(model.binom.all, new.data, type="response")
+
+# ggplot(data=new.data, aes(x=Speech.Timing.Rate.Monologue, y=Group)) +
+#   geom_line() +
+#   geom_point(
+#     data=df.binom, aes(x=Speech.Timing.Rate.Monologue, y=as.integer(Group)-1), 
+#     colour='red'
+#   )
+```
+
+```{R}
+df.binom <- data.frame(df[df$Group != "RBD",])
+```
+
+As a first step, a simple linear regression model based on a single predictor is built and visualized for each of the selected variables.
+```{R}
+p1 <- ggplot(df.binom, aes(x=Speech.Timing.Rate.Monologue, y=as.integer(Group)-1)) + 
+        geom_point() +
+        stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial))
+
+p2 <- ggplot(df.binom, aes(x=Speech.Timing.Rate.Reading, y=as.integer(Group)-1)) + 
+        geom_point() +
+        stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial))
+
+p3 <- ggplot(df.binom, aes(x=Pause.Interval.Duration.Reading, y=as.integer(Group)-1)) + 
+        geom_point() +
+        stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial))
+
+p4 <- ggplot(df.binom, aes(x=Pause.Interval.Duration.Monologue, y=as.integer(Group)-1)) + 
+        geom_point() +
+        stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial))
+
+p5 <- ggplot(df.binom, aes(x=Age, y=as.integer(Group)-1)) + 
+        geom_point() +
+        stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial))
+
+p6 <- ggplot(df.binom, aes(x=as.integer(Gender), y=as.integer(Group)-1)) + 
+        geom_point() +
+        stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial))
+
+p1 + p2 + p3 + p4 + p5 + p6
+```
+As we can see by visual inspection of the data points (black), none of the predictors is sufficient to predict the response variable (Group) on its own. Hence, a series of multiple
+linear regression models are tried.
+
+```{R}
+model.binom.all.2 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Gender, 
+  family="binomial"
+)
+
+summary(model.binom.all.2)
+# Gender and STRR sign and AIC 96.5
+
+model.binom.all.3 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue, 
+  family="binomial"
+)
+
+summary(model.binom.all.3)
+#STRM not sign but AIC 94.9
+
+model.binom.all.4 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue + Pause.Interval.Duration.Reading,
+  family="binomial"
+)
+
+summary(model.binom.all.4)
+
+
+model.binom.all.5 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue + Pause.Interval.Duration.Reading + Pause.Interval.Duration.Monologue,
+  family="binomial"
+)
+
+summary(model.binom.all.5)
+
+model.binom.all.6 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Monologue + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.6)
+
+model.binom.all.7 <- glm(
+  data=df.binom, 
+  Group ~ Pause.Interval.Duration.Monologue + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.7)
+
+model.binom.all.8 <- glm(
+  data=df.binom, 
+  Group ~ Pause.Interval.Duration.Reading + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.8)
+
+model.binom.all.9 <- glm(
+  data=df.binom, 
+  Group ~ Pause.Interval.Duration.Reading + Pause.Interval.Duration.Monologue + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.9)
+#best model so far--> all sign. and AIC 88.3
+
+model.binom.all.10 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Speech.Timing.Rate.Monologue + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.10)
+```
+#### PCA
+As there has been significant correlation between the predictors in the ggpairs plot
+as well as some extreme changes in coefficients when adding additional variables,
+there exists the possbility of collinearity negatively affecting the models. Indeed,
+we observe variance inflation factors of more than 2.5 between all experimental predictors.
+This warrants and attempt at solving the potential collinearity issue.
+```{R}
+vif(glm(data=df.binom, Group ~ ., family = binomial))
+```
+
+```{R}
+#PCA
+df.binom.pca <- prcomp(df.binom[,c(3,4,5,6)], scale. = TRUE, center = TRUE)
+summary(df.binom.pca)
+```
+
+```{R}
+autoplot(df.binom.pca, loadings = TRUE, loadings.label = TRUE)
+```
+
+Running ggpairs shows, that there is no longer any correlation between the variables.
+```{R}
+df.biom.pca.joined <- cbind(df.binom, df.binom.pca$x)
+ggpairs(
+  df.biom.pca.joined[,-c(3,4,5,6)], 
+  aes(color=Group, alpha=0.5), 
+  lower=list(combo=wrap("facethist", binwidth=10.0))
+)
+```
+
+```{R}
+model.binom.pca <- glm(
+  data=df.biom.pca.joined, 
+  Group ~ PC1 + Gender,
+  family="binomial"
+)
+
+summary(model.binom.pca)
+autoplot(model.binom.pca, 1:6)
+
+anova(model.binom.pca, model.binom.all.9, test = "Chisq")
+
+ggplot(df.biom.pca.joined, aes(x=PC1, y=as.integer(Group)-1)) + 
+  geom_point() +
+  stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial))
+
+```
+
+### Multinomial Regression
+To predict over all three groups (HC, PD, RBD), we have to use a more complex
+multinomial model.
+```{R}
+# Set reference level explicitly
+df$Group <- relevel(df$Group, ref = "HC")
+
+# Train / test split
+set.seed(123)
+sample <- sample.int(n = nrow(df), size = floor(0.7 * nrow(df)), replace = F)
+
+df.train <- df[sample, ]
+df.test  <- df[-sample, ]
+
+model.all <- multinom(
+  Group ~ Speech.Timing.Rate.Monologue * Pause.Interval.Duration.Monologue,
+  data=df.train
+)
+
+df.train$Group.Predicted <- predict(model.all, newdata = df.train, "class")
+
+tab <- table(df.train$Group, df.train$Group.Predicted)
+tab
+round((sum(diag(tab)) / sum(tab)) * 100, 2)
+```
