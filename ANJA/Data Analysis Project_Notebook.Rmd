@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 ```{r, setup, include=FALSE}
 # Install libraries
 r_lib_user <- Sys.getenv("R_LIBS_USER")
@@ -113,7 +118,7 @@ For each sample in this data set ($n=130$), we have the following information:
   - Duration_Of_Pause_Intervals_Reading: Duration of pause intervals (DPI) describes the quality of speech timing, as pauses can be heavily influenced by the ability to properly initiate speech, it is measured in miliseconds (ms)
   - Rate_Of_Speech_Timing_Reading: Rate of speech time (RST) includes voiced, unvoiced and pause intervals, it is measured in intervals per minute (-/min)
 
-- Speech examination - Speaking task of monologue: participants were instructed to provide monologue about their interests, job, family or current activities for approximately 90 seconds
+- Speech examination - Speaking task of monologue: participants were instructed to provide monologue about their interests, job, family or current activities for approximately 90seconds
   - Duration_Of_Pause_Intervals_Monologue: Duration of pause intervals (DPI) describes the quality of speech timing, as pauses can be heavily influenced by the ability to properly initiate speech, it is measured in miliseconds (ms)
   - Rate_Of_Speech_Timing_Monologue: Rate of speech time (RST) includes voiced, unvoiced and pause intervals, it is measured in intervals per minute (-/min)
 
@@ -126,8 +131,8 @@ For each sample in this data set ($n=130$), we have the following information:
 str(df)
 ```
 
-```{R}
-st(df)
+```{R, results = "asis"}
+st(df, out="latex")
 ```
 `r table.nums("summary.statistics")`
 
