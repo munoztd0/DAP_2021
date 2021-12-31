@@ -102,16 +102,24 @@ if (!require(papaja)) {
 if(!require(pacman)) {
   install.packages("equatiomatic")
 }
-pacman::p_load(pander,
-               GGally,
+if(!require(devtools)) {
+  install.packages("devtools")
+  install_github("kassambara/factoextra")
+}
+pacman::p_load(pander,       # Rmarkdown visualization
+               GGally, 
                ggfortify,
                ggplot2,
-               MASS,
+               MASS,         # for stepAIC
                here,
-               kableExtra,
+               kableExtra,   # Rmarkdown table visualization
                papaja,
-               glmnet,
-               equatiomatic
+               glmnet,       # GLM implementation and analysis library
+               equatiomatic, # Rmarkdown model equation visualization
+               patchwork,    # arrange subplot
+               devtools,     # tool for PCA
+               factoextra,   # tool for PCA
+               
 )
 ```
 ## 2. Import data
@@ -359,49 +367,93 @@ anova(m, m4, test = "Chisq")
 * From the anova test there is a significant difference between the 2 models 
 * We cannot remove the feature smoothness of the model.
 
-## Validation
+## 3. Validation
  The selected model is the following: 
+```{r,cache=TRUE}
+m_selected <-
+  glm(
+    data = df_mean_reduc,
+    diagnosis ~ radius + texture + smoothness + concave.points,
+    family = binomial
+  )
+```
+With the formula: 
+
+```{r,cache=TRUE}
+pander(summary(m_selected))
+extract_eq(
+  m_selected,
+  use_coefs = TRUE,
+  wrap = TRUE,
+  terms_per_line = 2
+)
+```
+ 
+The ratio of the residual deviance by its degrees of freedom is $160.3/564 = 0.284$ where the dispersion parameter is 1. ( to check !!)
 
 diagnostic plot
-```{r,cache=TRUE}
-751.44/153.35
+```{r}
+autoplot(m_selected,1:4)
 ```
-Overdistribution ? 
-```{r,cache=TRUE}
-  library(boot)
-  diag <- glm.diag(m)
-  glm.diag.plots(m, diag)
-```
-
-## Visualization 
-
-( to see)
-
-See in annex  a model selection perform with the MASS package and an other GLM modelisation with glmnet. 
+commentaire !!!
+See in annex an other GLM modelisation with glmnet less conservative. 
 
 # IV. PCA
-```{r}
-p1 <-prcomp(df_mean_reduc[-1])
-summary(p1)
-#str(p1)
-p1
-autoplot(p1,x=1, y=2,data=df_mean,colour = "diagnosis", loadings = TRUE, loadings.colour = "blue",
-         loadings.label = TRUE)
-autoplot(p1,x=1, y=2,data=df_mean,colour = "diagnosis", loadings = TRUE, loadings.colour = "blue",
-         loadings.label = TRUE)
+## 1. Variability explained by each PC{.tabset}
+Let's apply the principal components analysis to our features.
+```{r, cache=TRUE}
+p <- prcomp(df_mean_reduc[,-1], scale=TRUE)
 ```
-The first PCA component explain the 99% of the data. Interpretation distribution ? 
+Let's see the percentage of variability explained by each principal components.
 
+### Graph
 
-```{r}
-df_mean_pca <- cbind(df_mean_reduc, p1$x)
-summary(df_mean_pca)
+```{r,cache=TRUE}
+fviz_eig(
+  p,
+  addlabels = TRUE,
+  geom = c("bar", "line"),
+  barfill = "grey",
+  barcolor = "grey",
+  linecolor = "red",
+  ncp = 10
+) + 
+  labs(title = "Percentage of variability explained by each PC",
+       x = "Principal Components", y = "Percentage of variances")
+```
+ The 2 first components explain more than 99% of the data. 
+ 
+### Table
+
+```{r, cache=TRUE}
+pander(summary(p))
+```
+ The 4 first components explain more than 90% of the data. 
+ 
+## 2. Observations in PC plans
+```{r, cache=TRUE}
+autoplot(p,x = 1,y = 2, data = df_mean_reduc,colour = "diagnosis",
+  loadings = TRUE,loadings.colour = "blue",loadings.label = TRUE) + theme_minimal()
+```
+
+By plotting the data in the plan of the first 2 principal components we see a clear separation between benign and  malignant type of cancer. That mean that knowing the location in this plan of a new observation should allow to predict the severity of the cancer. Let's try this approach by applying a GLM model to the first two PC. 
+
+Note: We tried to plot the data in all the possible pairs formed by the first four components. The clearest separation between the type of cancer occurs in the plan PC1-PC2
+ 
+## 3. GLM model with PCA
+### Implementation
+```{r, cache=TRUE}
+df_mean_pca <- cbind(df_mean_reduc, p$x)
 glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2, family = binomial)
-summary(glm_pca)
-autoplot(glm_pca,1:4)
-ggplot(data = df_mean_pca, aes(x= PC1))+ geom_density()
-ggplot(data = df_mean_pca, aes(x= PC2))+ geom_density()
 ```
+
+### Validation
+
+```{r, cache=TRUE}
+pander(summary(glm_pca))
+autoplot(glm_pca,1:4)+ theme_minimal()
+```
+commentaire : to do 
 # Conclusion
 
 ## 1.
@@ -452,7 +504,13 @@ ggpairs(data = df_extreme,aes(color = diagnosis,alpha =0.5))
 ```
 
 We get the same results as for the mean group.
-## 2. glmnet 
+## 2. STEP AIC 
+```{r}
+m5<-stepAIC(m,trace = TRUE)
+m5$anova
+```
+
+## 3. glmnet 
 Let's separate the dataset into train and test set
 ```{r}
 ## 75% of the sample size
@@ -495,7 +553,7 @@ confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.1se'
 as.numeric(1-assess$class)
 coef(cvfit, s="lambda.1se")
 ```
-## 3. knn 
+## 4. knn 
 k nearst ? 
 pas interpretable
 ```{r}
