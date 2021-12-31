@@ -21,16 +21,13 @@ output:
 
 ---
 
-\newpage
-TO DO 
--do p test ... 
-- cc°
--commentaire
-s'occuper des citations
-
 # Introduction 
 
-## 1. Information about the dataset, context
+## Context 
+ 
+  [...]
+  
+## 1. Information about the dataset 
 
 [Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) \
 
@@ -38,7 +35,7 @@ s'occuper des citations
 "Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
 \
 
-![image of a fine needle aspirate (FNA) of a breast mass](fig1.jpg){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:40%;"}
+![fine needle aspirate (FNA) of a breast mass](fig1.jpg){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:40%;"}
 
 $~$
 $~$
@@ -73,7 +70,7 @@ ftp ftp.cs.wisc.edu cd math-prog/cpo-dataset/machine-learn/WDBC/
 The aim is to **predict whether the cancer is benign or malignant with only few features **
 
 ## 3. Choice of data 
-There is a lot of data, choose only the data concerning the mean. The following analysis has been done 
+There is a lot of data, we choose only the data concerning the mean. The following analysis has been done 
 also for the worst-type of data and lead to similar conclusion. See in annex the inspection of these 2 subframes. 
 
 ## 4. Plan of the analysis 
@@ -81,17 +78,16 @@ also for the worst-type of data and lead to similar conclusion. See in annex the
 * Inspect the data to understand it better
 * Check if the sample proportion of benign and malignant cancer is representative of the whole population 
 * Select variables of interest by discarding according to the correlation level 
-* Built GLM models and select the best model with anova
-* Discuss the goodness of this model 
-* Apply PCA to and see if the variables explained in the reduced dimension are coherente with the one found previously
-* Address the accuracy of the GLM model by testing with a subsetof the data
+* Built GLM models and select the best model with anova, discuss the goodness of this model 
+* Apply PCA to see to what extent dimension can be reduced and perform a GLM model with relevant dimension.
+* Conclude by addressing the accuracy of these GLM models with a subset of the data
 
-In annex, I built a GLM model with the library glmnet and I find the same selection of variable;
+In annex, I built a GLM model with the library glmnet and I find the same selection of variable.
 
 # I. Preprocessing
 
 ## 1. Required libraries 
-```{r}
+```{r, cache = TRUE}
 # Check if packages are installed and if not to install them or just load them
 if(!require(pacman)) {
   install.packages(c("pacman", "remotes"))
@@ -123,7 +119,7 @@ pacman::p_load(pander,       # Rmarkdown visualization
 )
 ```
 ## 2. Import data
-```{r}
+```{r, cache = TRUE}
 path = here("LUCILE") # get relative path
 setwd(path) # set working directory
 df <-
@@ -131,13 +127,13 @@ df <-
 ```
 
 Let's delete ID number and the last variable because there are not relevant.
-```{r}
+```{r, cache = TRUE}
 df<-df[,-33]
 df<-df[,-1]
 ```
 
 We will work only with the mean-type data, so let's create a new frame for the variables of this type. 
-```{r, echo = FALSE, comment=NA}
+```{r, echo = FALSE, comment=NA, cache = TRUE}
 df_mean <- data.frame(
   "diagnosis"          = df$diagnosis,
   "radius"             = df$radius_mean,
@@ -181,10 +177,11 @@ However, this proportion representative of the reality:
 
 "The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"   [2]
 
-Blabla citation in parentesis [@james_1890] blbabla, or citation in text @james_1890
 
 # II. Selection of variables of interest 
+
 Hypothesis:
+
 According to the description of the data, radius, perimeter, area and compactness should be correlated since it exists a formula between these variables.
 
 ## 1. Correlation{.tabset}
@@ -212,8 +209,8 @@ Description :
 
 Observations :
   
-* In each subplot a distinction can be made according to the type of 'diagnosis'
-* The observations coming from malignant cancer seem to be in general bigger than the data coming from benign cancer
+* In each subplot a distinction can be made according to the type of 'diagnosis'.
+* The observations coming from malignant cancer seem to be in general bigger than the data coming from benign cancer.   
 
 
 ### ggcorr
@@ -239,11 +236,10 @@ ggcorr(
 
 * Even if compactness is define as $perimeter^2 / area - 1.0$m the r between this variable and area or perimeter is not 1 because the correlation show only the linear dependency and their relation is not linear.
 
-From here let's remove area, perimeter and compactness
-Let's see to what extent these features can be deduced from the others.
-
 ### Linear models of correlated variables{.tabset}
 
+ [...]
+ 
 #### Perimeter
 
 ```{r, cache = TRUE}
@@ -292,6 +288,7 @@ df_mean_reduc <-df_mean[-c(4,5,7)]
 ## 1. Set a first GLM model
 
 We set a GLM model with the remaining features. 
+why, why binomial : [...]
 ```{r,cache=TRUE}
 m <-
   glm(
@@ -303,7 +300,7 @@ m <-
 summary(m)
 ```
 
-Why take binomial? 
+
 
 ## 2. Model selection{.tabset} 
 By performing several anova test, we will see that we can remove the features concavity, symmetry and fractal_dimension, because there is no significant difference between the model with theses variables and the one without.
@@ -376,11 +373,12 @@ m_selected <-
     diagnosis ~ radius + texture + smoothness + concave.points,
     family = binomial
   )
+pander(summary(m_selected))
 ```
+
 With the formula: 
 
 ```{r,cache=TRUE}
-pander(summary(m_selected))
 extract_eq(
   m_selected,
   use_coefs = TRUE,
@@ -389,18 +387,24 @@ extract_eq(
 )
 ```
  
-The ratio of the residual deviance by its degrees of freedom is $160.3/564 = 0.284$ where the dispersion parameter is 1. ( to check !!)
+The ratio of the residual deviance by its degrees of freedom is $160.3/564 = 0.284$ where the dispersion parameter is 1.
+[we want these two values close...]
 
 diagnostic plot
-```{r}
+
+```{r, cache=TRUE}
 autoplot(m_selected,1:4)
 ```
-commentaire !!!
+
+[...]
+
 See in annex an other GLM modelisation with glmnet less conservative. 
 
 # IV. PCA
 ## 1. Variability explained by each PC{.tabset}
+
 Let's apply the principal components analysis to our features.
+
 ```{r, cache=TRUE}
 p <- prcomp(df_mean_reduc[,-1], scale=TRUE)
 ```
@@ -421,7 +425,7 @@ fviz_eig(
   labs(title = "Percentage of variability explained by each PC",
        x = "Principal Components", y = "Percentage of variances")
 ```
- The 2 first components explain more than 99% of the data. 
+ The 4 first components explain more than 90% of the data. 
  
 ### Table
 
@@ -433,18 +437,21 @@ pander(summary(p))
 ## 2. Observations in PC plans
 ```{r, cache=TRUE}
 autoplot(p,x = 1,y = 2, data = df_mean_reduc,colour = "diagnosis",
-  loadings = TRUE,loadings.colour = "blue",loadings.label = TRUE) + theme_minimal()
+  loadings = TRUE,loadings.colour = "blue",loadings.label = TRUE)+
+  theme_minimal()
 ```
 
 By plotting the data in the plan of the first 2 principal components we see a clear separation between benign and  malignant type of cancer. That mean that knowing the location in this plan of a new observation should allow to predict the severity of the cancer. Let's try this approach by applying a GLM model to the first two PC. 
 
-Note: We tried to plot the data in all the possible pairs formed by the first four components. The clearest separation between the type of cancer occurs in the plan PC1-PC2
+Note:
+We tried to plot the data in all the possible pairs formed by the first four components. The clearest separation between the type of cancer occurs in the plan PC1-PC2
  
 ## 3. GLM model with PCA
 ### Implementation
 ```{r, cache=TRUE}
 df_mean_pca <- cbind(df_mean_reduc, p$x)
-glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2, family = binomial)
+glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2, 
+              family = binomial)
 ```
 
 ### Validation
@@ -453,18 +460,18 @@ glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2, family = binomi
 pander(summary(glm_pca))
 autoplot(glm_pca,1:4)+ theme_minimal()
 ```
-commentaire : to do 
+
+[...]
+
 # Conclusion
 
-## 1.
-Features allowing to predict severity of cancer ? 
- With 
- ## 2. test accuracy of the prediction with these feature 
- test set with accuracy 
- et des plots 
+## 1.Features allowing to predict severity of cancer ? 
 
-After application of 2 diff methods, let's conclude
-presentation of the result visualisation
+  [...]
+  
+## 2. test accuracy of the prediction with these feature 
+
+
 
 *******************************************************************************
 
@@ -552,17 +559,6 @@ assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.1se')
 confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.1se')
 as.numeric(1-assess$class)
 coef(cvfit, s="lambda.1se")
-```
-## 4. knn 
-k nearst ? 
-pas interpretable
-```{r}
-#install.packages('FNN')
-#install.packages('crosstable')
-library(crosstable)
-library('FNN')
-dat_pred <- FNN :: knn(train =x_train,test=  x_test,cl= y_train, k =10)
-pander(table(x = y_test, y = dat_pred))
 ```
 ## Version of R used 
 
