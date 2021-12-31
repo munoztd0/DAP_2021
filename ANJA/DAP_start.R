@@ -5,7 +5,6 @@ cols.to.keep <- c(
   "Gender",
   "Positive_history_of_Parkinson_disease_in_family",
   "Overview_of_motor_examination._UPDRS_III_total",
-  "X18_Speech",
   "Rate_of_speech_timing",
   "Rate_of_speech_timing.1"
 )
@@ -17,7 +16,6 @@ rename.cols.to <- c(
   "Gender",
   "Family_History",
   "UPDRS_III_Total",
-  "UPDRS_18_Speech",
   "Rate_Of_Speech_Reading",
   "Rate_Of_Speech_Monologue"
 )
@@ -45,11 +43,11 @@ df <- subset(df, select = -c(Participant_code))
 df$UPDRS_III_Total <- as.integer(df$UPDRS_III_Total)
 
 # Convert columns to factors
-col.names <- c("Group", "Gender", "Family_History", "UPDRS_18_Speech")
+col.names <- c("Group", "Gender", "Family_History")
 df[col.names] <- lapply(df[col.names], as.factor)
 
 # The two columns should be factors with NA values
-col.names <- c("Family_History", "UPDRS_18_Speech")
+col.names <- c("Family_History")
 df[col.names] <- lapply(df[col.names], addNA)
 
 str(df)
@@ -59,9 +57,16 @@ library(GGally)
 ggpairs(df)
 
 str(df)
-
+                            
 # Models
 m1 <- glm(data=df[df$Group != "HC",], Group ~ ., family = "binomial")
 summary(m1)
+# for 3 groups (ordinal) use polr
+
+library(MASS)
+m2 <- polr(data=df, Group~Family_History)
+summary(m2)
 
 anova(m1)
+
+MASS::stepAIC(m1)
