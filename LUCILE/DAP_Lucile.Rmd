@@ -393,8 +393,7 @@ See in annex the diagnostic plot of the retained model and an other GLM modelisa
 
 # IV. PCA
 ## 1. Variability explained by each PC{.tabset}
-
-Let's apply the principal components analysis to our features.
+Still in the perspective of predicting the severity of the breast cancer, we will reduce the dimensionality of the data with the principal components analysis and model it in the space of  most relevant principal components. 
 
 ```{r, cache=TRUE}
 p <- prcomp(df_mean_reduc[,-1], scale=TRUE)
@@ -404,19 +403,13 @@ Let's see the percentage of variability explained by each principal components.
 ### Graph
 
 ```{r,cache=TRUE}
-fviz_eig(
-  p,
-  addlabels = TRUE,
-  geom = c("bar", "line"),
-  barfill = "grey",
-  barcolor = "grey",
-  linecolor = "red",
-  ncp = 10
-) + 
-  labs(title = "Percentage of variability explained by each PC",
-       x = "Principal Components", y = "Percentage of variances")
+fviz_eig(p,addlabels = TRUE,geom = c("bar", "line"),barfill = "grey",
+         barcolor = "grey",linecolor = "red",ncp = 10) + 
+    labs(title = "Percentage of variability explained by each PC",
+          x = "Principal Components", y = "Percentage of variances") +
+    theme_minimal()
 ```
- The 4 first components explain more than 90% of the data. 
+ The first four components explain more than 90% of the data. 
  
 ### Table
 
@@ -435,24 +428,29 @@ autoplot(p,x = 1,y = 2, data = df_mean_reduc,colour = "diagnosis",
 By plotting the data in the plan of the first 2 principal components we see a clear separation between benign and  malignant type of cancer. That mean that knowing the location in this plan of a new observation should allow to predict the severity of the cancer. Let's try this approach by applying a GLM model to the first two PC. 
 
 Note:
-We tried to plot the data in all the possible pairs formed by the first four components. The clearest separation between the type of cancer occurs in the plan PC1-PC2
+
+We tried to plot the data in all the possible pairs formed by the first four components. The clearest separation between the type of cancer occurs in the plan PC1-PC2.
  
 ## 3. GLM model with PCA
 ### Implementation
+We want to predict 'diagnosis' only with PC1 and PC2 with the help of a GLM model.
+We try with the binomial family but as before there is an underdispersion issue. We use the quasibinomial family instead.
+
 ```{r, cache=TRUE}
 df_mean_pca <- cbind(df_mean_reduc, p$x)
 glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2, 
-              family = binomial)
+              family = quasibinomial)
 ```
 
 ### Validation
 
 ```{r, cache=TRUE}
-pander(summary(glm_pca))
-autoplot(glm_pca,1:4)+ theme_minimal()
+summary(glm_pca)
 ```
-
-[...]
+* The algorithm converge: the number of fisher scoring iterations is reasonable.
+* The p-value of the two PC is significant. 
+* The ratio of the residual deviance by its degrees of freedom is $162.50/565 = 0.288$ where the dispersion parameter is 0.618.
+These two values are close, we can validated this model.
 
 # Conclusion
 
@@ -467,98 +465,71 @@ autoplot(glm_pca,1:4)+ theme_minimal()
 *******************************************************************************
 
 # Annex
-## diagnostic plot of retained glm model
+
+## 1.diagnostic plot of retained glm model
 
 ```{r, cache=TRUE}
 autoplot(m_selected_quas,1:4)+ theme_minimal()
 ```
 
 [...]
-## 1. Correlation in the 'standard deviation' and 'worst' group
 
-```{r, echo = FALSE, cache=T}
-# create a new frame for a the variable of type extreme
-df_se <-data.frame("diagnosis"          = df$diagnosis,
-                        "radius"             = df$radius_se,
-                        "texture"            = df$texture_se, 
-                        "perimeter"          = df$perimeter_se,
-                        "area"               = df$area_se, 
-                        "smoothness"         = df$smoothness_se, 
-                        "compactness"        = df$compactness_se,
-                        "concavity"          = df$concavity_se, 
-                        "concave.points"     = df$concave.points_se, 
-                        "symmetry"           = df$symmetry_se,
-                        "fractal_dimension " = df$fractal_dimension_se) 
-str(df_se)
-ggpairs(data = df_se,aes(color = diagnosis,alpha =0.5))
+## 2. glmnet{.tabset} 
 
-df_extreme <-data.frame("diagnosis"          = df$diagnosis,
-                        "radius"             = df$radius_worst,
-                        "texture"            = df$texture_worst, 
-                        "perimeter"          = df$perimeter_worst,
-                        "area"               = df$area_worst, 
-                        "smoothness"         = df$smoothness_worst, 
-                        "compactness"        = df$compactness_worst,
-                        "concavity"          = df$concavity_worst, 
-                        "concave.points"     = df$concave.points_worst, 
-                        "symmetry"           = df$symmetry_worst,
-                        "fractal_dimension " = df$fractal_dimension_worst) 
-str(df_extreme)
-ggpairs(data = df_extreme,aes(color = diagnosis,alpha =0.5))
-```
+First, let's separate the data into train and test set. ( This will permit to be more accurrate when we test the goodness of the model)
+```{r,message = FALSE,cache=TRUE}
+# set the seed to make partition reproducible
+set.seed(123)
 
-We get the same results as for the mean group.
-## 2. STEP AIC 
-```{r}
-#m5<-stepAIC(m,trace = TRUE)
-#m5$anova
-```
-
-## 3. glmnet 
-Let's separate the dataset into train and test set
-```{r}
-## 75% of the sample size
 prop_train_test <- floor(0.75 * nrow(df_mean_reduc))
 
-## set the seed to make your partition reproducible
-set.seed(123)
-train_ind <- sample(seq_len(nrow(df_mean_reduc)), size = prop_train_test)
-#sample = sample.split(data$num, SplitRatio = .75)
-#train = subset(data, sample == TRUE)
-#test  = subset(data, sample == FALSE)
+# 0.75 of the data fall randomly into the training set and the remaining is for the test set
+train_ind <- sample(seq_len(nrow(df_mean_reduc)), size = prop_train_test) 
 train <- df_mean_reduc[train_ind, ]
 test <- df_mean_reduc[-train_ind, ]
 
 x_train <- train[,-1]
 y_train <- train$diagnosis
 x_test <-  test[,-1]
-y_test <- test$diagnosis
+y_test <-  test$diagnosis
 ```
 
-
-```{r}
+```{r, cache=TRUE}
 library("glmnet")
 tol_length=length(levels(y_train))
 
 # run glm : train and test with cross validation
-cvfit<-cv.glmnet(as.matrix(x_train), y_train,family = "binomial", type.measure="class")
-plot(cvfit)
-cvfit$lambda.min
-assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.min')
-confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.min')
-as.numeric(1-assess$class)
-coef(cvfit, s="lambda.min")
+cvfit<-cv.glmnet(as.matrix(x_train), y_train,family = "binomial",
+                 type.measure="class")
 ```
 
+
+```{r, cache=TRUE}
+plot(cvfit)
+```
+
+### lambda.min
+
+```{r, cache=TRUE}
+cvfit$lambda.min
+assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.min')
+pander(confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.min'))
+as.numeric(1-assess$class)
+coef(cvfit, s="lambda.min")
+
+```
+
+### lambda.1se
+
 Let's look with the first lambda:
-```{r}
+```{r,cache=TRUE}
 cvfit$lambda.1se
 assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.1se')
 confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.1se')
 as.numeric(1-assess$class)
 coef(cvfit, s="lambda.1se")
 ```
-## Version of R used 
+## 3.Version of R used 
 
 ```{r echo = FALSE}
 sessionInfo()
@@ -566,17 +537,14 @@ sessionInfo()
 *****************************************************************************
 
 # References
-$~$
-$~$
 ```{r, include = F}
 #papaja::r_refs(file = "r-references.bib")
 #my_citation <- cite_r(file = "r-references.bib", )
 # `r_refs()` creates a BibTeX file containing citations for R and all currently loaded packages.
 # `cite_r()` takes these citations and turns them into readily reportable text.
 # `my_citation` now contains the following text that you can use in your document: `r my_citation`
-
-#* [1] https://www.researchgate.net/figure/a-b-Fine-needle-aspiration-cytology-of-the-breast-lesion-showed-singly-lying_fig1_41548857
-#* [2] https://pubmed.ncbi.nlm.nih.gov/7091922/
-#* [3] K. P. Bennett and O. L. Mangasarian: "Robust Linear Programming Discrimination of Two Linearly Inseparable Sets", Optimization Methods and Software 1, 1992, 23-34
-
 ```
+* [1] https://www.researchgate.net/figure/a-b-Fine-needle-aspiration-cytology-of-the-breast-lesion-showed-singly-lying_fig1_41548857
+* [2] https://pubmed.ncbi.nlm.nih.gov/7091922/
+* [3] K. P. Bennett and O. L. Mangasarian: "Robust Linear Programming Discrimination of Two Linearly Inseparable Sets", Optimization Methods and Software 1, 1992, 23-34
+
