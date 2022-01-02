@@ -472,11 +472,10 @@ These two values are close, we can validated this model.
 autoplot(m_selected_quas,1:4)+ theme_minimal()
 ```
 
-[...]
 
 ## 2. glmnet{.tabset} 
 
-First, let's separate the data into train and test set. ( This will permit to be more accurrate when we test the goodness of the model)
+First, let's separate the data into train and test set. (This will permit to be more accurate when we test the goodness of the model)
 ```{r,message = FALSE,cache=TRUE}
 # set the seed to make partition reproducible
 set.seed(123)
@@ -493,48 +492,77 @@ y_train <- train$diagnosis
 x_test <-  test[,-1]
 y_test <-  test$diagnosis
 ```
-
+Apply GLM with cross validation
 ```{r, cache=TRUE}
 library("glmnet")
 tol_length=length(levels(y_train))
 
-# run glm : train and test with cross validation
 cvfit<-cv.glmnet(as.matrix(x_train), y_train,family = "binomial",
                  type.measure="class")
 ```
-
-
+Show the misclassification error according to the regularization hyperparameter $\lambda$.
 ```{r, cache=TRUE}
 plot(cvfit)
 ```
+We will now see the for two particular values of this regularization hyperparameter the accurary of the model with the confusion matrix and which features are retained.
 
 ### lambda.min
+Let's choose this particular value of $\lambda$ 
+```{r, cache=TRUE}
+pander(cvfit$lambda.min)
+```
+
+The confusion matrix is:
 
 ```{r, cache=TRUE}
-cvfit$lambda.min
-assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.min')
-pander(confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.min'))
-as.numeric(1-assess$class)
+pander(confusion.glmnet(cvfit, newx =as.matrix(x_test), 
+                        newy = y_test, s = 'lambda.min'))
+```
+
+The accuracy is very good: 
+
+```{r, cache=TRUE}
+assess<-assess.glmnet(cvfit,newx=as.matrix(x_test),
+                      newy=y_test, s='lambda.min')
+pander(as.numeric(1-assess$class))
+```
+
+Let's see the features retained by this model :
+
+```{r, cache=TRUE}
 coef(cvfit, s="lambda.min")
 
 ```
+This model is less conservative than our previous GLM model. Indeed, the variable "smoothness" is not taken into account.  
 
 ### lambda.1se
 
-Let's look with the first lambda:
+Let's choose this particular value of $\lambda$: 
+
 ```{r,cache=TRUE}
-cvfit$lambda.1se
-assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.1se')
-confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.1se')
-as.numeric(1-assess$class)
+pander(cvfit$lambda.1se)
+```
+
+The confusion matrix is:
+```{r,cache=TRUE}
+pander(confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test,
+                        s = 'lambda.1se'))
+```
+
+The accuracy is very good: 
+
+```{r,cache=TRUE}
+assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test,
+                      s='lambda.1se')
+pander(as.numeric(1-assess$class))
+```
+
+Let's see the features retained by this model :
+
+```{r,cache=TRUE}
 coef(cvfit, s="lambda.1se")
 ```
-## 3.Version of R used 
-
-```{r echo = FALSE}
-sessionInfo()
-```
-*****************************************************************************
+Again, this model is less conservative than our previous GLM model.
 
 # References
 ```{r, include = F}
