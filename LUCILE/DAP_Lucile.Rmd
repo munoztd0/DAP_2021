@@ -21,16 +21,13 @@ output:
 
 ---
 
-\newpage
-TO DO 
--do p test ... 
-- cc°
--commentaire
-s'occuper des citations
-
 # Introduction 
 
-## 1. Information about the dataset, context
+## Context 
+ 
+  [...]
+  
+## 1. Information about the dataset 
 
 [Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) \
 
@@ -38,7 +35,7 @@ s'occuper des citations
 "Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
 \
 
-![image of a fine needle aspirate (FNA) of a breast mass](fig1.jpg){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:40%;"}
+![fine needle aspirate (FNA) of a breast mass](fig1.jpg){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:40%;"}
 
 $~$
 $~$
@@ -73,7 +70,7 @@ ftp ftp.cs.wisc.edu cd math-prog/cpo-dataset/machine-learn/WDBC/
 The aim is to **predict whether the cancer is benign or malignant with only few features **
 
 ## 3. Choice of data 
-There is a lot of data, choose only the data concerning the mean. The following analysis has been done 
+There is a lot of data, we choose only the data concerning the mean. The following analysis has been done 
 also for the worst-type of data and lead to similar conclusion. See in annex the inspection of these 2 subframes. 
 
 ## 4. Plan of the analysis 
@@ -81,18 +78,17 @@ also for the worst-type of data and lead to similar conclusion. See in annex the
 * Inspect the data to understand it better
 * Check if the sample proportion of benign and malignant cancer is representative of the whole population 
 * Select variables of interest by discarding according to the correlation level 
-* Built GLM models and select the best model with anova
-* Discuss the goodness of this model 
-* Apply PCA to and see if the variables explained in the reduced dimension are coherente with the one found previously
-* Address the accuracy of the GLM model by testing with a subsetof the data
+* Built GLM models and select the best model with anova, discuss the goodness of this model 
+* Apply PCA to see to what extent dimension can be reduced and perform a GLM model with relevant dimension.
+* Conclude by addressing the accuracy of these GLM models with a subset of the data
 
-In annex, I built a GLM model with the library glmnet and I find the same selection of variable;
+In annex, I built a GLM model with the library glmnet and I find the same selection of variable.
 
 # I. Preprocessing
 
 ## 1. Required libraries 
-```{r}
-# Check if packages are installed and if not to install them or just load them
+```{r, cache = TRUE, warning = FALSE}
+# Check if packages are installed and if not install them
 if(!require(pacman)) {
   install.packages(c("pacman", "remotes"))
 }
@@ -110,8 +106,8 @@ pacman::p_load(pander,       # Rmarkdown visualization
                GGally, 
                ggfortify,
                ggplot2,
-               MASS,         # for stepAIC
-               here,
+               #MASS,        # for stepAIC
+               here,         # to load the path
                kableExtra,   # Rmarkdown table visualization
                papaja,
                glmnet,       # GLM implementation and analysis library
@@ -123,21 +119,21 @@ pacman::p_load(pander,       # Rmarkdown visualization
 )
 ```
 ## 2. Import data
-```{r}
+```{r, cache = TRUE}
 path = here("LUCILE") # get relative path
 setwd(path) # set working directory
 df <-
   read.csv('data.csv', stringsAsFactors = 1)# load data from github repository
 ```
 
-Let's delete ID number and the last variable because there are not relevant.
-```{r}
+Let's delete ID number and the last variable - which is full of NA- because there are not relevant.
+```{r, cache = TRUE}
 df<-df[,-33]
 df<-df[,-1]
 ```
 
 We will work only with the mean-type data, so let's create a new frame for the variables of this type. 
-```{r, echo = FALSE, comment=NA}
+```{r, cache = TRUE}
 df_mean <- data.frame(
   "diagnosis"          = df$diagnosis,
   "radius"             = df$radius_mean,
@@ -155,7 +151,7 @@ df_mean <- data.frame(
 
 ## 3. Inspection {.tabset}
 ### Structure
-```{r, comment=NA}
+```{r, comment=NA,cache=TRUE}
 str(df_mean)
 ```
 
@@ -172,26 +168,27 @@ pander(summary(df_mean))
 
 ## 4. Proportion of benign vs malignant cancer 
 ```{r, comment=NA,cache=TRUE}
-kable(prop.table(table(df_mean$diagnosis)),col.names = c("Severity","Frequency"))   
+kable(prop.table(table(df_mean$diagnosis)),col.names = 
+        c("Severity","Frequency"))   
 ```
 
 The two types of cancer are not represented in the same proportion, this can lead to a bias. 
 
-However, this proportion representative of the reality:
+However, this proportion is more or less representative of the reality:
 
 "The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"   [2]
 
-Blabla citation in parentesis [@james_1890] blbabla, or citation in text @james_1890
 
 # II. Selection of variables of interest 
-Hypothesis:
-According to the description of the data, radius, perimeter, area and compactness should be correlated since it exists a formula between these variables.
+We want to remove the variables with high correlation to avoid problems during the modelisation.
+According to the description of the data, radius, perimeter, area and compactness should be correlated since it exists a formula between these variables. Let's verify that.
+
 
 ## 1. Correlation{.tabset}
 
 ### ggpairs
 
-```{r, warning=F, message=F,cache=TRUE}
+```{r, warning=FALSE, message=FALSE,cache=TRUE}
 ggpairs(
   df_mean,
   aes(color = diagnosis, alpha = 0.5),
@@ -212,22 +209,18 @@ Description :
 
 Observations :
   
-* In each subplot a distinction can be made according to the type of 'diagnosis'
-* The observations coming from malignant cancer seem to be in general bigger than the data coming from benign cancer
+* In each subplot a distinction can be made according to the type of 'diagnosis'.
+* The observations coming from malignant cancer seem to be in general bigger than the data coming from benign cancer.   
 
+This first observation supports the hypothesis that the value of some features is different according to the severity of the cancer.
 
 ### ggcorr
 The following function permit to visualize better the correlation
 ```{r, warning=F, cache=TRUE}
-ggcorr(
-  df_mean,
-  geom = "text",
-  nbreaks = 5,
-  hjust = 1,
-  label = FALSE,
-  label_alpha = 0.7
-) + labs(title = " Breath cancer features Pearson correlation") + theme(legend.position =
-                                                                          "none")
+ggcorr(df_mean,geom = "text",nbreaks = 5,hjust = 1,label = FALSE,
+       label_alpha = 0.7) +
+      labs(title = " Breath cancer features Pearson correlation") +
+      theme(legend.position ="none")
 ```
 
 
@@ -237,13 +230,14 @@ ggcorr(
 
 * Surprisingly, concavity, compactness and concave.points have a strong correlation.( $r \approx 0.8$ or $r \approx 0.9$)
 
-* Even if compactness is define as $perimeter^2 / area - 1.0$m the r between this variable and area or perimeter is not 1 because the correlation show only the linear dependency and their relation is not linear.
+Note:
 
-From here let's remove area, perimeter and compactness
-Let's see to what extent these features can be deduced from the others.
+Even if compactness is define as $perimeter^2 / area - 1.0$ the r between this variable and area or perimeter is not 1 because the correlation shows only the linear dependency and their relation is not linear.
 
 ### Linear models of correlated variables{.tabset}
 
+ We want to discard the variables: perimeter, area and compactness. To be sure that these variables can be explained by the remaining variables, we set a linear model to express the potential discarded variable according to the other and address the goodness of the model by looking the adjusted $R^2$.
+ 
 #### Perimeter
 
 ```{r, cache = TRUE}
@@ -282,7 +276,8 @@ pander(summary(m_compactness))
 
 ### Variables discarded
 
-The variables area, perimeter and compactness are well explained by the other variables ( Adjusted R-squared very close to 1). So we discard them.
+The variables area, perimeter and compactness are well explained by the other variables (the Adjusted R-squared is very close to 1). So we can discard them.
+
 ```{r,cache=TRUE}
 df_mean_reduc <-df_mean[-c(4,5,7)]
 ```
@@ -292,6 +287,7 @@ df_mean_reduc <-df_mean[-c(4,5,7)]
 ## 1. Set a first GLM model
 
 We set a GLM model with the remaining features. 
+Since we have a problem of classification, we use the binomial family.
 ```{r,cache=TRUE}
 m <-
   glm(
@@ -303,10 +299,13 @@ m <-
 summary(m)
 ```
 
-Why take binomial? 
+* The algorithm converge: the number of fisher scoring iterations is reasonable.
+* There are a lot of variable not significant. To solve this we can try to remove them.
+* The ratio of the residual deviance by its degrees of freedom is $153/561 = 0.272$ where the dispersion parameter is 1. There is underdispersion. To solve this we can use the quasibinomial family.
+
 
 ## 2. Model selection{.tabset} 
-By performing several anova test, we will see that we can remove the features concavity, symmetry and fractal_dimension, because there is no significant difference between the model with theses variables and the one without.
+By performing several anova test, we will see that we can remove the features concavity, symmetry and fractal_dimension, because there is not a significant difference between the model with theses variables and the one without.
 
 ###  fractal_dimension
 ```{r,cache=TRUE}
@@ -363,44 +362,39 @@ summary(m4)
 anova(m, m4, test = "Chisq")
 ```
 
-* The model without smoothness has a AIC much bigger than the other model
+* The model without smoothness has an AIC much bigger than the other model
 * From the anova test there is a significant difference between the 2 models 
 * We cannot remove the feature smoothness of the model.
 
-## 3. Validation
- The selected model is the following: 
+
+## 3. Deal with underdispersion
+Let's set a GLM model with a quasibinomial family to solve the issue of underdispersion. 
+
 ```{r,cache=TRUE}
-m_selected <-
+m_selected_quas <-
   glm(
     data = df_mean_reduc,
     diagnosis ~ radius + texture + smoothness + concave.points,
-    family = binomial
+    family = quasibinomial
   )
+(summary(m_selected_quas))
 ```
-With the formula: 
+
+The formula of the retained model is: 
 
 ```{r,cache=TRUE}
-pander(summary(m_selected))
-extract_eq(
-  m_selected,
-  use_coefs = TRUE,
-  wrap = TRUE,
-  terms_per_line = 2
-)
+extract_eq(m_selected_quas,use_coefs = TRUE,wrap = TRUE,terms_per_line = 2)
 ```
  
-The ratio of the residual deviance by its degrees of freedom is $160.3/564 = 0.284$ where the dispersion parameter is 1. ( to check !!)
+The ratio of the residual deviance by its degrees of freedom is $160.32/564 = 0.284$ where the dispersion parameter is 0.458.
+These two values are close, we can validated this model.
 
-diagnostic plot
-```{r}
-autoplot(m_selected,1:4)
-```
-commentaire !!!
-See in annex an other GLM modelisation with glmnet less conservative. 
+See in annex the diagnostic plot of the retained model and an other GLM modelisation less conservative with glmnet. 
 
 # IV. PCA
 ## 1. Variability explained by each PC{.tabset}
-Let's apply the principal components analysis to our features.
+Still in the perspective of predicting the severity of the breast cancer, we will reduce the dimensionality of the data with the principal components analysis and model it in the space of  most relevant principal components. 
+
 ```{r, cache=TRUE}
 p <- prcomp(df_mean_reduc[,-1], scale=TRUE)
 ```
@@ -409,19 +403,13 @@ Let's see the percentage of variability explained by each principal components.
 ### Graph
 
 ```{r,cache=TRUE}
-fviz_eig(
-  p,
-  addlabels = TRUE,
-  geom = c("bar", "line"),
-  barfill = "grey",
-  barcolor = "grey",
-  linecolor = "red",
-  ncp = 10
-) + 
-  labs(title = "Percentage of variability explained by each PC",
-       x = "Principal Components", y = "Percentage of variances")
+fviz_eig(p,addlabels = TRUE,geom = c("bar", "line"),barfill = "grey",
+         barcolor = "grey",linecolor = "red",ncp = 10) + 
+    labs(title = "Percentage of variability explained by each PC",
+          x = "Principal Components", y = "Percentage of variances") +
+    theme_minimal()
 ```
- The 2 first components explain more than 99% of the data. 
+ The first four components explain more than 90% of the data. 
  
 ### Table
 
@@ -433,156 +421,158 @@ pander(summary(p))
 ## 2. Observations in PC plans
 ```{r, cache=TRUE}
 autoplot(p,x = 1,y = 2, data = df_mean_reduc,colour = "diagnosis",
-  loadings = TRUE,loadings.colour = "blue",loadings.label = TRUE) + theme_minimal()
+  loadings = TRUE,loadings.colour = "blue",loadings.label = TRUE)+
+  theme_minimal()
 ```
 
 By plotting the data in the plan of the first 2 principal components we see a clear separation between benign and  malignant type of cancer. That mean that knowing the location in this plan of a new observation should allow to predict the severity of the cancer. Let's try this approach by applying a GLM model to the first two PC. 
 
-Note: We tried to plot the data in all the possible pairs formed by the first four components. The clearest separation between the type of cancer occurs in the plan PC1-PC2
+Note:
+
+We tried to plot the data in all the possible pairs formed by the first four components. The clearest separation between the type of cancer occurs in the plan PC1-PC2.
  
 ## 3. GLM model with PCA
 ### Implementation
+We want to predict 'diagnosis' only with PC1 and PC2 with the help of a GLM model.
+We try with the binomial family but as before there is an underdispersion issue. We use the quasibinomial family instead.
+
 ```{r, cache=TRUE}
 df_mean_pca <- cbind(df_mean_reduc, p$x)
-glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2, family = binomial)
+glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2, 
+              family = quasibinomial)
 ```
 
 ### Validation
 
 ```{r, cache=TRUE}
-pander(summary(glm_pca))
-autoplot(glm_pca,1:4)+ theme_minimal()
+summary(glm_pca)
 ```
-commentaire : to do 
+* The algorithm converge: the number of fisher scoring iterations is reasonable.
+* The p-value of the two PC is significant. 
+* The ratio of the residual deviance by its degrees of freedom is $162.50/565 = 0.288$ where the dispersion parameter is 0.618.
+These two values are close, we can validated this model.
+
 # Conclusion
 
-## 1.
-Features allowing to predict severity of cancer ? 
- With 
- ## 2. test accuracy of the prediction with these feature 
- test set with accuracy 
- et des plots 
+## 1.Features allowing to predict severity of cancer ? 
 
-After application of 2 diff methods, let's conclude
-presentation of the result visualisation
+  [...]
+  
+## 2. test accuracy of the prediction with these feature 
+
+
 
 *******************************************************************************
 
 # Annex
 
-## 1. Correlation in the 'standard deviation' and 'worst' group
+## 1.diagnostic plot of retained glm model
 
-```{r, echo = FALSE, cache=T}
-# create a new frame for a the variable of type extreme
-df_se <-data.frame("diagnosis"          = df$diagnosis,
-                        "radius"             = df$radius_se,
-                        "texture"            = df$texture_se, 
-                        "perimeter"          = df$perimeter_se,
-                        "area"               = df$area_se, 
-                        "smoothness"         = df$smoothness_se, 
-                        "compactness"        = df$compactness_se,
-                        "concavity"          = df$concavity_se, 
-                        "concave.points"     = df$concave.points_se, 
-                        "symmetry"           = df$symmetry_se,
-                        "fractal_dimension " = df$fractal_dimension_se) 
-str(df_se)
-ggpairs(data = df_se,aes(color = diagnosis,alpha =0.5))
-
-df_extreme <-data.frame("diagnosis"          = df$diagnosis,
-                        "radius"             = df$radius_worst,
-                        "texture"            = df$texture_worst, 
-                        "perimeter"          = df$perimeter_worst,
-                        "area"               = df$area_worst, 
-                        "smoothness"         = df$smoothness_worst, 
-                        "compactness"        = df$compactness_worst,
-                        "concavity"          = df$concavity_worst, 
-                        "concave.points"     = df$concave.points_worst, 
-                        "symmetry"           = df$symmetry_worst,
-                        "fractal_dimension " = df$fractal_dimension_worst) 
-str(df_extreme)
-ggpairs(data = df_extreme,aes(color = diagnosis,alpha =0.5))
+```{r, cache=TRUE}
+autoplot(m_selected_quas,1:4)+ theme_minimal()
 ```
 
-We get the same results as for the mean group.
-## 2. STEP AIC 
-```{r}
-m5<-stepAIC(m,trace = TRUE)
-m5$anova
-```
 
-## 3. glmnet 
-Let's separate the dataset into train and test set
-```{r}
-## 75% of the sample size
+## 2. glmnet{.tabset} 
+
+First, let's separate the data into train and test set. (This will permit to be more accurate when we test the goodness of the model)
+```{r,message = FALSE,cache=TRUE}
+# set the seed to make partition reproducible
+set.seed(123)
+
 prop_train_test <- floor(0.75 * nrow(df_mean_reduc))
 
-## set the seed to make your partition reproducible
-set.seed(123)
-train_ind <- sample(seq_len(nrow(df_mean_reduc)), size = prop_train_test)
-#sample = sample.split(data$num, SplitRatio = .75)
-#train = subset(data, sample == TRUE)
-#test  = subset(data, sample == FALSE)
+# 0.75 of the data fall randomly into the training set and the remaining is for the test set
+train_ind <- sample(seq_len(nrow(df_mean_reduc)), size = prop_train_test) 
 train <- df_mean_reduc[train_ind, ]
 test <- df_mean_reduc[-train_ind, ]
 
 x_train <- train[,-1]
 y_train <- train$diagnosis
 x_test <-  test[,-1]
-y_test <- test$diagnosis
+y_test <-  test$diagnosis
 ```
-
-
-```{r}
+Apply GLM with cross validation
+```{r, cache=TRUE}
+library("glmnet")
 tol_length=length(levels(y_train))
 
-# run glm : train and test with cross validation
-cvfit<-cv.glmnet(as.matrix(x_train), y_train,family = "binomial", type.measure="class")
+cvfit<-cv.glmnet(as.matrix(x_train), y_train,family = "binomial",
+                 type.measure="class")
+```
+Show the misclassification error according to the regularization hyperparameter $\lambda$.
+```{r, cache=TRUE}
 plot(cvfit)
-cvfit$lambda.min
-assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.min')
-confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.min')
-as.numeric(1-assess$class)
-coef(cvfit, s="lambda.min")
+```
+We will now see the for two particular values of this regularization hyperparameter the accurary of the model with the confusion matrix and which features are retained.
+
+### lambda.min
+Let's choose this particular value of $\lambda$ 
+```{r, cache=TRUE}
+pander(cvfit$lambda.min)
 ```
 
-Let's look with the first lambda:
-```{r}
-cvfit$lambda.1se
-assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test, s='lambda.1se')
-confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test, s = 'lambda.1se')
-as.numeric(1-assess$class)
+The confusion matrix is:
+
+```{r, cache=TRUE}
+pander(confusion.glmnet(cvfit, newx =as.matrix(x_test), 
+                        newy = y_test, s = 'lambda.min'))
+```
+
+The accuracy is very good: 
+
+```{r, cache=TRUE}
+assess<-assess.glmnet(cvfit,newx=as.matrix(x_test),
+                      newy=y_test, s='lambda.min')
+pander(as.numeric(1-assess$class))
+```
+
+Let's see the features retained by this model :
+
+```{r, cache=TRUE}
+coef(cvfit, s="lambda.min")
+
+```
+This model is less conservative than our previous GLM model. Indeed, the variable "smoothness" is not taken into account.  
+
+### lambda.1se
+
+Let's choose this particular value of $\lambda$: 
+
+```{r,cache=TRUE}
+pander(cvfit$lambda.1se)
+```
+
+The confusion matrix is:
+```{r,cache=TRUE}
+pander(confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test,
+                        s = 'lambda.1se'))
+```
+
+The accuracy is very good: 
+
+```{r,cache=TRUE}
+assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test,
+                      s='lambda.1se')
+pander(as.numeric(1-assess$class))
+```
+
+Let's see the features retained by this model :
+
+```{r,cache=TRUE}
 coef(cvfit, s="lambda.1se")
 ```
-## 4. knn 
-k nearst ? 
-pas interpretable
-```{r}
-#install.packages('FNN')
-#install.packages('crosstable')
-library(crosstable)
-library('FNN')
-dat_pred <- FNN :: knn(train =x_train,test=  x_test,cl= y_train, k =10)
-pander(table(x = y_test, y = dat_pred))
-```
-## Version of R used 
-
-```{r echo = FALSE}
-sessionInfo()
-```
-*****************************************************************************
+Again, this model is less conservative than our previous GLM model.
 
 # References
-$~$
-$~$
 ```{r, include = F}
-papaja::r_refs(file = "r-references.bib")
-my_citation <- cite_r(file = "r-references.bib", )
+#papaja::r_refs(file = "r-references.bib")
+#my_citation <- cite_r(file = "r-references.bib", )
 # `r_refs()` creates a BibTeX file containing citations for R and all currently loaded packages.
 # `cite_r()` takes these citations and turns them into readily reportable text.
 # `my_citation` now contains the following text that you can use in your document: `r my_citation`
-
-#* [1] https://www.researchgate.net/figure/a-b-Fine-needle-aspiration-cytology-of-the-breast-lesion-showed-singly-lying_fig1_41548857
-#* [2] https://pubmed.ncbi.nlm.nih.gov/7091922/
-#* [3] K. P. Bennett and O. L. Mangasarian: "Robust Linear Programming Discrimination of Two Linearly Inseparable Sets", Optimization Methods and Software 1, 1992, 23-34
-
 ```
+* [1] https://www.researchgate.net/figure/a-b-Fine-needle-aspiration-cytology-of-the-breast-lesion-showed-singly-lying_fig1_41548857
+* [2] https://pubmed.ncbi.nlm.nih.gov/7091922/
+* [3] K. P. Bennett and O. L. Mangasarian: "Robust Linear Programming Discrimination of Two Linearly Inseparable Sets", Optimization Methods and Software 1, 1992, 23-34
+
