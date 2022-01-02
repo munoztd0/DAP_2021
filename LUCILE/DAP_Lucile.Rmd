@@ -87,8 +87,8 @@ In annex, I built a GLM model with the library glmnet and I find the same select
 # I. Preprocessing
 
 ## 1. Required libraries 
-```{r, cache = TRUE}
-# Check if packages are installed and if not to install them or just load them
+```{r, cache = TRUE, warning = FALSE}
+# Check if packages are installed and if not install them
 if(!require(pacman)) {
   install.packages(c("pacman", "remotes"))
 }
@@ -106,8 +106,8 @@ pacman::p_load(pander,       # Rmarkdown visualization
                GGally, 
                ggfortify,
                ggplot2,
-               MASS,         # for stepAIC
-               here,
+               #MASS,        # for stepAIC
+               here,         # to load the path
                kableExtra,   # Rmarkdown table visualization
                papaja,
                glmnet,       # GLM implementation and analysis library
@@ -126,14 +126,14 @@ df <-
   read.csv('data.csv', stringsAsFactors = 1)# load data from github repository
 ```
 
-Let's delete ID number and the last variable because there are not relevant.
+Let's delete ID number and the last variable - which is full of NA- because there are not relevant.
 ```{r, cache = TRUE}
 df<-df[,-33]
 df<-df[,-1]
 ```
 
 We will work only with the mean-type data, so let's create a new frame for the variables of this type. 
-```{r, echo = FALSE, comment=NA, cache = TRUE}
+```{r, cache = TRUE}
 df_mean <- data.frame(
   "diagnosis"          = df$diagnosis,
   "radius"             = df$radius_mean,
@@ -151,7 +151,7 @@ df_mean <- data.frame(
 
 ## 3. Inspection {.tabset}
 ### Structure
-```{r, comment=NA}
+```{r, comment=NA,cache=TRUE}
 str(df_mean)
 ```
 
@@ -168,27 +168,27 @@ pander(summary(df_mean))
 
 ## 4. Proportion of benign vs malignant cancer 
 ```{r, comment=NA,cache=TRUE}
-kable(prop.table(table(df_mean$diagnosis)),col.names = c("Severity","Frequency"))   
+kable(prop.table(table(df_mean$diagnosis)),col.names = 
+        c("Severity","Frequency"))   
 ```
 
 The two types of cancer are not represented in the same proportion, this can lead to a bias. 
 
-However, this proportion representative of the reality:
+However, this proportion is more or less representative of the reality:
 
 "The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"   [2]
 
 
 # II. Selection of variables of interest 
+We want to remove the variables with high correlation to avoid problems during the modelisation.
+According to the description of the data, radius, perimeter, area and compactness should be correlated since it exists a formula between these variables. Let's verify that.
 
-Hypothesis:
-
-According to the description of the data, radius, perimeter, area and compactness should be correlated since it exists a formula between these variables.
 
 ## 1. Correlation{.tabset}
 
 ### ggpairs
 
-```{r, warning=F, message=F,cache=TRUE}
+```{r, warning=FALSE, message=FALSE,cache=TRUE}
 ggpairs(
   df_mean,
   aes(color = diagnosis, alpha = 0.5),
@@ -212,19 +212,15 @@ Observations :
 * In each subplot a distinction can be made according to the type of 'diagnosis'.
 * The observations coming from malignant cancer seem to be in general bigger than the data coming from benign cancer.   
 
+This first observation supports the hypothesis that the value of some features is different according to the severity of the cancer.
 
 ### ggcorr
 The following function permit to visualize better the correlation
 ```{r, warning=F, cache=TRUE}
-ggcorr(
-  df_mean,
-  geom = "text",
-  nbreaks = 5,
-  hjust = 1,
-  label = FALSE,
-  label_alpha = 0.7
-) + labs(title = " Breath cancer features Pearson correlation") + theme(legend.position =
-                                                                          "none")
+ggcorr(df_mean,geom = "text",nbreaks = 5,hjust = 1,label = FALSE,
+       label_alpha = 0.7) +
+      labs(title = " Breath cancer features Pearson correlation") +
+      theme(legend.position ="none")
 ```
 
 
@@ -234,7 +230,8 @@ ggcorr(
 
 * Surprisingly, concavity, compactness and concave.points have a strong correlation.( $r \approx 0.8$ or $r \approx 0.9$)
 
-* Even if compactness is define as $perimeter^2 / area - 1.0$m the r between this variable and area or perimeter is not 1 because the correlation show only the linear dependency and their relation is not linear.
+Note:
+Even if compactness is define as $perimeter^2 / area - 1.0$ the r between this variable and area or perimeter is not 1 because the correlation shows only the linear dependency and their relation is not linear.
 
 ### Linear models of correlated variables{.tabset}
 
@@ -513,8 +510,8 @@ ggpairs(data = df_extreme,aes(color = diagnosis,alpha =0.5))
 We get the same results as for the mean group.
 ## 2. STEP AIC 
 ```{r}
-m5<-stepAIC(m,trace = TRUE)
-m5$anova
+#m5<-stepAIC(m,trace = TRUE)
+#m5$anova
 ```
 
 ## 3. glmnet 
@@ -540,6 +537,7 @@ y_test <- test$diagnosis
 
 
 ```{r}
+library("glmnet")
 tol_length=length(levels(y_train))
 
 # run glm : train and test with cross validation
@@ -571,8 +569,8 @@ sessionInfo()
 $~$
 $~$
 ```{r, include = F}
-papaja::r_refs(file = "r-references.bib")
-my_citation <- cite_r(file = "r-references.bib", )
+#papaja::r_refs(file = "r-references.bib")
+#my_citation <- cite_r(file = "r-references.bib", )
 # `r_refs()` creates a BibTeX file containing citations for R and all currently loaded packages.
 # `cite_r()` takes these citations and turns them into readily reportable text.
 # `my_citation` now contains the following text that you can use in your document: `r my_citation`
