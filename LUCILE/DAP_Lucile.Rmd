@@ -231,11 +231,12 @@ ggcorr(df_mean,geom = "text",nbreaks = 5,hjust = 1,label = FALSE,
 * Surprisingly, concavity, compactness and concave.points have a strong correlation.( $r \approx 0.8$ or $r \approx 0.9$)
 
 Note:
+
 Even if compactness is define as $perimeter^2 / area - 1.0$ the r between this variable and area or perimeter is not 1 because the correlation shows only the linear dependency and their relation is not linear.
 
 ### Linear models of correlated variables{.tabset}
 
- [...]
+ We want to discard the variables: perimeter, area and compactness. To be sure that these variables can be explained by the remaining variables, we set a linear model to express the potential discarded variable according to the other and address the goodness of the model by looking the adjusted $R^2$.
  
 #### Perimeter
 
@@ -275,7 +276,8 @@ pander(summary(m_compactness))
 
 ### Variables discarded
 
-The variables area, perimeter and compactness are well explained by the other variables ( Adjusted R-squared very close to 1). So we discard them.
+The variables area, perimeter and compactness are well explained by the other variables (the Adjusted R-squared is very close to 1). So we can discard them.
+
 ```{r,cache=TRUE}
 df_mean_reduc <-df_mean[-c(4,5,7)]
 ```
@@ -285,7 +287,7 @@ df_mean_reduc <-df_mean[-c(4,5,7)]
 ## 1. Set a first GLM model
 
 We set a GLM model with the remaining features. 
-why, why binomial : [...]
+Since we have a problem of classification, we use the binomial family.
 ```{r,cache=TRUE}
 m <-
   glm(
@@ -297,10 +299,13 @@ m <-
 summary(m)
 ```
 
+* The algorithm converge: the number of fisher scoring iterations is reasonable.
+* There are a lot of variable not significant. To solve this we can try to remove them.
+* The ratio of the residual deviance by its degrees of freedom is $153/561 = 0.272$ where the dispersion parameter is 1. There is underdispersion. To solve this we can use the quasibinomial family.
 
 
 ## 2. Model selection{.tabset} 
-By performing several anova test, we will see that we can remove the features concavity, symmetry and fractal_dimension, because there is no significant difference between the model with theses variables and the one without.
+By performing several anova test, we will see that we can remove the features concavity, symmetry and fractal_dimension, because there is not a significant difference between the model with theses variables and the one without.
 
 ###  fractal_dimension
 ```{r,cache=TRUE}
@@ -357,45 +362,34 @@ summary(m4)
 anova(m, m4, test = "Chisq")
 ```
 
-* The model without smoothness has a AIC much bigger than the other model
+* The model without smoothness has an AIC much bigger than the other model
 * From the anova test there is a significant difference between the 2 models 
 * We cannot remove the feature smoothness of the model.
 
-## 3. Validation
- The selected model is the following: 
+
+## 3. Deal with underdispersion
+Let's set a GLM model with a quasibinomial family to solve the issue of underdispersion. 
+
 ```{r,cache=TRUE}
-m_selected <-
+m_selected_quas <-
   glm(
     data = df_mean_reduc,
     diagnosis ~ radius + texture + smoothness + concave.points,
-    family = binomial
+    family = quasibinomial
   )
-pander(summary(m_selected))
+(summary(m_selected_quas))
 ```
 
-With the formula: 
+The formula of the retained model is: 
 
 ```{r,cache=TRUE}
-extract_eq(
-  m_selected,
-  use_coefs = TRUE,
-  wrap = TRUE,
-  terms_per_line = 2
-)
+extract_eq(m_selected_quas,use_coefs = TRUE,wrap = TRUE,terms_per_line = 2)
 ```
  
-The ratio of the residual deviance by its degrees of freedom is $160.3/564 = 0.284$ where the dispersion parameter is 1.
-[we want these two values close...]
+The ratio of the residual deviance by its degrees of freedom is $160.32/564 = 0.284$ where the dispersion parameter is 0.458.
+These two values are close, we can validated this model.
 
-diagnostic plot
-
-```{r, cache=TRUE}
-autoplot(m_selected,1:4)
-```
-
-[...]
-
-See in annex an other GLM modelisation with glmnet less conservative. 
+See in annex the diagnostic plot of the retained model and an other GLM modelisation less conservative with glmnet. 
 
 # IV. PCA
 ## 1. Variability explained by each PC{.tabset}
@@ -473,7 +467,13 @@ autoplot(glm_pca,1:4)+ theme_minimal()
 *******************************************************************************
 
 # Annex
+## diagnostic plot of retained glm model
 
+```{r, cache=TRUE}
+autoplot(m_selected_quas,1:4)+ theme_minimal()
+```
+
+[...]
 ## 1. Correlation in the 'standard deviation' and 'worst' group
 
 ```{r, echo = FALSE, cache=T}
