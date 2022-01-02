@@ -26,9 +26,9 @@ csl: ieee.csl
 ## Context 
 
  
-One of the biggest causes of mortality among women is breast cancer @ibrahim_feature_2021. More the detection is delayed, lower the chance of survival is. That why efficient diagnosis is critical to provide personalized care and treatement, and improves cancer outcomes. Howeover, it is quiet difficult due to the complexity and diversity of this disease. 
+One of the biggest causes of mortality among women is breast cancer @ibrahim_feature_2021. The more the detection is delayed, the lower the chance of survival is. That is why efficient diagnosis is critical to provide personalized care and treatment, and to improve cancer outcomes. However, it is quite difficult due to the complexity and diversity of this disease. 
 
-A major concern of the field is to be able to classify the type of tumor with a very good accuracy and determine critical features that allow this classification. 
+A major concern of the field is to be able to classify the type of tumor with very good accuracy and determine critical features that allow this classification. 
 
 ## 1. Information about the dataset 
 We propose to study the Wisconsin Breast Cancer Dataset. 
@@ -43,7 +43,7 @@ To understand the feature of the selected dataset, we will need first some defin
 
 ![Benign and malignant tumor of a breast mass, fine needle aspiration @sumbria_breast_2021](benign_malignant.png){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:60%;"}
   
-According to the description of the data, "the features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
+According to data description, "the features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
 
 There are ten real-valued features computed for each cell nucleus:
 
@@ -61,30 +61,29 @@ Name of the variables    type  Description
 10)'fractal_dimension'   num         $coastline approximation - 1$
 ----------------------  ----- ---------------------------------------------------------
 
-The mean, standard error and "worst" or largest (mean of the three
+The mean, standard error, and "worst" or largest (mean of the three
 largest values) of these features were computed for each image,
 resulting in 30 features. 
 All feature values are recorded with four significant digits.
 
 Note: 
-The following analysis has been done with the full dataset. Howeover, the mean of each feature has shown to be more relevant, so we decide to present the analysis only with the mean variables.
+The following analysis has been done with the full dataset. However, the mean of each feature has shown to be more relevant, so we decide to present the analysis only with the mean variables.
 
 [Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) 
 
 ##  2. Question of interest 
 
-The aim is to **predict whether the tumor is benign or malignant with only few features. **
+The aim is to **predict whether the tumor is benign or malignant with only a few features. **
 
 ## 3. Plan of the analysis 
 
 * Inspect the data to understand it better
 * Check if the sample proportion of benign and malignant cancer is representative of the whole population 
 * Select variables of interest by discarding according to the correlation level 
-* Built GLM models and select the best model with anova, discuss the goodness of this model 
-* Apply PCA to see to what extent dimension can be reduced and perform a GLM model with relevant dimension.
-* Conclude by addressing the accuracy of these GLM models with a subset of the data
+* Build GLM models and select the best model with anova, question the validity of this model 
+* Apply PCA to see to what extent dimension can be reduced and perform a GLM model with relevant dimensions.
 
-In annex, we built a GLM model with the library glmnet and we find a similar selection of variable.
+In the annex, we build a GLM model with the library "glmnet" and we find a similar selection of variables.
 
 # I. Preprocessing
 
@@ -174,16 +173,17 @@ kable(prop.table(table(df_mean$diagnosis)),col.names =
         c("Severity","Frequency"))   
 ```
 
-The two types of cancer are not represented in the same proportion, this can lead to a bias. 
 
-However, this proportion is more or less representative of the reality:
+The two types of tumors are not represented in the same proportion, this can lead to a bias. 
 
-"The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1" @spivey_predicting_1982  
+However, according to  @spivey_predicting_1982 , this proportion seems to be more or less representative of the reality:
+
+"The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"
 
 
 # II. Selection of variables of interest 
-We want to remove the variables with high correlation to avoid problems during the modelisation.
-According to the description of the data, radius, perimeter, area and compactness should be correlated since it exists a formula between these variables. Let's verify that.
+We want to remove the variables with high correlation to avoid problems during the modelization.
+According to data description, radius, perimeter, area and compactness should be correlated since it exists a formula between these variables. Let's verify that.
 
 
 ## 1. Correlation{.tabset}
@@ -205,19 +205,19 @@ ggpairs(
 ```
 Description :
   
-* On the lower triangular part of the matrix, scatterplots of each pair of feature for benign (red) and malignant (blue) type are displayed.
+* On the lower triangular part of the matrix, scatterplots of each pair of features for benign (red) and malignant (blue) types are displayed.
 * On the diagonal, the variable distribution is displayed.
-* On the upper triangular part Pearson correlation is displayed.
+* On the upper triangular part, Pearson correlation is displayed.
 
 Observations :
   
 * In each subplot a distinction can be made according to the type of 'diagnosis'.
-* The observations coming from malignant cancer seem to be in general bigger than the data coming from benign cancer.   
+* The observations coming from malignant tumor seem to be in general bigger than the data coming from the benign ones.   
 
-This first observation supports the hypothesis that the value of some features is different according to the severity of the cancer.
+This first observation supports the hypothesis that the value of some features is different according to the type of tumor.
 
 ### ggcorr
-The following function permit to visualize better the correlation
+The following function permits to visualize better the correlation.
 ```{r, warning=F, cache=TRUE}
 ggcorr(df_mean,geom = "text",nbreaks = 5,hjust = 1,label = FALSE,
        label_alpha = 0.7) +
@@ -234,11 +234,11 @@ ggcorr(df_mean,geom = "text",nbreaks = 5,hjust = 1,label = FALSE,
 
 Note:
 
-Even if compactness is define as $perimeter^2 / area - 1.0$ the r between this variable and area or perimeter is not 1 because the correlation shows only the linear dependency and their relation is not linear.
+Even if compactness is defined as $perimeter^2 / area - 1.0$ the r between this variable and area or perimeter is not 1 because the correlation shows only the linear dependency and their relationship is not linear.
 
 ### Linear models of correlated variables{.tabset}
 
- We want to discard the variables: perimeter, area and compactness. To be sure that these variables can be explained by the remaining variables, we set a linear model to express the potential discarded variable according to the other and address the goodness of the model by looking the adjusted $R^2$.
+ We want to discard the variables: perimeter, area, and compactness. To be sure that these variables can be explained by the remaining variables, we set a linear model to express the potential discarded variable according to the other and address the goodness of the model by looking at the adjusted $R^2$.
  
 #### Perimeter
 
@@ -278,7 +278,7 @@ pander(summary(m_compactness))
 
 ### Variables discarded
 
-The variables area, perimeter and compactness are well explained by the other variables (the Adjusted R-squared is very close to 1). So we can discard them.
+The variables area, perimeter, and compactness are well explained by the other variables (the Adjusted R-squared is very close to 1). So we can discard them.
 
 ```{r,cache=TRUE}
 df_mean_reduc <-df_mean[-c(4,5,7)]
@@ -289,7 +289,7 @@ df_mean_reduc <-df_mean[-c(4,5,7)]
 ## 1. Set a first GLM model
 
 We set a GLM model with the remaining features. 
-Since we have a problem of classification, we use the binomial family.
+Since we want to classify two types of tumor, we use the binomial family.
 ```{r,cache=TRUE}
 m <-
   glm(
@@ -301,8 +301,9 @@ m <-
 summary(m)
 ```
 
-* The algorithm converge: the number of fisher scoring iterations is reasonable.
-* There are a lot of variable not significant. To solve this we can try to remove them.
+
+* The algorithm converges: the number of fisher scoring iterations is reasonable.
+* There is a lot of variables not significant. To solve this we can try to remove them.
 * The ratio of the residual deviance by its degrees of freedom is $153/561 = 0.272$ where the dispersion parameter is 1. There is underdispersion. To solve this we can use the quasibinomial family.
 
 
@@ -321,8 +322,9 @@ m1 <-
 summary(m1)
 anova(m, m1, test = "Chisq")
 ```
+
 * The 2 models have a similar AIC
-* From the anova test there is no significant difference between the 2 models 
+* From the anova test there is no significant difference between the two models 
 
 ### symmetry 
 
