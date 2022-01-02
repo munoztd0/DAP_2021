@@ -21,38 +21,31 @@ urlcolor: blue
 bibliography: ref.bib
 csl: ieee.csl
 ---
-@noauthor_uci_nodate
 # Introduction 
 
 ## Context 
 
  
-One of the biggest causes of mortality among women is breast cancer ( cf pdf)
- diagnose as soon as possible can but it is quiet difficult due to the complexity and diversity of this disease. 
- 
- def
- According to https://www.cancer.gov/publications/dictionaries/cancer-terms/def/tumor, a tumor is "An abnormal mass of tissue that forms when cells grow and divide more than they should or do not die when they should. Tumors may be benign (not cancer) or malignant (cancer). Benign tumors may grow large but do not spread into, or invade, nearby tissues or other parts of the body. Malignant tumors can spread into, or invade, nearby tissues"
- Specifically, breast cancer is a malignant tumor located in breast cells of the fatty tissues or the fibrous connective tissues within the breast.  
- https://www.breastcancer.org/symptoms/understand_bc/what_is_bc
- 
-The problem is to diagnose the severity of the breast 
-Determine quickly and with precision the severity of a cancer is a critical point
-  
+One of the biggest causes of mortality among women is breast cancer @ibrahim_feature_2021. More the detection is delayed, lower the chance of survival is. That why efficient diagnosis is critical to provide personalized care and treatement, and improves cancer outcomes. Howeover, it is quiet difficult due to the complexity and diversity of this disease. 
+
+A major concern of the field is to be able to classify the type of tumor with a very good accuracy and determine critical features that allow this classification. 
+
 ## 1. Information about the dataset 
 We propose to study the Wisconsin Breast Cancer Dataset. 
 
-"Fine needle aspiration is a type of biopsy procedure. In fine needle aspiration, a thin needle is inserted into an area of abnormal-appearing tissue or body fluid." https://www.webmd.com/a-to-z-guides/fine-needle-aspiration
+To understand the feature of the selected dataset, we will need first some definitions:
 
-"Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
+  * According to @noauthor_definition_2011, a tumor is "An abnormal mass of tissue that forms when cells grow and divide more than they should or do not die when they should. Tumors may be benign (not cancer) or malignant (cancer). Benign tumors may grow large but do not spread into, or invade, nearby tissues or other parts of the body. Malignant tumors can spread into, or invade, nearby tissues"
 
-![Benign and malignant tumor (FNA) of a breast mass](benign_malignant.png){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:60%;"}
+* Specifically, breast cancer is a malignant tumor located in breast cells of the fatty tissues or the fibrous connective tissues within the breast. @noauthor_what_2018 
 
-https://medium.com/analytics-vidhya/breast-cancer-diagnostic-dataset-eda-fa0de80f15bd
+* "Fine needle aspiration is a type of biopsy procedure. In fine needle aspiration, a thin needle is inserted into an area of abnormal-appearing tissue or body fluid." @hoffman_fine_nodate
 
-$~$
-$~$
+![Benign and malignant tumor of a breast mass, fine needle aspiration @sumbria_breast_2021](benign_malignant.png){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:60%;"}
+  
+According to the description of the data, "the features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
 
-Ten real-valued features are computed for each cell nucleus:
+There are ten real-valued features computed for each cell nucleus:
 
 Name of the variables    type  Description
 ----------------------  ----- ---------------------------------------------------------
@@ -67,27 +60,22 @@ Name of the variables    type  Description
 9) 'symmetry'            num         symmetry of the nucleus 
 10)'fractal_dimension'   num         $coastline approximation - 1$
 ----------------------  ----- ---------------------------------------------------------
+
 The mean, standard error and "worst" or largest (mean of the three
 largest values) of these features were computed for each image,
-resulting in 30 features.
+resulting in 30 features. 
 All feature values are recorded with four significant digits.
 
-The 3-dimensional space is that described in: [3].
+Note: 
+The following analysis has been done with the full dataset. Howeover, the mean of each feature has shown to be more relevant, so we decide to present the analysis only with the mean variables.
 
-This database is also available through the UW CS ftp server: 
-ftp ftp.cs.wisc.edu cd math-prog/cpo-dataset/machine-learn/WDBC/
-
-[Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) \
+[Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) 
 
 ##  2. Question of interest 
 
-The aim is to **predict whether the cancer is benign or malignant with only few features **
+The aim is to **predict whether the tumor is benign or malignant with only few features. **
 
-## 3. Choice of data 
-There is a lot of data, we choose only the data concerning the mean. The following analysis has been done 
-also for the worst-type of data and lead to similar conclusion. See in annex the inspection of these 2 subframes. 
-
-## 4. Plan of the analysis 
+## 3. Plan of the analysis 
 
 * Inspect the data to understand it better
 * Check if the sample proportion of benign and malignant cancer is representative of the whole population 
@@ -96,7 +84,7 @@ also for the worst-type of data and lead to similar conclusion. See in annex the
 * Apply PCA to see to what extent dimension can be reduced and perform a GLM model with relevant dimension.
 * Conclude by addressing the accuracy of these GLM models with a subset of the data
 
-In annex, I built a GLM model with the library glmnet and I find the same selection of variable.
+In annex, we built a GLM model with the library glmnet and we find a similar selection of variable.
 
 # I. Preprocessing
 
@@ -190,7 +178,7 @@ The two types of cancer are not represented in the same proportion, this can lea
 
 However, this proportion is more or less representative of the reality:
 
-"The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"   [2]
+"The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1" @spivey_predicting_1982  
 
 
 # II. Selection of variables of interest 
@@ -403,7 +391,7 @@ extract_eq(m_selected_quas,use_coefs = TRUE,wrap = TRUE,terms_per_line = 2)
 The ratio of the residual deviance by its degrees of freedom is $160.32/564 = 0.284$ where the dispersion parameter is 0.458.
 These two values are close, we can validated this model.
 
-See in annex the diagnostic plot of the retained model and an other GLM modelisation less conservative with glmnet. 
+See in annex the diagnostic plot of the retained model and an other GLM modelisation with glmnet. 
 
 # IV. PCA
 ## 1. Variability explained by each PC{.tabset}
@@ -478,6 +466,7 @@ These two values are close, we can validated this model.
 
 *******************************************************************************
 
+further analysis : test train set glm confusion matrix, choose a model that diminush the true negative rate 
 # Annex
 
 ## 1.diagnostic plot of retained glm model
