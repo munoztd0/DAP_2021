@@ -1,41 +1,53 @@
 ---
 title: "Breast Cancer Wisconsin Diagnostic"
 author: L. Favero
-output: 
+output:
+  #pdf_document:
+     #toc: true # table of contents
+     #toc_depth: 2
   rmdformats::robobook: 
   #install.packages('rmdformats')
   #pdf_document:
-  #  df_print: kable
-  #  keep_tex: true
-  #  fig_caption: true 
+    #df_print: kable
+   #keep_tex: true
+  # fig_caption: true 
   #  latex_engine: pdflatex
   #  toc: true # table of contents
   #  toc_depth: 3
   # number_sections: true # sections auto numbering
-#fontsize: 11pt
+fontsize: 11pt
 #geometry: margin=1in
-#urlcolor: blue
-#bibliography:
-#- r-references.bib
-
-
+urlcolor: blue
+bibliography: ref.bib
+csl: ieee.csl
 ---
-
+@noauthor_uci_nodate
 # Introduction 
 
 ## Context 
+
  
-  [...]
+One of the biggest causes of mortality among women is breast cancer ( cf pdf)
+ diagnose as soon as possible can but it is quiet difficult due to the complexity and diversity of this disease. 
+ 
+ def
+ According to https://www.cancer.gov/publications/dictionaries/cancer-terms/def/tumor, a tumor is "An abnormal mass of tissue that forms when cells grow and divide more than they should or do not die when they should. Tumors may be benign (not cancer) or malignant (cancer). Benign tumors may grow large but do not spread into, or invade, nearby tissues or other parts of the body. Malignant tumors can spread into, or invade, nearby tissues"
+ Specifically, breast cancer is a malignant tumor located in breast cells of the fatty tissues or the fibrous connective tissues within the breast.  
+ https://www.breastcancer.org/symptoms/understand_bc/what_is_bc
+ 
+The problem is to diagnose the severity of the breast 
+Determine quickly and with precision the severity of a cancer is a critical point
   
 ## 1. Information about the dataset 
+We propose to study the Wisconsin Breast Cancer Dataset. 
 
-[Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) \
-
+"Fine needle aspiration is a type of biopsy procedure. In fine needle aspiration, a thin needle is inserted into an area of abnormal-appearing tissue or body fluid." https://www.webmd.com/a-to-z-guides/fine-needle-aspiration
 
 "Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
-\
 
-![fine needle aspirate (FNA) of a breast mass](fig1.jpg){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:40%;"}
+![Benign and malignant tumor (FNA) of a breast mass](benign_malignant.png){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:60%;"}
+
+https://medium.com/analytics-vidhya/breast-cancer-diagnostic-dataset-eda-fa0de80f15bd
 
 $~$
 $~$
@@ -64,6 +76,8 @@ The 3-dimensional space is that described in: [3].
 
 This database is also available through the UW CS ftp server: 
 ftp ftp.cs.wisc.edu cd math-prog/cpo-dataset/machine-learn/WDBC/
+
+[Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) \
 
 ##  2. Question of interest 
 
@@ -472,7 +486,6 @@ These two values are close, we can validated this model.
 autoplot(m_selected_quas,1:4)+ theme_minimal()
 ```
 
-
 ## 2. glmnet{.tabset} 
 
 First, let's separate the data into train and test set. (This will permit to be more accurate when we test the goodness of the model)
@@ -572,7 +585,3 @@ Again, this model is less conservative than our previous GLM model.
 # `cite_r()` takes these citations and turns them into readily reportable text.
 # `my_citation` now contains the following text that you can use in your document: `r my_citation`
 ```
-* [1] https://www.researchgate.net/figure/a-b-Fine-needle-aspiration-cytology-of-the-breast-lesion-showed-singly-lying_fig1_41548857
-* [2] https://pubmed.ncbi.nlm.nih.gov/7091922/
-* [3] K. P. Bennett and O. L. Mangasarian: "Robust Linear Programming Discrimination of Two Linearly Inseparable Sets", Optimization Methods and Software 1, 1992, 23-34
-
