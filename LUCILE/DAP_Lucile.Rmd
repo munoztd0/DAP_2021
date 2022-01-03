@@ -7,16 +7,7 @@ output:
      #toc_depth: 2
   rmdformats::robobook: 
   #install.packages('rmdformats')
-  #pdf_document:
-    #df_print: kable
-   #keep_tex: true
-  # fig_caption: true 
-  #  latex_engine: pdflatex
-  #  toc: true # table of contents
-  #  toc_depth: 3
-  # number_sections: true # sections auto numbering
 fontsize: 11pt
-#geometry: margin=1in
 urlcolor: blue
 bibliography: ref.bib
 csl: ieee.csl
@@ -28,14 +19,14 @@ csl: ieee.csl
  
 One of the biggest causes of mortality among women is breast cancer @ibrahim_feature_2021. The more the detection is delayed, the lower the chance of survival is. That is why efficient diagnosis is critical to provide personalized care and treatment, and to improve cancer outcomes. However, it is quite difficult due to the complexity and diversity of this disease. 
 
-A major concern of the field is to be able to classify the type of tumor with very good accuracy and determine critical features that allow this classification. 
+A major concern of the field is to be able to classify the type of tumor with very good accuracy and determine critical features that allow this classification.  Particular attention is paid to the false positive rate of this classification since  it is a vital issue.
 
 ## 1. Information about the dataset 
 We propose to study the Wisconsin Breast Cancer Dataset. 
 
 To understand the feature of the selected dataset, we will need first some definitions:
 
-  * According to @noauthor_definition_2011, a tumor is "An abnormal mass of tissue that forms when cells grow and divide more than they should or do not die when they should. Tumors may be benign (not cancer) or malignant (cancer). Benign tumors may grow large but do not spread into, or invade, nearby tissues or other parts of the body. Malignant tumors can spread into, or invade, nearby tissues"
+* According to @noauthor_definition_2011, a tumor is "An abnormal mass of tissue that forms when cells grow and divide more than they should or do not die when they should. Tumors may be benign (not cancer) or malignant (cancer). Benign tumors may grow large but do not spread into, or invade, nearby tissues or other parts of the body. Malignant tumors can spread into, or invade, nearby tissues"
 
 * Specifically, breast cancer is a malignant tumor located in breast cells of the fatty tissues or the fibrous connective tissues within the breast. @noauthor_what_2018 
 
@@ -73,7 +64,7 @@ The following analysis has been done with the full dataset. However, the mean of
 
 ##  2. Question of interest 
 
-The aim is to **predict whether the tumor is benign or malignant with only a few features. **
+Find a model (classifier) able to predict whether the tumor is benign or malignant with only a few features. 
 
 ## 3. Plan of the analysis 
 
@@ -81,6 +72,7 @@ The aim is to **predict whether the tumor is benign or malignant with only a few
 * Check if the sample proportion of benign and malignant cancer is representative of the whole population 
 * Select variables of interest by discarding according to the correlation level 
 * Build GLM models and select the best model with anova, question the validity of this model 
+* Address the question of accuracy of the prediction and false positive rate of the selected model
 * Apply PCA to see to what extent dimension can be reduced and perform a GLM model with relevant dimensions.
 
 In the annex, we build a GLM model with the library "glmnet" and we find a similar selection of variables.
@@ -397,14 +389,13 @@ extract_eq(m_selected_quas,use_coefs = TRUE,wrap = TRUE,terms_per_line = 2)
 The ratio of the residual deviance by its degrees of freedom is $160.32/564 = 0.284$ where the dispersion parameter is 0.458.
 These two values are close, we can validate this model.
 
-See in annex the diagnostic plot of the retained model and another GLM modelization with glmnet. 
+See in annex another GLM modelization with glmnet. 
 
 ## 4.  Confusion matrix 
 First, let's separate the data into train and test sets.
 ```{r,message = FALSE,cache=TRUE}
 # set the seed to make partition reproducible
-set.seed(123)
-
+set.seed(6)
 prop_train_test <- floor(0.75 * nrow(df_mean_reduc))
 
 # 0.75 of the data fall randomly into the training set and the remaining is for the test set
@@ -416,12 +407,10 @@ y_test<- as.numeric(test$diagnosis)-1
 
 Built the model with the data of the train set
 ```{r,cache=TRUE}
-m_selected_quas_test <-
-  glm(
-    data = train,
-    diagnosis ~ radius + texture + smoothness + concave.points,
-    family = quasibinomial
-  )
+m_selected_quas_test <-glm(data = train,
+                          diagnosis ~ 
+                          radius + texture + smoothness + concave.points,
+                          family = quasibinomial)
 ```
 
 Test the accuracy of the model with the test set by computing the confusion matrix and other statistics. 
@@ -431,9 +420,17 @@ pred <- as.numeric(pdata>0.5)
 conf_mat<-confusionMatrix(reference = as.factor(y_test), data = as.factor(pred))
 rownames(conf_mat$table) =c("B","M")
 colnames(conf_mat$table) =c("B","M")
+kable(prop.table(conf_mat$table))
+```
+* True positive and false negative are high ($TP \approx 0.59$,$FN \approx 0.36$)
+* True negative and false positive are low ($ \approx 0.03$ )
+
+```{r,cache=TRUE}
 conf_mat
 ```
-* From the confusion matrix
+The accuracy of the model is 0.9441, with a 95% confidence interval:(0.8927, 0.9755).
+
+Further direction: Here we compute the confusion matrix and the other statistics with only one test set. It could be accurate to do this computation for several test set.  
 
 # IV. PCA
 ## 1. Variability explained by each PC{.tabset}
@@ -469,7 +466,7 @@ autoplot(p,x = 1,y = 2, data = df_mean_reduc,colour = "diagnosis",
   theme_minimal()
 ```
 
-By plotting the data in the plan of the first 2 principal components we see a clear separation between benign and  malignant type of cancer. That mean that knowing the location in this plan of a new observation should allow to predict the severity of the cancer. Let's try this approach by applying a GLM model to the first two PC. 
+By plotting the data in the plan of the first 2 principal components we see a clear separation between benign and  malignant type of cancer. That mean that knowing the location in this plan of a new observation should allow to predict cancer. Let's try this approach by applying a GLM model to the first two PC. 
 
 Note:
 
@@ -499,12 +496,19 @@ These two values are close, we can validate this model.
 
 # Conclusion
 
-The goal of this study were to predict whether a tumor is benign or malignant with only a few features.
-To do so, we first  implemented a GLM models using the quasibinomial family to avoid underdistribution.  We were able to discard some feature not significant One with the feature of data 
+The goal of this study was to find a classifier able to predict whether a tumor is benign or malignant with only a few features.
 
-In addition to that we performed a PCA. By reducing the dimensionality of the data, we notice a clear different location in the plan of the two first principal components according to the tumor identity. We then built a GLM model using only these two PCs. This approach permit predict the caner with less variables ( only two ) but is not interpretable. 
+To do so, we first implemented a GLM model using the quasibinomial family to avoid underdistribution. Some not significant features were discarded. The accuracy of this model is quite good, so it permits to perform good prediction, and the critical criterion of low true negative rate is respected. 
 
-resp
+In addition to that, we performed a PCA. By reducing the dimensionality of the data, we noticed clear different locations in the plan of the two first principal components according to the tumor identity. So a GLM model was built using only these two PCs. This approach allows to predict cancer with fewer variables (only two) but there are not interpretable. 
+
+To conclude, we were able to build a model with the following features extracted from the image of a FNA of a breast cell nucleus:
+
+* The radius of the nucleus and its local variation
+* The texture of the nucleus (standard deviation of gray-scale values)
+* The number of concave portions of the contour
+
+This model permits to predict breast cancer with quite a good accuracy. 
 
 *******************************************************************************
 
@@ -603,10 +607,4 @@ coef(cvfit, s="lambda.1se")
 Again, this model is less conservative than our previous GLM model.
 
 # References
-```{r, include = F}
-#papaja::r_refs(file = "r-references.bib")
-#my_citation <- cite_r(file = "r-references.bib", )
-# `r_refs()` creates a BibTeX file containing citations for R and all currently loaded packages.
-# `cite_r()` takes these citations and turns them into readily reportable text.
-# `my_citation` now contains the following text that you can use in your document: `r my_citation`
-```
+
