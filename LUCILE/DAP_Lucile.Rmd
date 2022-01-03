@@ -103,6 +103,9 @@ if(!require(devtools)) {
   install.packages("devtools")
   install_github("kassambara/factoextra")
 }
+if(!require(caret)) {
+  install.packages("caret")
+}
 pacman::p_load(pander,       # Rmarkdown visualization
                GGally, 
                ggfortify,
@@ -116,6 +119,7 @@ pacman::p_load(pander,       # Rmarkdown visualization
                patchwork,    # arrange subplot
                devtools,     # tool for PCA
                factoextra,   # tool for PCA
+               caret         # for the confusion matrix
                
 )
 ```
@@ -170,7 +174,7 @@ pander(summary(df_mean))
 ## 4. Proportion of benign vs malignant cancer 
 ```{r, comment=NA,cache=TRUE}
 kable(prop.table(table(df_mean$diagnosis)),col.names = 
-        c("Severity","Frequency"))   
+        c("Type","Frequency"))   
 ```
 
 
@@ -395,6 +399,42 @@ These two values are close, we can validate this model.
 
 See in annex the diagnostic plot of the retained model and another GLM modelization with glmnet. 
 
+## 4.  Confusion matrix 
+First, let's separate the data into train and test sets.
+```{r,message = FALSE,cache=TRUE}
+# set the seed to make partition reproducible
+set.seed(123)
+
+prop_train_test <- floor(0.75 * nrow(df_mean_reduc))
+
+# 0.75 of the data fall randomly into the training set and the remaining is for the test set
+train_ind <- sample(seq_len(nrow(df_mean_reduc)), size = prop_train_test) 
+train <- df_mean_reduc[train_ind, ]
+test <- df_mean_reduc[-train_ind, ]
+y_test<- as.numeric(test$diagnosis)-1
+```
+
+Built the model with the data of the train set
+```{r,cache=TRUE}
+m_selected_quas_test <-
+  glm(
+    data = train,
+    diagnosis ~ radius + texture + smoothness + concave.points,
+    family = quasibinomial
+  )
+```
+
+Test the accuracy of the model with the test set by computing the confusion matrix and other statistics. 
+```{r,cache=TRUE}
+pdata <- predict(m_selected_quas_test, newdata = test, type = "response")
+pred <- as.numeric(pdata>0.5)
+conf_mat<-confusionMatrix(reference = as.factor(y_test), data = as.factor(pred))
+rownames(conf_mat$table) =c("B","M")
+colnames(conf_mat$table) =c("B","M")
+conf_mat
+```
+* From the confusion matrix
+
 # IV. PCA
 ## 1. Variability explained by each PC{.tabset}
 In the perspective of predicting breast cancer, we will reduce the dimensionality of the data with the principal components analysis and model it in the space of most relevant principal components. 
@@ -471,13 +511,7 @@ resp
 
 # Annex
 
-## 1. Diagnostic plot of retained glm model
-
-```{r, cache=TRUE}
-autoplot(m_selected_quas,1:4)+ theme_minimal()
-```
-
-## 2. Glmnet{.tabset} 
+##  Glmnet{.tabset} 
 
 First, let's separate the data into train and test sets. (This will permit us to be more accurate when we test the goodness of the model)
 ```{r,message = FALSE,cache=TRUE}
