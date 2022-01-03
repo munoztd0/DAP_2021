@@ -3,9 +3,9 @@ title: "DAP Project"
 author: "Daniel Granja"
 date: "10/12/2021"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 
