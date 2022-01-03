@@ -45,11 +45,11 @@ Name of the variables    type  Description
 3) 'perimeter'           num         perimeter of the nucleus 
 4) 'area'                num         area of the nucleus
 5) 'smoothness'          num         local variation in radius lengths 
-6) 'compactness'         num         $perimeter^2 / area - 1.0$ 
+6) 'compactness'         num         perimeter<sup>2</sup> / area - 1 
 7) 'concavity'           num         severity of concave portions of the contour 
 8) 'concave.points'      num         number of concave portions of the contour 
 9) 'symmetry'            num         symmetry of the nucleus 
-10)'fractal_dimension'   num         $coastline approximation - 1$
+10) 'fractal_dimension'   num         coastline approximation - 1
 ----------------------  ----- ---------------------------------------------------------
 
 The mean, standard error, and "worst" or largest (mean of the three
@@ -80,29 +80,30 @@ In the annex, we build a GLM model with the library "glmnet" and we find a simil
 # I. Preprocessing
 
 ## 1. Required libraries 
-```{r, cache = TRUE, warning = FALSE}
+
+
+```{r, warning = FALSE, message=FALSE}
 # Check if packages are installed and if not install them
 if(!require(pacman)) {
-  install.packages(c("pacman", "remotes"))
+  install.packages(c("pacman", "remotes", "equatiomatic"))
 }
 if (!require(papaja)) {
   remotes::install_github("crsh/papaja")
+  remotes::install_github("kassambara/factoextra")
 }
-if(!require(pacman)) {
-  install.packages("equatiomatic")
-}
-if(!require(devtools)) {
-  install.packages("devtools")
-  install_github("kassambara/factoextra")
-}
-if(!require(caret)) {
-  install.packages("caret")
-}
-pacman::p_load(pander,       # Rmarkdown visualization
+
+# if(!require(devtools)) {
+#   install.packages("devtools")
+#   
+# }
+# if(!require(caret)) {
+#   install.packages("caret")
+# }
+
+suppressPackageStartupMessages(pacman::p_load(pander,       # Rmarkdown visualization
                GGally, 
                ggfortify,
                ggplot2,
-               #MASS,        # for stepAIC
                here,         # to load the path
                kableExtra,   # Rmarkdown table visualization
                papaja,
@@ -113,20 +114,18 @@ pacman::p_load(pander,       # Rmarkdown visualization
                factoextra,   # tool for PCA
                caret         # for the confusion matrix
                
-)
+))
 ```
 ## 2. Import data
 ```{r, cache = TRUE}
 path = here("LUCILE") # get relative path
 setwd(path) # set working directory
-df <-
-  read.csv('data.csv', stringsAsFactors = 1)# load data from github repository
+df <- read.csv('data.csv', stringsAsFactors = 1)# load data 
 ```
 
 Let's delete ID number and the last variable - which is full of NA- because there are not relevant.
 ```{r, cache = TRUE}
-df<-df[,-33]
-df<-df[,-1]
+df<-df[,-33]; df<-df[,-1]
 ```
 
 We will work only with the mean-type data, so let's create a new frame for the variables of this type. 
@@ -174,7 +173,7 @@ The two types of tumors are not represented in the same proportion, this can lea
 
 However, according to  @spivey_predicting_1982 , this proportion seems to be more or less representative of the reality:
 
-"The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"
+<em>"The benign to malignant ratio (B:M ratio) among breast biopsies (number of benign breast lesions divided by number of breast cancers) is widely believed to be around 4:1 or 5:1"</em>
 
 
 # II. Selection of variables of interest 
@@ -219,6 +218,7 @@ ggcorr(df_mean,geom = "text",nbreaks = 5,hjust = 1,label = FALSE,
        label_alpha = 0.7) +
       labs(title = " Breath cancer features Pearson correlation") +
       theme(legend.position ="none")
+
 ```
 
 
@@ -383,7 +383,7 @@ m_selected_quas <-
 The formula of the retained model is: 
 
 ```{r,cache=TRUE}
-extract_eq(m_selected_quas,use_coefs = TRUE,wrap = TRUE,terms_per_line = 2)
+extract_eq(m_selected_quas, use_coefs = TRUE, wrap = TRUE, terms_per_line = 2)
 ```
  
 The ratio of the residual deviance by its degrees of freedom is $160.32/564 = 0.284$ where the dispersion parameter is 0.458.
@@ -404,6 +404,8 @@ train <- df_mean_reduc[train_ind, ]
 test <- df_mean_reduc[-train_ind, ]
 y_test<- as.numeric(test$diagnosis)-1
 ```
+
+#Perform train / test split on the data
 
 Built the model with the data of the train set
 ```{r,cache=TRUE}
@@ -462,7 +464,7 @@ pander(summary(p))
 ## 2. Observations in PC plans
 ```{r, cache=TRUE}
 autoplot(p,x = 1,y = 2, data = df_mean_reduc,colour = "diagnosis",
-  loadings = TRUE,loadings.colour = "blue",loadings.label = TRUE)+
+  loadings = TRUE, loadings.colour = "blue", loadings.label = TRUE)+
   theme_minimal()
 ```
 
@@ -474,7 +476,7 @@ We tried to plot the data in all the possible pairs formed by the first four com
  
 ## 3. GLM model with PCA
 ### Implementation
-We want to predict 'diagnosis' only with PC1 and PC2 with the help of a GLM model.
+We want to predict <em>'diagnosis'</em> only with PC1 and PC2 with the help of a GLM model.
 We try with the binomial family but as before there is an underdispersion issue. We use the quasibinomial family instead.
 
 ```{r, cache=TRUE}
