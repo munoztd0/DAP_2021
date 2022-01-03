@@ -36,7 +36,7 @@ According to the American Psychological Association (APA), emotion is defined as
 Researchers have been studying the impact of emotions on cognitive functions, such as memory. Studies have shown that emotional activation, and specifically emotions of negative valence, favours the retrieval processes of associative memory for single items, but impairs it for associated items or contexts (Schmidt, Patnaik & Kensinger, 2010).
 It's believed that the neurobiological systems sustaining high emotional arousal and memory are linked, especially through the adrenal stress hormones, itself mediated by the amygdala activity (McGaugh, 2013).
 In the study the dataset came from, Riegel et al. (2020) used words to elicit emotions (disgust, fear or neutral). Each pair displayed the same emotion and when showed together they had to imagine an interaction between them, forcing the creation of a meaningful association. To be sure that the displayed words showed the correct emotion, affective ratings were asked as controls. Each participant had to rate each pair on a Likert scale (1 to 7) of disgust and fear.
-In this project, we are going to use part of this dataset to analyse and compare three statistical methods. We will compare (a) a logitic model, (b) an ordinal polytomous logistic regression without random effects and (c) an ordinal polytomous logistic regression with random effects. 
+In this project, we are going to use part of this dataset to analyse and compare three statistical methods. We will compare (a) a simple logistic ordinal regression, (b) a mixed-effect model considering the subjects' repetition, and (c) a mixed-effect model considering the subjects' repetition and the random effects.
 
 
 Data description
@@ -218,7 +218,7 @@ Being the model that best fits the data doesn't mean that it's a good model, tha
 
 ```{r, echo=FALSE}
 sjPlot::tab_model(m3.0)
-#RVAideMemoire::Anova.clmm(m3.0, type = "II") #or type = "III" depending on the context
+
 ```
 
 In this table, we can see that the Conditional R^2 is 0.528, which means that the model explains 52,8% of the variance explained by both the fixed and random factors.  
@@ -226,10 +226,13 @@ In this table, we can see that the Conditional R^2 is 0.528, which means that th
 Diagnostic of the model
 =======================
 ```{r}
-#plot(m3.0) #do not work
-#autoplot.resid(m3.0) ##do not work
+
 #read this : David W.. Hosmer, Lemeshow, S., & Rodney X.. Sturdivant. (2000). Applied logistic regression. New York: Wiley. --> §5
 
 autoplot.clm(m1.2)
 plot(m0, which = 2)
 ```
+
+Conclusion
+==========
+The present data analysis was aimed to analyse and compare three statistical methods to analyse a dataset that 

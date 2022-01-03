@@ -1,13 +1,14 @@
-base
 pacman
+tinylabels
 papaja
 usethis
 devtools
-pander
 ggplot2
+lattice
+caret
+pander
 GGally
 ggfortify
-MASS
 here
 kableExtra
 Matrix
