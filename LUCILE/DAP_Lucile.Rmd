@@ -289,7 +289,7 @@ df_mean_reduc <-df_mean[-c(4,5,7)]
 ## 1. Set a first GLM model
 
 We set a GLM model with the remaining features. 
-Since we want to classify two types of tumor, we use the binomial family.
+Since we want to classify two types of tumors, we use the binomial family.
 ```{r,cache=TRUE}
 m <-
   glm(
@@ -308,7 +308,7 @@ summary(m)
 
 
 ## 2. Model selection{.tabset} 
-By performing several anova test, we will see that we can remove the features concavity, symmetry and fractal_dimension, because there is not a significant difference between the model with theses variables and the one without.
+By performing several anova test, we will see that we can remove the features concavity, symmetry and fractal_dimension, because there is not a significant difference between the model with these variables and the one without.
 
 ###  fractal_dimension
 ```{r,cache=TRUE}
@@ -391,18 +391,18 @@ extract_eq(m_selected_quas,use_coefs = TRUE,wrap = TRUE,terms_per_line = 2)
 ```
  
 The ratio of the residual deviance by its degrees of freedom is $160.32/564 = 0.284$ where the dispersion parameter is 0.458.
-These two values are close, we can validated this model.
+These two values are close, we can validate this model.
 
-See in annex the diagnostic plot of the retained model and an other GLM modelisation with glmnet. 
+See in annex the diagnostic plot of the retained model and another GLM modelization with glmnet. 
 
 # IV. PCA
 ## 1. Variability explained by each PC{.tabset}
-Still in the perspective of predicting the severity of the breast cancer, we will reduce the dimensionality of the data with the principal components analysis and model it in the space of  most relevant principal components. 
+In the perspective of predicting breast cancer, we will reduce the dimensionality of the data with the principal components analysis and model it in the space of most relevant principal components. 
 
 ```{r, cache=TRUE}
 p <- prcomp(df_mean_reduc[,-1], scale=TRUE)
 ```
-Let's see the percentage of variability explained by each principal components.
+Let's see the percentage of variability explained by each principal component.
 
 ### Graph
 
@@ -451,35 +451,35 @@ glm_pca <-glm(data= df_mean_pca, df_mean_pca$diagnosis ~PC1+PC2,
 ```{r, cache=TRUE}
 summary(glm_pca)
 ```
-* The algorithm converge: the number of fisher scoring iterations is reasonable.
+
+* The algorithm converges: the number of fisher scoring iterations is reasonable.
 * The p-value of the two PC is significant. 
 * The ratio of the residual deviance by its degrees of freedom is $162.50/565 = 0.288$ where the dispersion parameter is 0.618.
-These two values are close, we can validated this model.
+These two values are close, we can validate this model.
 
 # Conclusion
 
-## 1.Features allowing to predict severity of cancer ? 
+The goal of this study were to predict whether a tumor is benign or malignant with only a few features.
+To do so, we first  implemented a GLM models using the quasibinomial family to avoid underdistribution.  We were able to discard some feature not significant One with the feature of data 
 
-  [...]
-  
-## 2. test accuracy of the prediction with these feature 
+In addition to that we performed a PCA. By reducing the dimensionality of the data, we notice a clear different location in the plan of the two first principal components according to the tumor identity. We then built a GLM model using only these two PCs. This approach permit predict the caner with less variables ( only two ) but is not interpretable. 
 
-
+resp
 
 *******************************************************************************
 
-further analysis : test train set glm confusion matrix, choose a model that diminush the true negative rate 
+
 # Annex
 
-## 1.diagnostic plot of retained glm model
+## 1. Diagnostic plot of retained glm model
 
 ```{r, cache=TRUE}
 autoplot(m_selected_quas,1:4)+ theme_minimal()
 ```
 
-## 2. glmnet{.tabset} 
+## 2. Glmnet{.tabset} 
 
-First, let's separate the data into train and test set. (This will permit to be more accurate when we test the goodness of the model)
+First, let's separate the data into train and test sets. (This will permit us to be more accurate when we test the goodness of the model)
 ```{r,message = FALSE,cache=TRUE}
 # set the seed to make partition reproducible
 set.seed(123)
@@ -508,7 +508,7 @@ Show the misclassification error according to the regularization hyperparameter 
 ```{r, cache=TRUE}
 plot(cvfit)
 ```
-We will now see the for two particular values of this regularization hyperparameter the accurary of the model with the confusion matrix and which features are retained.
+We will now see the for two particular values of this regularization hyperparameter the accuracy of the model with the confusion matrix and which features are retained.
 
 ### lambda.min
 Let's choose this particular value of $\lambda$ 
