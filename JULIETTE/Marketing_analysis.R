@@ -192,4 +192,10 @@ summary(pm1)
 
 names(data)
 
-
+#QUESTIONS
+#1. is NumStorePurchases normal ? if yes does that justify using it instead of NumDeals?
+ # 2. what is : sjPlot::tab_model(finalm1, rm.terms     for ?
+     # 3. should i add comments for the lm part ?
+        #4. PCA : part not working. Does it make sense to use PCA knowing 
+      #that my main variables are factors ?
+       # 5. Should I do something else ?
