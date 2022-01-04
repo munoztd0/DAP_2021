@@ -17,8 +17,10 @@ output:
 <br>
 
 ## I - General introduction
-
+<br>
+<br>
 **Origin**
+<br>
 The present dataframe has been created for marketing analysis purposes. It assembles various personal information about 2239 customers, such as their education level, income, age, marital status, number of children at home... 
 <br>
 
@@ -29,44 +31,65 @@ There is very few context concerning this dataframe, since the source is unknown
 It is not clear when these informations were registered, but probably by 2014 since the date of customers' enrollment within the company doesn't go further than 2014. 
 <br>
 
-**Aims**
+**Aim**
 <br>
-*To predict the customer's behavior (Number of purchases made with a discount) depending on the most significant personal attributes
+*To predict the customer's behavior (Number of purchases made with a discount) depending on the most significant personal attributes*
 
 
-**Attributes** 
+**Attributes**
 
- + *People*
++ People
 
 ID: Customer's unique identifier
+<br>
 Year_Birth: Customer's birth year
+<br>
 Education: Customer's education level
+<br>
 Marital_Status: Customer's marital status
+<br>
 Income: Customer's yearly household income
+<br>
 Kidhome: Number of children in customer's household
+<br>
 Teenhome: Number of teenagers in customer's household
+<br>
 Dt_Customer: Date of customer's enrollment with the company
+<br>
 Recency: Number of days since customer's last purchase
+<br>
 Complain: 1 if customer complained in the last 2 years, 0 otherwise
 
-  + *Products*
++ Products 
 
 MntWines: Amount spent on wine in last 2 years
+<br>
 MntFruits: Amount spent on fruits in last 2 years
+<br>
 MntMeatProducts: Amount spent on meat in last 2 years
+<br>
 MntFishProducts: Amount spent on fish in last 2 years
+<br>
 MntSweetProducts: Amount spent on sweets in last 2 years
+<br>
 MntGoldProds: Amount spent on gold in last 2 years
 
-  + *Promotions*
++Promotions
 
 NumDealsPurchases: Number of purchases made with a discount
+<br>
 AcceptedCmp1: 1 if customer accepted the offer in the 1st campaign, 0 otherwise
+<br>
 AcceptedCmp2: 1 if customer accepted the offer in the 2nd campaign, 0 otherwise
+<br>
 AcceptedCmp3: 1 if customer accepted the offer in the 3rd campaign, 0 otherwise
+<br>
 AcceptedCmp4: 1 if customer accepted the offer in the 4th campaign, 0 otherwise
+<br>
 AcceptedCmp5: 1 if customer accepted the offer in the 5th campaign, 0 otherwise
+<br>
 Response: 1 if customer accepted the offer in the last campaign, 0 otherwise
+<br>
 NumStorePurchases: Number of purchases made directly in stores
 
 
@@ -76,7 +99,7 @@ if(!require(pacman)) {
   install.packages("pacman")
   library(pacman)
 }
-suppressPackageStartupMessages(pacman::p_load(tidyverse, gtsummary, ggpubr, moments, here, sjPlot, parameters, effectsize, pander))
+suppressPackageStartupMessages(pacman::p_load(tidyverse, gtsummary, ggpubr, moments, here, sjPlot, parameters, effectsize, pander, psych))
 
 path =  here("JULIETTE") 
 setwd(path)
@@ -105,6 +128,7 @@ data %>%
   geom_histogram()
 ``` 
 
+
 We are only interested in the total number of promotions accepted by the customers, since we don't have details about the nature of each promotion. 
 ```{r}
 data$AcceptedCmpTotal <- data$AcceptedCmp1 + data$AcceptedCmp2 + data$AcceptedCmp3 + data$AcceptedCmp4 + data$AcceptedCmp5 + data$Response 
@@ -129,13 +153,10 @@ Since the dataset is very big, we can choose to delete these lines.
 # which(data$age>110)
 data <- data[-c(193, 240, 340),]
 ```
-<<<<<<< HEAD
-=======
 
->>>>>>> 358b61172573a8471ea7704ed00b42bc57b4fb09
 Marital status can be simplified in only a few levels, and transformed into a factor.
 Since the "other" section represents less than 1% of the participants, it is not enough to model it as a factor.
-
+<br>
 We then transform some relevant variables into factors.
 
 ```{r}
@@ -169,21 +190,19 @@ Here we will be eyeballing the relationship between various variables, and deter
 
 data %>% 
       filter(!is.na(Marital_Status)) %>% 
-      ggplot(aes(MntWines, Marital_Status)) + geom_boxplot(na.rm = TRUE)
+      ggplot(aes(AcceptedCmpTotal, Income)) +  geom_violin(trim=FALSE, fill='#A4A4A4', color  ="darkred") # geom_boxplot(width=0.05, outlier.colour =  "red") + theme_minimal()
 
-ggplot(data, aes(Kidhome, MntSweetProducts))+ geom_boxplot(outlier.colour =  "red") +  geom_point(position = position_jitter()) 
+ggplot(data, aes(Education, MntWines))+ geom_boxplot(outlier.colour =  "red") +  geom_point(position = position_jitter(), color="coral4") 
 
 ggplot(data, aes(x=Income, y=NumStorePurchases)) +
   geom_violin(trim=FALSE, fill='#A4A4A4', color="darkred")+
   theme_minimal()
 
-ggplot(data, aes(x=MntWines, y=Marital_Status)) +
-  geom_violin(trim=FALSE, fill='#A4A4A4', color="darkred")+
-  geom_boxplot(width=0.05) + theme_minimal()
 
 ```
-
+<br>
 The number of store purchases seems to be the most useful variable to analyse since we might want to determine which profils buy the most in the store. In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. 
+<br>
 In this case, the data is intrisincally skewed because there are no negative values possible. Skewness is quite high (0.7) but remains tolerable regarding the nature of the data. It has to be kept in mind while performing the model assumption checks.
 
 ```{r, fig.show="hold", out.width="50%", fig.align="center", warning=F, message=F}
@@ -195,17 +214,24 @@ ggplot(data, aes(x = NumStorePurchases)) +
 ```
 
 ## IV - Modelling
+<br>
+### A. Linear model
 
-### A. LINEAR MODEL
-
-### **A.1. Creating the model and assessing assumptions**
+### A.1. Model creating and assumptions
+<br>
 ```{r, out.width="50%", warning=F, message=F}
 m1 <- lm(data=data, NumStorePurchases ~ Kidhome*Income*Education*age) 
 plot(m1, c(1:2,4), ask=F)
 ```
 <!-- add comments -->
+<br>
+<br>
 Looking at the QQplot, we don't see any specific patterns appearing, which means the residuals are distributed normally. Although we do observe smaller ends for the lowest theoritical quantiles.
+<br>
+<br>
 For the Cook's distance, we clearly observe an outlier (observation 2234), while the vast majority of the values are under 1.
+<br>
+<br>
 For the comparison of residuals VS fitted values,
 
 
@@ -221,11 +247,14 @@ newdf = data %>%
 ```
 
 ### **A.2. Reassessing without the outliers**
+<br>
 
 ```{r, out.width="50%", warning=F, message=F}
 m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age)
 plot(m1, c(1:2,4), ask=F)
 ```
+<br>
+<br>
 Paying attention to the QQplot, we see that extreme points are more normal. The Cook's distance graph also doesn't show values higher than 0,5.
 
 ### **A.3. Model selection**
@@ -236,15 +265,14 @@ ms <- MASS::stepAIC(m1, direction = "both", trace = FALSE)
 ms$anova
 ```
 
-### **A.4. Computing the final model**
 
+The final model chosen here is: 
+<br>
 ```{r}
 finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age + Kidhome:Income + Kidhome:Education + Income:Education + Kidhome:age + Income:age + Education:age + Kidhome:Income:Education + Income:Education:age)
 ```
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-### **A.5. Statistical inference**
+### **A.4. Statistical inference**
 
 We first use the eta_squared function to compute the effect sizes: everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
 <!-- what is effect size and why use it ? -->
@@ -274,37 +302,52 @@ sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Education"), sho
 sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "age"), show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = c("age", "Kidhome"), show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = c("age", "Income", "Education"), show.data  = T, jitter = 1) 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
 ```
+<br>
+<br>
 As we could easily assume, the number of store purchases increases along with the income. A more counter-intuitive finding is that it's lower for customers who have kids ; this could be due to the fact that this dataframe doesn't take into account the number of store purchases of the other parents. 
+<br>
 <br>
 Looking at the interaction effects between education and income, we see that for the same income, customers who received basic education are clearly separated from the other customers by purchasing less.
 <br>
+<br>
 For the interaction between income and age, an interesting pattern appears : for the lowest incomes, the number of store purchases decreases with age, while the tendency is reversed for the highest wages.
 <br>
+<br>
 We also observe an interaction effect between having kids at home and age : the number of store purchases stays stable for those who don't have kids at home, while it decreases for those who do have kids at home, possibly because when the parents get older, kids leave the house.
+<br>
 <br>
 Finally, over time, the augmentation of the number of store purchases proportional to the salary stays stable except for every education level except for those who received basic education.
 
 #### Summary table of standardized estimates
 
-We then want a table that summarizes all the standardized estimates in a numeric form.
+We want a table that summarizes all the standardized estimates in a numeric form.
 ```{r}
 sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"), show.intercept = F)   #
 ```
-<!--add comments for example the Rsquared is good-->
+<br>
+We see that R^2 and adjusted R^2 have acceptable values. 
 
-### B. PRINCIPAL COMPONENT ANALYSIS
+### B. Principal component analysis
 
 
 ```{r}
 clean_data <-data[rowSums(is.na(data))==0, ]
 pm1<-prcomp(clean_data[,-c(1,3,4,6,7,8,18)],  scale=TRUE)
 summary(pm1)
-
+```
+<br>
+Looking at cumulative proportion, we need 8 principal components to reach 0,90 proportion of variance.
+<br>
+<br>
+We also see that PC6 is non-significant.
+<br>
+<br>
+We delete PC6 from the model, and this new model m3 is not significantly different from m2. 
+<br>
+<br>
+Therefore, we keep the simplest, which is m3. With summary(m3), we see that all PCs are significant. We keep the model m3.
+```{r}
 data2 <- cbind(clean_data, pm1$x)
 m2 <- lm(data=data2, NumStorePurchases ~ PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8)
 summary(m2)
@@ -312,10 +355,7 @@ m3 <- update(m2, . ~ . - PC6)
 anova(m3, m2)
 summary(m3)
 ```
-We need 8 principal components to reach 0,90.
-We see that PC6 is non-significant.
-We delete PC6 from the model, and this new model m3 is not significantly different from m2. Therefore we keep the simplest, which is m3. With summary(m3), we see that all PCs are significant. We keep the model m3.
-```
+
 ```{r, warning=F, message=F}
 sjPlot::tab_pca(pm1, show.cronb = F, show.var = T, nmbr.fctr = 8)
 ```
