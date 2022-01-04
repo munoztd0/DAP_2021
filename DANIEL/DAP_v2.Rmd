@@ -1,9 +1,8 @@
 ---
 title: "DAP Project"
 author: "Daniel Granja"
-date: "10/12/2021"
+date: "January 2022"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
 ---
@@ -14,11 +13,10 @@ knitr::opts_chunk$set(echo = TRUE)
 #this is to check to see if package are installed and if not to install them or just load them if they are installed!
 if(!require(pacman)) {install.packages("pacman")}
 
-pacman::p_load(here, ggplot2, rstatix, ordinal,stargazer, RVAideMemoire,sjPlot, HH, likert, dplyr,sure,vtable)
+pacman::p_load(here, ggplot2, ordinal,ggfortify, sjPlot, likert, vtable)
 
 #get relative path
-path =  here("DANIEL") #You put the name of YOUR folder and here() will find the relative path for you ! 
-#setwd(path) #set working directory
+path =  here("DANIEL")
 
  
 #data scanning 
@@ -36,7 +34,7 @@ According to the American Psychological Association (APA), emotion is defined as
 Researchers have been studying the impact of emotions on cognitive functions, such as memory. Studies have shown that emotional activation, and specifically emotions of negative valence, favours the retrieval processes of associative memory for single items, but impairs it for associated items or contexts (Schmidt, Patnaik & Kensinger, 2010).
 It's believed that the neurobiological systems sustaining high emotional arousal and memory are linked, especially through the adrenal stress hormones, itself mediated by the amygdala activity (McGaugh, 2013).
 In the study the dataset came from, Riegel et al. (2020) used words to elicit emotions (disgust, fear or neutral). Each pair displayed the same emotion and when showed together they had to imagine an interaction between them, forcing the creation of a meaningful association. To be sure that the displayed words showed the correct emotion, affective ratings were asked as controls. Each participant had to rate each pair on a Likert scale (1 to 7) of disgust and fear.
-In this project, we are going to use part of this dataset to analyse and compare three statistical methods. We will compare (a) a simple logistic ordinal regression, (b) a mixed-effect model considering the subjects' repetition, and (c) a mixed-effect model considering the subjects' repetition and the random effects.
+In this project, we are going to use part of this dataset to analyse and compare three statistical methods. We will compare (a) a simple logistic ordinal regression, (b) a mixed-effect model considering the subjects' repetition, and (c) a mixed-effect model considering the subjects' repetition and the random effects to find a model that fits the best our data, considering how the emotion elicited in the word pairs and the gender impact the subjective ratings of disgust by the participants.
 
 
 Data description
@@ -54,7 +52,7 @@ Here is a description of the different variables:
 * **Disgust**: a Likert scale (1 to 7) of the subjects’ emotional subjective feeling of disgust.
 
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 #Creating a working dataset
 #Giving nice names to variables
 
@@ -67,6 +65,8 @@ fear<-Raw_data$fear
 
 #Creating a dataset
 Data<-data.frame(subjects,wordpairs,emotion,gender,disgust)
+```
+```{r, echo=FALSE}
 
 #Adapting the variables
 Data$emotion<-as.factor(Data$emotion)
@@ -82,7 +82,7 @@ Data exploration (Dataset)
 
 ```{r basic explor, comment = NA}
 str(Data)
-st(Data) #use "vtable"
+st(Data)
 ```
 As one can see in the table, the distribution of emotion through the word pairs and the gender is equivalent. The distribution of the disgust response has a floor effect, more than 80% of it being 1 and 2.
 
@@ -118,21 +118,16 @@ plot(likert(summary = df))+
   theme( legend.box.background = element_rect(), legend.box.margin = margin(6, 6, 6, 6), legend.position = "right")
 ```
 
-This figure shows the distribution of the subjective evaluation of disgust across all pair of words, depending of the emotion elicited by the words. As one can see, there still is a floor effect, but it seems less strong for the disgust emotion, as one can expect.
+This figure shows the distribution of the subjective evaluation of disgust across all pair of words, depending of the emotion elicited by the words. As one can see, there still is a floor effect, but it seems less strong for the disgust emotion, as one can expect. Another representation including the gender can be found in the Appendix 1. 
 
 
-```{r alternate graph, include=FALSE}
-##Disgust depending on emotion presented
-ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()+
-  labs(title = "Distribution of disgust evaluation", x = "Pairs of words' emotions", y = "Likert scale of subjective disgust feeling") + theme(plot.title = element_text(hjust = 0.75)) + labs(colour = "Gender")+ theme(plot.title = element_text(size = rel(2)))
-```
 
 Modelisation
 ============
 
 Even if we have seen in our exploration that there seems to be a floor effect, we must do a diagnostic of a linear model to certify the inadaptation of this model to analyse our data.
 
-```{r Basic analysis, include= FALSE}
+```{r Basic analysis, include=FALSE}
 disgust2<-as.numeric(disgust)
 m0 = lm(disgust2~emotion*gender, data=Data)
 plot(m0)
@@ -143,15 +138,16 @@ plot(m0)
 sjPlot::plot_model(m0,type = "diag")[[3]]
 ```
 
-As expected, the residuals distribution does not follow a normal curve. Therefore, we cannot do a classic linear regression to analyse this data. Alternative techniques have to be investigated. (Find more diagnostic graphs in the appendix.)
+As expected, the residuals distribution does not follow a normal curve. Therefore, we cannot do a classic linear regression to analyse this data. Alternative techniques have to be investigated. (Find more diagnostic graphs in the Appendix 2.)
 
 Three possible methods are being tested: (a) a simple logistic ordinal regression, (b) a mixed-effect model considering the subjects' repetition, and (c) a mixed-effect model considering the subjects' repetition and the random effect of the emotions. 
 
-After modeling these methods, we can use the Akaike information criterion to estimate the prediction error of each model, and thereby their relative quality. 
-```{r, include=FALSE}
+After modeling these methods (see Appendix 3), we can use the Akaike information criterion to estimate the prediction error of each model, and thereby their relative quality. 
+
+```{r, echo=FALSE}
 #best method
 m1.2 = clm(disgust ~ emotion * gender, data = Data)
-m2.2 = clmm(disgust ~ emotion * gender + (1|subjects), data = Data)
+#m2.2 = clmm(disgust ~ emotion * gender + (1|subjects), data = Data)
 m3.2 = clmm(disgust ~ emotion * gender + (emotion | subjects), data = Data)
 a1<- extractAIC(m1.2)
 a2<- extractAIC(m2.2)
@@ -169,13 +165,13 @@ c2
 ```
 
 As shown in this table, we can conclude that the model that seems to fit the best our data is the Model C, the mixed-effect model considering the subjects' repetition and the random effect of the emotions, as it has the smaller AIC, and more equivalent degrees of freedom.
-This being done, we must now look for the best model using this method. According to our initial hypothesis, we want to know if there is an impact of the word pairs' emotion and the gender on the subjective evaluation of disgust. 
+This being done, we must now look for the best model using this method. According to our initial hypothesis, we want to know if there is an impact of the word pairs' emotion and the gender on the subjective evaluation of disgust (see the modelisation in Appendix 3). 
 
-```{r best model, include=FALSE}
+```{r best model, echo=FALSE}
 #best model
 #m3.2 = clmm(disgust ~ emotion * gender + (emotion | subjects), data = Data) #done above
-m3.1 = clmm(disgust ~ emotion + gender + (emotion | subjects), data = Data)
-m3.0 = clmm(disgust ~ emotion + (emotion | subjects), data = Data)
+#m3.1 = clmm(disgust ~ emotion + gender + (emotion | subjects), data = Data)
+#m3.0 = clmm(disgust ~ emotion + (emotion | subjects), data = Data)
 
 a4<-extractAIC(m3.2)
 a5<-extractAIC(m3.1)
@@ -196,9 +192,9 @@ As shown in the table above, and following the AIC estimate, the model that fits
 
 Model analysis
 ==============
-Now that we have choosen the Model without Gender as being the model that better fits our data, we have to analyse it.  
+Now that we have choose the Model without Gender as being the model that better fits our data, we have to analyse it.  
 
-```{r best model analysis}
+```{r best model analysis,echo=FALSE, eval=TRUE}
 summary(m3.0)
 (ctable <- coef(summary(m3.0)))
 
@@ -217,22 +213,72 @@ $$Logit(P(Y\le 7))= 3.4641 - (-2.0596)*emotionFear - (-3.9909)*emotionNeutral$$
 Being the model that best fits the data doesn't mean that it's a good model, that is why we must check for the effect size. 
 
 ```{r, echo=FALSE}
-sjPlot::tab_model(m3.0)
+sjPlot::tab_model(m3.0, show.stat = TRUE, show.aic = T, show.reflvl = T, show.est = T, p.style = "stars")
 
 ```
 
-In this table, we can see that the Conditional R^2 is 0.528, which means that the model explains 52,8% of the variance explained by both the fixed and random factors.  
+In this table, we can see that the Conditional R^2 is 0.528, which means that the model explains 52,8% of the variance explained by both the fixed and random factors. 
+
+
+Model representation 
+--------------------
+```{r}
+plot_model(m3.0, show.values = T, value.offset = .4, title = "Disgust")
+```
+The model represented above shows how more a disgust evaluation is high, more the odds of the wordpairs' eliciting disgust is high. It also shows that when the emotion elicited was not disgust, the odds of a a high evluation of disgust are low.
+
 
 Diagnostic of the model
 =======================
 ```{r}
 
+
+
 #read this : David W.. Hosmer, Lemeshow, S., & Rodney X.. Sturdivant. (2000). Applied logistic regression. New York: Wiley. --> §5
 
-autoplot.clm(m1.2)
-plot(m0, which = 2)
+#autoplot.clm(m1.2)
+#autoplot.clm(m3.0)
+#plot(m0, which = 2)
 ```
 
 Conclusion
 ==========
-The present data analysis was aimed to analyse and compare three statistical methods to analyse a dataset that 
+The present data analysis was aimed to compare three statistical methods and to analyse how the emotion elicited in the word pairs and the gender impact the subjective ratings of disgust by the participants. As shown, the best method is the one that take in consideration the repetition of the subjects and the way each one of them express the emotion elicited. For that, the mixed-effect model considering the subjects' repetition and the random effects not including the gender was the best model tested. In other words, gender doesn't seem significative in the disgust evaluation, but it seems important to control for the way each subject do the evaluation. Further investigation can be made with the fear evaluation of this dataset to support or reject this proposition.
+
+
+Bibliography
+============
+
+Emotion – APA Dictionary of Psychology. (s. d.). Retrieved January 4, 2022 from https://dictionary.apa.org/emotion
+
+McGaugh, J. L. (2013). Making lasting memories : Remembering the significant. Proceedings of the National Academy of Sciences, 110(2), 10402‑10407. https://doi.org/10.1073/pnas.1301209110
+
+Riegel, M., Wierzba, M., Wypych, M., Ritchey, M., Jednoróg, K., Grabowska, A., Vuilleumier, P., & Marchewka, A. (2020). Distinct medial-temporal lobe mechanisms of encoding and amygdala-mediated memory reinstatement for disgust and fear (p. 825844). https://doi.org/10.1101/825844
+
+Schmidt, K., Patnaik, P., & Kensinger, E. A. (2011). Emotion’s influence on memory for spatial and temporal context. Cognition and Emotion, 25(2), 229‑243. https://doi.org/10.1080/02699931.2010.483123
+
+
+
+
+Appendix
+========
+
+1. Alternative graph
+--------------------
+```{r alternate graph}
+##Disgust depending on emotion presented
+ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter()+
+  labs(title = "Distribution of disgust evaluation", x = "Wordpairs' emotions", y = "Likert scale of subjective disgust evaluation (1-7)") + theme(plot.title = element_text(hjust = 0.75)) + labs(colour = "Gender")+ theme(plot.title = element_text(size = rel(2)))
+```
+
+2. Linear model diagnostics
+--------------------------
+```{r}
+autoplot(m0)
+```
+
+3. Hidden code
+------------------
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+```
+
