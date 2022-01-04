@@ -230,7 +230,9 @@ The model represented above shows how more a disgust evaluation is high, more th
 
 Diagnostic of the model
 =======================
-```{r}
+It is expected that the parameters of the individual effects are distributed around the parameters of the mean effects 
+
+```{r, include=FALSE}
 
 
 
