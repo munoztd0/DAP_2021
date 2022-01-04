@@ -1,0 +1,25 @@
+\begin{table*}[hbt]
+\ifnextchar[{\eatarg}{}
+[!htbp] \centering \renewcommand*{\arraystretch}{1.1}\caption{Summary Statistics}\resizebox{\textwidth}{!}{
+\begin{tabular}{lrrrrrrr}
+\hline
+\hline
+Variable & N & Mean & Std. Dev. & Min & Pctl. 25 & Pctl. 75 & Max \\
+\hline
+Age & 130 & 64.331 & 10.134 & 34 & 58.25 & 72 & 83 \\
+Gender & 130 &  &  &  &  &  &  \\
+... F & 27 & 20.8\% &  &  &  &  &  \\
+... M & 103 & 79.2\% &  &  &  &  &  \\
+Speech.Timing.Rate.Reading & 130 & 327.277 & 47.385 & 140 & 297.25 & 358.75 & 457 \\
+Speech.Timing.Rate.Monologue & 130 & 288.338 & 52.892 & 112 & 258 & 328.75 & 412 \\
+Pause.Interval.Duration.Reading & 130 & 166.646 & 46.488 & 96 & 138.25 & 185 & 388 \\
+Pause.Interval.Duration.Monologue & 130 & 229.069 & 79.697 & 117 & 177 & 263.25 & 611 \\
+Group & 130 &  &  &  &  &  &  \\
+... HC & 50 & 38.5\% &  &  &  &  &  \\
+... PD & 30 & 23.1\% &  &  &  &  &  \\
+... RBD & 50 & 38.5\% &  &  &  &  & \\
+\hline
+\hline
+\end{tabular}
+}
+\end{table*}

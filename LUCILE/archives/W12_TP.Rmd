@@ -1,0 +1,121 @@
+---
+title: "W12 TP"
+author: "Lucile Favero"
+date: "12/6/2021"
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 1
+    number_sections: true
+    df_print: kable
+---
+# Aim
+**Report how bone marrow transplant survival times relates to graft versus host disease (GHVD)**
+
+# Preprocessing 
+## Load library and data
+```{r}
+library(GGally)       # for ggpairs
+library(ggfortify)    # for autoplot
+library(ggplot2)      # for ggplot
+library('MASS')       # for the glm model selection 
+library(glmnet)
+library(patchwork)
+library(ISwR)
+library(survival)
+library(survminer)
+
+d<- graft.vs.host
+```
+## Understand datas
+ 
+ >"The gvhd data frame has 37 rows and 7 columns. It contains data from patients receiving a nondepleted >allogenic bone marrow transplant with the purpose of finding variables associated with the development of >acute graft-versus-host disease."
+ 
+```{r}
+str(d)
+summary(d)
+```
+Transform into factor the variables : type, preg, gvhd, dead
+```{r}
+d$type <-as.factor(d$type)#type of leukaemia coded 1: AML, 2: ALL, 3: CML for acute myeloid, acute lymphatic, and chronic myeloid leukaemia.
+d$preg<-as.factor(d$preg)# indicating whether donor has been pregnant. 0: no, 1: yes.``
+levels(d$preg)<-c("no","yes")
+d$gvhd<-as.factor(d$gvhd)# graft-versus-host disease, 0: no, 1: yes
+levels(d$gvhd)<-c("no","yes")
+d$dead <- as.factor(d$dead) # a numeric vector code, 0: no (censored), 1: yes
+levels(d$dead)<-c("no","yes")
+str(d)
+summary(d)
+```
+Plot the ggpairs:
+```{r}
+ggpairs(d, aes(color=gvhd, alpha = 0.3))
+```
+
+# Modelization 
+
+```{r}
+surv<-Surv(d$time,d$dead=="yes")
+```
+
+## A simple model
+We set a model depending only on gvhd
+```{r, warning=FALSE}
+m1<-coxph(data=d,surv~ gvhd)
+summary(m1)
+```
+
+The variable is significant for this model.
+```{r}
+m1.diag<-cox.zph(m1)
+m1.diag
+p1<-ggsurv(survfit(m1))+ylim(0,1)
+p2<-ggcoxdiagnostics(m1,hline=FALSE)+ geom_smooth()
+ggcoxzph(m1.diag)
+(p1 | p2)
+```
+The p-value is larger than 5%, so the null hypothesis of proportional hazards is rejected.
+However, the second plot has a correct regression line and the in the third, all the points are in the CI.
+
+
+## Add more variables
+```{r, warning=FALSE}
+m2<-coxph(data=d,surv~ gvhd+rcpage+ donage+ type+ preg +index )
+summary(m2)
+```
+
+The two variables significant for this model are gvhd and type.
+```{r, warning=FALSE}
+m2.diag<-cox.zph(m2)
+m2.diag
+p1<-ggsurv(survfit(m2))+ylim(0,1)
+p2<-ggcoxdiagnostics(m2,hline=FALSE)+ geom_smooth()
+p3<-ggcoxzph(m2.diag)
+p1 | p2
+p3
+```
+From the second plot, we see that the linear prediction is not respected.
+The p-value is larger than 5%, so the null hypothesis of proportional hazards is rejected.
+In the last plot all the points are in the CI.
+## only gvhd and type
+```{r, warning=FALSE}
+m3<-coxph(data=d,surv~ gvhd+type )
+summary(m3)
+```
+The two variables are significant. 
+```{r, warning=FALSE}
+m3.diag<-cox.zph(m3)
+m3.diag
+p1<-ggsurv(survfit(m3))+ylim(0,1)
+p2<-ggcoxdiagnostics(m3,hline=FALSE)+ geom_smooth()
+p3<-ggcoxzph(m3.diag)
+p1 | p2
+p3
+```
+From the second plot, we see that the linear prediction is not respected.
+The p-value is lower than 5%, so the null hypothesis of proportional hazards is not rejected.
+In the last plot all the points are in the CI.
+# Version of R used 
+```{r, echo = FALSE}
+sessionInfo()
+```

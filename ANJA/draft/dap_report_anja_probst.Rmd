@@ -1,0 +1,536 @@
+---
+title             : "Early Biomarkers of Parkinson's Disease Based on Natural Connected Speech"
+shorttitle        : "Biomarkers of Parkinson's Disease"
+
+author: 
+  - name          : "Anja Probst"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "24 rue du Général-Dufour, 1211 Genève 4"
+    email         : "anja.probst@etu.unige.ch"
+    role:         # Contributorship roles (e.g., CRediT, https://casrai.org/credit/)
+      - Conceptualization
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+
+affiliation:
+  - id            : "1"
+    institution   : "University of Geneva"
+
+authornote:
+
+abstract: |
+  One or two sentences providing a **basic introduction** to the field,  comprehensible to a scientist in any discipline.
+  
+  Two to three sentences of **more detailed background**, comprehensible  to scientists in related disciplines.
+  
+  One sentence clearly stating the **general problem** being addressed by  this particular study.
+  
+  One sentence summarizing the main result (with the words "**here we show**" or their equivalent).
+  
+  Two or three sentences explaining what the **main result** reveals in direct comparison to what was thought to be the case previously, or how the  main result adds to previous knowledge.
+  
+  One or two sentences to put the results into a more **general context**.
+  
+  Two or three sentences to provide a **broader perspective**, readily comprehensible to a scientist in any discipline.
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+keywords          : "keywords"
+wordcount         : "X"
+
+bibliography      : ["r-references.bib"]
+
+floatsintext      : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "doc"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+if(!require(pacman)) {install.packages(c("pacman", "remotes"))}
+if(!require(papaja)) {remotes::install_github("crsh/papaja")}
+
+pacman::p_load(
+  here, tinylabels, apaTables, tidyverse, gtsummary, car, GGally, 
+  ggfortify, MASS, rcompanion, moments, utils, sjPlot, interactions, 
+  kableExtra, report, papaja, bookdown, vtable, captioner, reshape2,
+  ggpubr, nnet, patchwork, stargazer
+)
+r_refs("r-references.bib")
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+\newpage
+
+# Introduction
+
+## Context of the Project
+
+Patients with the neurodegenerative disease Parkinson's have numerous symptoms ranging from cognitive impairments to motor symptoms. Those symptoms may appear relatively late in the disease when the neurodegeneration has already widely spread in different areas of the brain (mainly Basal Ganglia). Main symptoms of PD are motor dysfunctions including abnormalities in the production and sound of speech of such patients (up to 90%). These abnormalities in speech and voice are called hypokinetic dysarthria which is characterized by a decreased quality of the speech, where the voice, sound formation as well as the articulation is impaired. As I mentioned before, often motor impairments are detected relatively late in the disease. To improve diagnostics and to detect the disease in a much earlier stage, the detection of biomarkers related to neurodegeneration could lead to a better prognosis and therapy of PD.
+
+Therefore, the investigation of prodromal speech changes could be an appropriate and suitable approach. To investigate this approach, an automated speech monitoring system was developed, that uses a segmentation method for the precise estimation of voiced and unvoiced segments of speech, respirations, and pauses. Further proposed was a set of acoustic speech features based on the segmentation algorithm applicable to connected speech, allowing the description of complex vocal disturbances due to neurodegeneration including respiratory deficits, dysphonia, imprecise articulation, and dysrhythmia.
+
+In this data analysis project, the main focus was to explore, if there are any speech patterns that support the usage of an automated speech monitoring system to detect prodromal parkinsonian neurodegeneration based on natural connected speech.
+
+130 subjects were tested. 30 subjects with early, untreated Parkinson's disease (PD) where the disease is already manifested. 50 subjects with REM sleep behaviour disorder (RBD), which is a disease where its relatively likely to develop PD in a later phase. As a control group, 50 healthy subjects (HD) were included.
+
+## Manual Variable Selection
+
+Due to the constraints of this project, I reduced the data set from originally 62 variables to the best fitting 7. As I am looking specificially into the aspect of speech, and to evaluate if speech is a good predictor for PD, I chose speech related variables that were assessed empirically, and should represent the hypothesis the best. Note that patient group will be extracted from the variable Participant_code. The resulting data set is summarized in Table\ \@ref(tab:summarize-data-frame)
+
+```{R, prepare data set, include=FALSE}
+cols.to.keep <- c(
+  "Participant_code",
+  "Age",
+  "Gender",
+  "Rate_of_speech_timing",
+  "Rate_of_speech_timing.1",
+  "Duration_of_pause_intervals",
+  "Duration_of_pause_intervals.1"
+)
+
+# Above columns will be renamed to
+rename.cols.to <- c(
+  "Participant_code",
+  "Age",
+  "Gender",
+  "Speech.Timing.Rate.Reading",
+  "Speech.Timing.Rate.Monologue",
+  "Pause.Interval.Duration.Reading",
+  "Pause.Interval.Duration.Monologue"
+)
+
+csv.path <- "BiomarkersPD.csv"
+
+df <- read.csv(csv.path, sep = ",", header = TRUE)
+
+# Only keep required columns
+df <- df[cols.to.keep]
+
+# Change column names
+colnames(df) <- rename.cols.to
+
+# Replace "-" with NA
+df[df == "-"] <- NA
+
+# Get groups from participant codes
+df$Group <- gsub('[[:digit:]]+', '', df$Participant_code)
+
+# Participant codes no longer required, remove
+df <- subset(df, select = -c(Participant_code))
+
+# Convert columns to factors
+col.names <- c("Group", "Gender")
+df[col.names] <- lapply(df[col.names], as.factor)
+```
+
+## Data Description
+
+For each sample in this data set ($n=130$), we have the following information:
+
+- Demographic information:
+  - Age (years)
+  - Gender (M for male, F for female)
+
+- Speech examination - Speaking task of reading passage: speakers read a standardized, phonetically-balanced text of 80 words twice
+  - Duration_Of_Pause_Intervals_Reading: Duration of pause intervals (DPI) describes the quality of speech timing, as pauses can be heavily influenced by the ability to properly initiate speech, it is measured in miliseconds (ms)
+  - Rate_Of_Speech_Timing_Reading: Rate of speech time (RST) includes voiced, unvoiced and pause intervals, it is measured in intervals per minute (-/min)
+
+- Speech examination - Speaking task of monologue: participants were instructed to provide monologue about their interests, job, family or current activities for approximately 90 seconds
+  - Duration_Of_Pause_Intervals_Monologue: Duration of pause intervals (DPI) describes the quality of speech timing, as pauses can be heavily influenced by the ability to properly initiate speech, it is measured in milliseconds (ms)
+  - Rate_Of_Speech_Timing_Monologue: Rate of speech time (RST) includes voiced, unvoiced and pause intervals, it is measured in intervals per minute (-/min)
+
+- Group: based on Participant Code
+  - PD: subjects with Parkinson's disease
+  - RBD: subjects with REM sleep behaviour disorder
+  - HC: healthy controls
+
+```{R describe data frame variables}
+str(df)
+```
+
+```{R summarize-data-frame, results = "asis"}
+sumtable(df, out="latex", anchor="tab:summarize-data-frame", title="Summary of the Data Set used in this Analysis")
+```
+
+\newpage
+
+# Data Pre-Processing
+
+```{R intial-ggpairs-plot, echo=FALSE, warning=FALSE, results='hide', fig.align = 'center'}
+ggpairs(
+  df, 
+  aes(color=Group, alpha=0.5), 
+  lower=list(combo=wrap("facethist", binwidth=10.0)), 
+  upper=list(continuous=wrap("cor", size=2))
+) + theme_light(base_size = 7)
+```
+
+```{R boxplots-and-correlations, fig.align = 'center'}
+df.melted <- melt(
+  subset(df, select=-c(Age, Gender)),
+  id="Group"
+)
+
+comparisons <- list(c("HC", "PD"), c("PD", "RBD"), c("HC", "RBD"))
+
+ggplot(df.melted, aes(x=Group, y=value)) +
+  geom_boxplot() +
+  facet_grid(cols = vars(variable)) +
+  labs(tab) +
+  stat_compare_means(
+    method = "t.test", 
+    comparisons = comparisons,
+    label = "p.signif"
+  ) +
+  theme_light() +
+  theme(
+    strip.text.x = element_text(
+      size = 7
+    )
+  )
+```
+
+\newpage
+
+# Data Analysis
+
+## Binomial Regression
+
+Above, we have seen that there are almost no differences between the groups PD and RBD, so in a first step, we will limit our investigation to creating a binomial model predicting the group HC or PD. Indeed, the paper from which the data was extracted discusses the hard problem of differentiating PD from RBD, which might very well be impossible with generalised linear models. We will revisit this problem in the section Multinomial Regression.
+
+```{R, create subset without RBD}
+df.binom <- data.frame(df[df$Group != "RBD",])
+```
+
+As a first step, a simple linear regression model based on a single predictor is built and visualized for each of the selected variables.
+
+```{R simple-linear-regression, fig.align = 'center'}
+p1 <- ggplot(df.binom, aes(x=Speech.Timing.Rate.Monologue, y=as.integer(Group)-1)) +
+  geom_point(colour="red", alpha=0.5) +
+  stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial)) +
+  labs(x="Speech Timing Monologue (ms)", y="Group", tag="a") +
+  theme_light() +
+  theme(
+    plot.tag=element_text(),
+    axis.title=element_text(size=7,face="bold")
+  )
+
+p2 <- ggplot(df.binom, aes(x=Speech.Timing.Rate.Reading, y=as.integer(Group)-1)) +
+  xlab("Speech Timing Reading (ms)") +
+  ylab("Group") +
+  geom_point(colour="red", alpha=0.5) +
+  stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial)) +
+  labs(tag = "b") +
+  theme(plot.tag = element_text()) +
+  theme_light()
+
+p3 <- ggplot(df.binom, aes(x=Pause.Interval.Duration.Reading, y=as.integer(Group)-1)) + xlab("Pause Interval Reading (-/ms)") +
+  ylab("Group") +
+  geom_point(colour="red", alpha=0.5) +
+  stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial)) +
+  labs(tag = "c") +
+  theme(plot.tag = element_text()) +
+  theme_light()
+
+p4 <- ggplot(df.binom, aes(x=Pause.Interval.Duration.Monologue, y=as.integer(Group)-1)) + 
+  xlab("Pause Interval Monologue (-/ms)") +
+  ylab("Group") +
+  geom_point(colour="red", alpha=0.5) +
+  stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial)) +
+  labs(tag = "d") +
+  theme(plot.tag = element_text()) +
+  theme_light()
+
+p5 <- ggplot(df.binom, aes(x=Age, y=as.integer(Group)-1)) + 
+  xlab("Age") +
+  ylab("Group") +
+  geom_point(colour="red", alpha=0.5) +
+  stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial)) +
+  labs(tag = "e") +
+  theme(plot.tag = element_text()) +
+  theme_light()
+
+p6 <- ggplot(df.binom, aes(x=as.integer(Gender), y=as.integer(Group)-1)) + 
+  xlab("Gender") +
+  ylab("Group") +
+  geom_point(colour="red", alpha=0.5) +
+  stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial)) +
+  labs(tag = "f") +
+  theme(plot.tag = element_text()) +
+  theme_light()
+
+p1 + p2 + p3 + p4 + p5 + p6
+```
+
+As we can see by visual inspection of the data points (red), none of the predictors is sufficient to predict the response variable (Group) on its own. Hence, a series of multiple
+linear regression models are tried.
+
+```{R, multiple linear regression model evaluation}
+model.binom.1 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Gender, 
+  family="binomial"
+)
+
+model.binom.2 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue, 
+  family="binomial"
+)
+
+anova(model.binom.1, model.binom.2, test ="Chisq")
+# Gender and STRR sign and AIC 96.5
+```
+
+```{r models general table, results = 'asis', echo = FALSE}
+stargazer(
+  model.binom.1, model.binom.2,
+  title="Comparison of generalised linear models",
+  type="latex", header=FALSE, no.space=TRUE
+)
+```
+
+```{R}
+model.binom.all.3 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue, 
+  family="binomial"
+)
+
+summary(model.binom.all.3)
+#STRM not sign but AIC 94.9
+
+model.binom.all.4 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue + Pause.Interval.Duration.Reading,
+  family="binomial"
+)
+
+summary(model.binom.all.4)
+
+
+model.binom.all.5 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue + Pause.Interval.Duration.Reading + Pause.Interval.Duration.Monologue,
+  family="binomial"
+)
+
+summary(model.binom.all.5)
+
+model.binom.all.6 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Monologue + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.6)
+
+model.binom.all.7 <- glm(
+  data=df.binom, 
+  Group ~ Pause.Interval.Duration.Monologue + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.7)
+
+model.binom.all.8 <- glm(
+  data=df.binom, 
+  Group ~ Pause.Interval.Duration.Reading + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.8)
+
+model.binom.all.9 <- glm(
+  data=df.binom, 
+  Group ~ Pause.Interval.Duration.Reading + Pause.Interval.Duration.Monologue + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.9)
+#best model so far--> all sign. and AIC 88.3
+
+model.binom.all.10 <- glm(
+  data=df.binom, 
+  Group ~ Speech.Timing.Rate.Reading + Speech.Timing.Rate.Monologue + Gender,
+  family="binomial"
+)
+
+summary(model.binom.all.10)
+```
+```{R automated-model-selection}
+summary(m)
+m.full <- glm(
+  data=df.binom, Group ~ .
+  family=binomial, 
+  na.action = "na.fail"
+)
+d <- dredge(m.full)
+
+summary(get.models(d, 1)[[1]])
+
+m <- glm(
+  data=df.binom, Group ~ Speech.Timing.Rate.Reading:Speech.Timing.Rate.Monologue, 
+  family=binomial
+)
+
+m <- glm(
+  data=df.binom, Group ~ Pause.Interval.Duration.Reading:Pause.Interval.Duration.Monologue + Gender, 
+  family=binomial
+)
+
+summary(m)
+```
+### PCA
+
+As there has been significant correlation between the predictors in the ggpairs plot
+as well as some extreme changes in coefficients when adding additional variables,
+there exists the possbility of collinearity negatively affecting the models. Indeed,
+we observe variance inflation factors of more than 2.5 between all experimental predictors.
+This warrants and attempt at solving the potential collinearity issue.
+
+```{R, check vif}
+vif(glm(data=df.binom, Group ~ ., family = binomial))
+```
+
+```{R, run PCA}
+#PCA
+df.binom.pca <- prcomp(df.binom[,c(3,4,5,6)], scale. = TRUE, center = TRUE)
+summary(df.binom.pca)
+```
+
+```{R pca-loadings, fig.align = 'center'}
+autoplot(
+  df.binom.pca,
+  data=df.binom,
+  loadings=TRUE,
+  loadings.label=TRUE,
+  loadings.label.repel=TRUE,
+  loadings.colour="black",
+  loadings.label.colour="black",
+  colour="Group",
+) +
+  labs(title="PCA of Speech Analysis Measurements") +
+  theme_light()
+```
+
+Running ggpairs shows, that there is no longer any correlation between the variables.
+
+```{R, check for removal of correlations}
+df.biom.pca.joined <- cbind(df.binom, df.binom.pca$x)
+ggpairs(
+  df.biom.pca.joined[,-c(3,4,5,6)], 
+  aes(color=Group, alpha=0.5), 
+  lower=list(combo=wrap("facethist", binwidth=10.0)),
+  upper=list(continuous=wrap("cor", size=2))
+) + 
+  theme_light(base_size = 7)
+```
+
+```{R, compare PCA-based model to best model from eval}
+model.binom.pca <- glm(
+  data=df.biom.pca.joined, 
+  Group ~ PC1 + Gender,
+  family="binomial"
+)
+
+summary(model.binom.pca)
+autoplot(model.binom.pca, 1:6)
+
+anova(model.binom.pca, model.binom.all.9, test = "Chisq")
+
+ggplot(df.biom.pca.joined, aes(x=PC1, y=as.integer(Group)-1)) + 
+  geom_point() +
+  stat_smooth(method="glm", se=TRUE, method.args = list(family=binomial))
+
+```
+
+## Multinomial Regression
+
+To predict over all three groups (HC, PD, RBD), we have to use a more complex
+multinomial model.
+
+```{R, run multinomial regression}
+# Set reference level explicitly
+df$Group <- relevel(df$Group, ref = "HC")
+
+# Train / test split
+set.seed(123)
+sample <- sample.int(n = nrow(df), size = floor(0.7 * nrow(df)), replace = F)
+
+df.train <- df[sample, ]
+df.test  <- df[-sample, ]
+
+model.all <- multinom(
+  Group ~ Speech.Timing.Rate.Monologue * Pause.Interval.Duration.Monologue,
+  data=df.train
+)
+
+df.train$Group.Predicted <- predict(model.all, newdata = df.train, "class")
+
+tab <- table(df.train$Group, df.train$Group.Predicted)
+tab
+round((sum(diag(tab)) / sum(tab)) * 100, 2)
+```
+
+\newpage
+
+# Conclusion
+
+
+\newpage
+
+# Appendix
+
+```{R, include=FALSE}
+
+# Move to appendix as example of how to do this "manually"
+# df.binom <- data.frame(df[df$Group != "RBD",])
+
+# model.binom.all <- glm(
+#   Group ~ Speech.Timing.Rate.Monologue, 
+#   data=df.binom, family="binomial"
+# )
+
+# new.data <- data.frame(
+#   Speech.Timing.Rate.Monologue=seq(
+#     min(df.binom$Speech.Timing.Rate.Monologue),
+#     max(df.binom$Speech.Timing.Rate.Monologue),
+#     len=100
+#   )
+# )
+
+# new.data$Group = predict(model.binom.all, new.data, type="response")
+
+# ggplot(data=new.data, aes(x=Speech.Timing.Rate.Monologue, y=Group)) +
+#   geom_line() +
+#   geom_point(
+#     data=df.binom, aes(x=Speech.Timing.Rate.Monologue, y=as.integer(Group)-1), 
+#     colour='red'
+#   )
+```
+
+\newpage
+
+# References
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id="refs" custom-style="Bibliography"></div>
+\endgroup
