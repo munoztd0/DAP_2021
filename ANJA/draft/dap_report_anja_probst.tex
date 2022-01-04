@@ -44,6 +44,46 @@
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -184,7 +224,7 @@ Two or three sentences to provide a \textbf{broader perspective}, readily compre
 \begin{document}
 \maketitle
 
-\newpage
+\clearpage
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -256,17 +296,6 @@ For each sample in this data set (\(n=130\)), we have the following information:
   \end{itemize}
 \end{itemize}
 
-\begin{verbatim}
-## 'data.frame':    130 obs. of  7 variables:
-##  $ Age                              : int  58 68 68 75 61 58 79 59 73 66 ...
-##  $ Gender                           : Factor w/ 2 levels "F","M": 1 1 2 2 2 2 2 1 2 2 ...
-##  $ Speech.Timing.Rate.Reading       : int  354 340 211 140 269 317 269 338 374 281 ...
-##  $ Speech.Timing.Rate.Monologue     : int  333 285 247 112 230 181 289 370 288 258 ...
-##  $ Pause.Interval.Duration.Reading  : int  146 173 377 360 211 186 214 145 117 213 ...
-##  $ Pause.Interval.Duration.Monologue: int  158 295 280 397 206 611 251 118 194 246 ...
-##  $ Group                            : Factor w/ 3 levels "HC","PD","RBD": 2 2 2 2 2 2 2 2 2 2 ...
-\end{verbatim}
-
 \begin{table}[!htbp] \centering \renewcommand*{\arraystretch}{1.1}\caption{Summary of the Data Set used in this Analysis}\label{tab:summarize-data-frame}\resizebox{\textwidth}{!}{
 \begin{tabular}{lrrrrrrr}
 \hline
@@ -291,7 +320,18 @@ Group & 130 &  &  &  &  &  &  \\
 }
 \end{table}
 
-\newpage
+\begin{verbatim}
+## 'data.frame':    130 obs. of  7 variables:
+##  $ Age                              : int  58 68 68 75 61 58 79 59 73 66 ...
+##  $ Gender                           : Factor w/ 2 levels "F","M": 1 1 2 2 2 2 2 1 2 2 ...
+##  $ Speech.Timing.Rate.Reading       : int  354 340 211 140 269 317 269 338 374 281 ...
+##  $ Speech.Timing.Rate.Monologue     : int  333 285 247 112 230 181 289 370 288 258 ...
+##  $ Pause.Interval.Duration.Reading  : int  146 173 377 360 211 186 214 145 117 213 ...
+##  $ Pause.Interval.Duration.Monologue: int  158 295 280 397 206 611 251 118 194 246 ...
+##  $ Group                            : Factor w/ 3 levels "HC","PD","RBD": 2 2 2 2 2 2 2 2 2 2 ...
+\end{verbatim}
+
+\clearpage
 
 \hypertarget{data-pre-processing}{%
 \section{Data Pre-Processing}\label{data-pre-processing}}
@@ -313,8 +353,7 @@ Group & 130 &  &  &  &  &  &  \\
 
 \caption{ }\label{fig:boxplots-and-correlations}
 \end{figure}
-
-\newpage
+\clearpage
 
 \hypertarget{data-analysis}{%
 \section{Data Analysis}\label{data-analysis}}
@@ -323,8 +362,6 @@ Group & 130 &  &  &  &  &  &  \\
 \subsection{Binomial Regression}\label{binomial-regression}}
 
 Above, we have seen that there are almost no differences between the groups PD and RBD, so in a first step, we will limit our investigation to creating a binomial model predicting the group HC or PD. Indeed, the paper from which the data was extracted discusses the hard problem of differentiating PD from RBD, which might very well be impossible with generalised linear models. We will revisit this problem in the section Multinomial Regression.
-
-As a first step, a simple linear regression model based on a single predictor is built and visualized for each of the selected variables.
 
 \begin{figure}
 
@@ -335,273 +372,84 @@ As a first step, a simple linear regression model based on a single predictor is
 \caption{ }\label{fig:simple-linear-regression}
 \end{figure}
 
-As we can see by visual inspection of the data points (red), none of the predictors is sufficient to predict the response variable (Group) on its own. Hence, a series of multiple
-linear regression models are tried.
+In a first step, a simple linear regression model based on a single predictor is built and visualized for each of the selected variables. As can be seen by visual inspection of the data points (red), none of the predictors is sufficient to predict the response variable (Group) on its own, given the respective overlap between the two groups. Hence, a series of multiple linear regression models have to be built and evaluated. As I would have to test 64 models (all possible combinations plus intercept only) to be certain to have found the best one, I chose to use the automated model selection function \texttt{dredge} from the R package \texttt{MuMIn}. Starting from the global binomial model \texttt{Group\ \textasciitilde{}\ .} as an input, \texttt{dredge} enumerates all possible models and evaluates them based on their AIC.
 
-\begin{verbatim}
-## Analysis of Deviance Table
-## 
-## Model 1: Group ~ Speech.Timing.Rate.Reading + Gender
-## Model 2: Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue
-##   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
-## 1        77     90.495                       
-## 2        76     86.886  1   3.6094  0.05745 .
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m.full }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(}
+  \AttributeTok{data=}\NormalTok{df.binom, Group }\SpecialCharTok{\textasciitilde{}}\NormalTok{ .,}
+  \AttributeTok{family=}\NormalTok{binomial, }
+  \AttributeTok{na.action =} \StringTok{"na.fail"}
+\NormalTok{)}
 
-\begin{table}[!htbp] \centering 
-  \caption{Comparison of generalised linear models} 
-  \label{} 
-\begin{tabular}{@{\extracolsep{5pt}}lcc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{2}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-3} 
-\\[-1.8ex] & \multicolumn{2}{c}{Group} \\ 
-\\[-1.8ex] & (1) & (2)\\ 
-\hline \\[-1.8ex] 
- Speech.Timing.Rate.Reading & $-$0.022$^{***}$ & $-$0.015$^{**}$ \\ 
-  & (0.007) & (0.008) \\ 
-  GenderM & $-$1.379$^{**}$ & $-$1.593$^{**}$ \\ 
-  & (0.622) & (0.657) \\ 
-  Speech.Timing.Rate.Monologue &  & $-$0.012$^{*}$ \\ 
-  &  & (0.006) \\ 
-  Constant & 7.559$^{***}$ & 9.148$^{***}$ \\ 
-  & (2.429) & (2.758) \\ 
- \hline \\[-1.8ex] 
-Observations & 80 & 80 \\ 
-Log Likelihood & $-$45.248 & $-$43.443 \\ 
-Akaike Inf. Crit. & 96.495 & 94.886 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{2}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
-\end{tabular} 
+\NormalTok{d }\OtherTok{\textless{}{-}} \FunctionTok{dredge}\NormalTok{(m.full, }\AttributeTok{rank =} \StringTok{"AIC"}\NormalTok{)}
+
+\NormalTok{m.best.no.interactions }\OtherTok{=} \FunctionTok{get.models}\NormalTok{(d, }\DecValTok{1}\NormalTok{)[[}\DecValTok{1}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[tbp]
+
+\begin{center}
+\begin{threeparttable}
+
+\caption{\label{tab:table-best-model-dredge}A full regression table of the best model (selected using dredge) without interactions.}
+
+\begin{tabular}{lllll}
+\toprule
+Predictor & \multicolumn{1}{c}{$b$} & \multicolumn{1}{c}{95\% CI} & \multicolumn{1}{c}{$z$} & \multicolumn{1}{c}{$p$}\\
+\midrule
+Intercept & -5.28 & $[-8.60$, $-2.53]$ & -3.42 & .001\\
+GenderM & -1.76 & $[-3.15$, $-0.49]$ & -2.63 & .009\\
+Pause Interval Duration Monologue & 0.01 & $[0.00$, $0.02]$ & 2.03 & .042\\
+Pause Interval Duration Reading & 0.02 & $[0.01$, $0.05]$ & 2.39 & .017\\
+\bottomrule
+\end{tabular}
+
+\end{threeparttable}
+\end{center}
+
 \end{table}
 
-\begin{verbatim}
-## 
-## Call:
-## glm(formula = Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue, 
-##     family = "binomial", data = df.binom)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -1.9191  -0.8481  -0.5094   0.9731   1.9811  
-## 
-## Coefficients:
-##                               Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)                   9.147601   2.757977   3.317 0.000911 ***
-## Speech.Timing.Rate.Reading   -0.015432   0.007633  -2.022 0.043202 *  
-## GenderM                      -1.593434   0.656825  -2.426 0.015268 *  
-## Speech.Timing.Rate.Monologue -0.011692   0.006355  -1.840 0.065805 .  
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 105.850  on 79  degrees of freedom
-## Residual deviance:  86.886  on 76  degrees of freedom
-## AIC: 94.886
-## 
-## Number of Fisher Scoring iterations: 4
-\end{verbatim}
+Looking at interactions \ldots{}
 
 \begin{verbatim}
 ## 
 ## Call:
-## glm(formula = Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue + 
-##     Pause.Interval.Duration.Reading, family = "binomial", data = df.binom)
+## glm(formula = Group ~ Pause.Interval.Duration.Reading:Pause.Interval.Duration.Monologue + 
+##     Gender, family = binomial, data = df.binom)
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -1.6314  -0.7342  -0.4876   0.8568   2.1461  
+## -1.8600  -0.7777  -0.5119   0.9345   2.0621  
 ## 
 ## Coefficients:
-##                                  Estimate Std. Error z value Pr(>|z|)   
-## (Intercept)                     -0.781999   5.056964  -0.155  0.87711   
-## Speech.Timing.Rate.Reading       0.001471   0.010539   0.140  0.88900   
-## GenderM                         -1.797042   0.684702  -2.625  0.00868 **
-## Speech.Timing.Rate.Monologue    -0.012453   0.006607  -1.885  0.05946 . 
-## Pause.Interval.Duration.Reading  0.029211   0.013563   2.154  0.03126 * 
+##                                                                     Estimate
+## (Intercept)                                                       -1.954e+00
+## GenderM                                                           -1.650e+00
+## Pause.Interval.Duration.Reading:Pause.Interval.Duration.Monologue  7.070e-05
+##                                                                   Std. Error
+## (Intercept)                                                        7.296e-01
+## GenderM                                                            6.492e-01
+## Pause.Interval.Duration.Reading:Pause.Interval.Duration.Monologue  1.976e-05
+##                                                                   z value
+## (Intercept)                                                        -2.678
+## GenderM                                                            -2.541
+## Pause.Interval.Duration.Reading:Pause.Interval.Duration.Monologue   3.577
+##                                                                   Pr(>|z|)    
+## (Intercept)                                                       0.007396 ** 
+## GenderM                                                           0.011061 *  
+## Pause.Interval.Duration.Reading:Pause.Interval.Duration.Monologue 0.000347 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 105.850  on 79  degrees of freedom
-## Residual deviance:  81.364  on 75  degrees of freedom
-## AIC: 91.364
+## Residual deviance:  81.561  on 77  degrees of freedom
+## AIC: 87.561
 ## 
 ## Number of Fisher Scoring iterations: 5
-\end{verbatim}
-
-\begin{verbatim}
-## 
-## Call:
-## glm(formula = Group ~ Speech.Timing.Rate.Reading + Gender + Speech.Timing.Rate.Monologue + 
-##     Pause.Interval.Duration.Reading + Pause.Interval.Duration.Monologue, 
-##     family = "binomial", data = df.binom)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -1.6222  -0.7566  -0.4526   0.8529   2.2134  
-## 
-## Coefficients:
-##                                    Estimate Std. Error z value Pr(>|z|)   
-## (Intercept)                       -2.407787   5.261491  -0.458  0.64722   
-## Speech.Timing.Rate.Reading        -0.002841   0.011187  -0.254  0.79951   
-## GenderM                           -1.819190   0.683407  -2.662  0.00777 **
-## Speech.Timing.Rate.Monologue      -0.003626   0.009835  -0.369  0.71233   
-## Pause.Interval.Duration.Reading    0.022184   0.014330   1.548  0.12161   
-## Pause.Interval.Duration.Monologue  0.007110   0.006185   1.150  0.25030   
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 105.850  on 79  degrees of freedom
-## Residual deviance:  79.909  on 74  degrees of freedom
-## AIC: 91.909
-## 
-## Number of Fisher Scoring iterations: 5
-\end{verbatim}
-
-\begin{verbatim}
-## 
-## Call:
-## glm(formula = Group ~ Speech.Timing.Rate.Monologue + Gender, 
-##     family = "binomial", data = df.binom)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -1.7522  -0.9287  -0.5692   1.0320   2.1563  
-## 
-## Coefficients:
-##                               Estimate Std. Error z value Pr(>|z|)   
-## (Intercept)                   5.602195   1.847992   3.032  0.00243 **
-## Speech.Timing.Rate.Monologue -0.017591   0.005583  -3.151  0.00163 **
-## GenderM                      -1.280231   0.616094  -2.078  0.03771 * 
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 105.850  on 79  degrees of freedom
-## Residual deviance:  91.442  on 77  degrees of freedom
-## AIC: 97.442
-## 
-## Number of Fisher Scoring iterations: 4
-\end{verbatim}
-
-\begin{verbatim}
-## 
-## Call:
-## glm(formula = Group ~ Pause.Interval.Duration.Monologue + Gender, 
-##     family = "binomial", data = df.binom)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -2.2692  -0.8650  -0.5966   1.0352   2.0883  
-## 
-## Coefficients:
-##                                    Estimate Std. Error z value Pr(>|z|)   
-## (Intercept)                       -2.662407   0.947283  -2.811  0.00495 **
-## Pause.Interval.Duration.Monologue  0.014149   0.004358   3.246  0.00117 **
-## GenderM                           -1.350678   0.619548  -2.180  0.02925 * 
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 105.850  on 79  degrees of freedom
-## Residual deviance:  88.193  on 77  degrees of freedom
-## AIC: 94.193
-## 
-## Number of Fisher Scoring iterations: 4
-\end{verbatim}
-
-\begin{verbatim}
-## 
-## Call:
-## glm(formula = Group ~ Pause.Interval.Duration.Reading + Gender, 
-##     family = "binomial", data = df.binom)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -2.0031  -0.7881  -0.5162   0.9264   2.2547  
-## 
-## Coefficients:
-##                                 Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)                     -4.93111    1.54530  -3.191 0.001418 ** 
-## Pause.Interval.Duration.Reading  0.03403    0.01011   3.365 0.000767 ***
-## GenderM                         -1.51002    0.63697  -2.371 0.017758 *  
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 105.850  on 79  degrees of freedom
-## Residual deviance:  85.525  on 77  degrees of freedom
-## AIC: 91.525
-## 
-## Number of Fisher Scoring iterations: 5
-\end{verbatim}
-
-\begin{verbatim}
-## 
-## Call:
-## glm(formula = Group ~ Pause.Interval.Duration.Reading + Pause.Interval.Duration.Monologue + 
-##     Gender, family = "binomial", data = df.binom)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -1.7201  -0.7704  -0.4509   0.8459   2.2333  
-## 
-## Coefficients:
-##                                    Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)                       -5.277691   1.542743  -3.421 0.000624 ***
-## Pause.Interval.Duration.Reading    0.024869   0.010402   2.391 0.016812 *  
-## Pause.Interval.Duration.Monologue  0.008873   0.004371   2.030 0.042371 *  
-## GenderM                           -1.760982   0.670491  -2.626 0.008629 ** 
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 105.850  on 79  degrees of freedom
-## Residual deviance:  80.274  on 76  degrees of freedom
-## AIC: 88.274
-## 
-## Number of Fisher Scoring iterations: 5
-\end{verbatim}
-
-\begin{verbatim}
-## 
-## Call:
-## glm(formula = Group ~ Speech.Timing.Rate.Reading + Speech.Timing.Rate.Monologue + 
-##     Gender, family = "binomial", data = df.binom)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -1.9191  -0.8481  -0.5094   0.9731   1.9811  
-## 
-## Coefficients:
-##                               Estimate Std. Error z value Pr(>|z|)    
-## (Intercept)                   9.147601   2.757977   3.317 0.000911 ***
-## Speech.Timing.Rate.Reading   -0.015432   0.007633  -2.022 0.043202 *  
-## Speech.Timing.Rate.Monologue -0.011692   0.006355  -1.840 0.065805 .  
-## GenderM                      -1.593434   0.656825  -2.426 0.015268 *  
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 105.850  on 79  degrees of freedom
-## Residual deviance:  86.886  on 76  degrees of freedom
-## AIC: 94.886
-## 
-## Number of Fisher Scoring iterations: 4
 \end{verbatim}
 
 \hypertarget{pca}{%
@@ -675,8 +523,8 @@ Running ggpairs shows, that there is no longer any correlation between the varia
 ## Analysis of Deviance Table
 ## 
 ## Model 1: Group ~ PC1 + Gender
-## Model 2: Group ~ Pause.Interval.Duration.Reading + Pause.Interval.Duration.Monologue + 
-##     Gender
+## Model 2: Group ~ Gender + Pause.Interval.Duration.Monologue + Pause.Interval.Duration.Reading + 
+##     1
 ##   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
 ## 1        77     81.454                     
 ## 2        76     80.274  1   1.1799   0.2774
@@ -711,17 +559,17 @@ multinomial model.
 ## [1] 63.74
 \end{verbatim}
 
-\newpage
+\clearpage
 
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
 
-\newpage
+\clearpage
 
-\hypertarget{appendix}{%
-\section{Appendix}\label{appendix}}
+\hypertarget{manual-model-plot}{%
+\subsection{Manual Model Plot}\label{manual-model-plot}}
 
-\newpage
+\clearpage
 
 \hypertarget{references}{%
 \section{References}\label{references}}
