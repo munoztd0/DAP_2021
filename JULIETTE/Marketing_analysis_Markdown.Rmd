@@ -257,6 +257,8 @@ effectsize::eta_squared(car::Anova(finalm1, type = 2), ci = 0.9, alternative = "
 ### **A.6. Plots and summary estimates** {.tabset}
 
 #### Plot estimates
+<br>
+We call the sjPlot function to plot all the estimates or to plot only one term at a time.
 
 ```{r, fig.show="hold", out.width="50%", fig.align = 'center'}
 sjPlot::plot_model(finalm1) 
@@ -271,12 +273,21 @@ sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Kidhome"), show.
 sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Education"), show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "age"), show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = c("age", "Kidhome"), show.data  = T, jitter = 1) 
+sjPlot::plot_model(finalm1, type = "pred", terms = c("age", "Income", "Education"), show.data  = T, jitter = 1) 
 <<<<<<< HEAD
 <<<<<<< HEAD
 
 =======
 ```
-<!--add comments -->
+As we could easily assume, the number of store purchases increases along with the income. A more counter-intuitive finding is that it's lower for customers who have kids ; this could be due to the fact that this dataframe doesn't take into account the number of store purchases of the other parents. 
+<br>
+Looking at the interaction effects between education and income, we see that for the same income, customers who received basic education are clearly separated from the other customers by purchasing less.
+<br>
+For the interaction between income and age, an interesting pattern appears : for the lowest incomes, the number of store purchases decreases with age, while the tendency is reversed for the highest wages.
+<br>
+We also observe an interaction effect between having kids at home and age : the number of store purchases stays stable for those who don't have kids at home, while it decreases for those who do have kids at home, possibly because when the parents get older, kids leave the house.
+<br>
+Finally, over time, the augmentation of the number of store purchases proportional to the salary stays stable except for every education level except for those who received basic education.
 
 #### Summary table of standardized estimates
 
