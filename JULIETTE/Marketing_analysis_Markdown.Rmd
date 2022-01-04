@@ -101,9 +101,8 @@ Since the dataset is very big, we can choose to delete these lines.
 ```{r}
 which(data$age>110)
 data <- data[-c(193, 240, 340),]
-
 ```
-Marital_Status can be simplified in only a few levels, and transformed into a factor.
+Marital status can be simplified in only a few levels, and transformed into a factor.
 Since the "other" section represents less than 1% of the participants, it is not enough to model it as a factor.
 We then transform some relevant variables into factors.
 ```{r}
@@ -195,12 +194,19 @@ ms$anova
 ```{r}
 finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age + Kidhome:Income + Kidhome:Education + Income:Education + Kidhome:age + Income:age + Education:age + Kidhome:Income:Education + Income:Education:age)
 ```
+<<<<<<< HEAD
 ### **A.6. Checking for interferences**
 We first use the effectsize function : everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
+=======
+**A.6. Checking for interferences**
+We first use the eta_squared function : everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
+>>>>>>> 2470a4f (added stuff stadard poaramters)
 We also call the sjPlot function to plot all the estimates or to plot only one term at a time.
 ```{r}
 parameters::model_parameters(anova(finalm1))
-effectsize::eta_squared(finalm1,ci = 0.9) 
+effectsize::eta_squared(car::Anova(finalm1, type = 2), ci = 0.9, alternative = "two") #modified this a bit
+```
+```{r, fig.show="hold", out.width="50%", fig.align = 'center'}
 sjPlot::plot_model(finalm1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = "Kidhome", show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = "Income", show.data  = T, jitter = 1) 
@@ -208,7 +214,13 @@ sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Kidhome"), show.
 sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Education"), show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "age"), show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = c("age", "Kidhome"), show.data  = T, jitter = 1) 
+<<<<<<< HEAD
 sjPlot::tab_model(finalm1, rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"))
+=======
+```
+```{r}
+sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"), show.intercept = F) #what is this for? # this to show all the STANDARDIZED estimates on a numeric form in a table summarizing all thE information
+>>>>>>> 823e7fc6feafb7f0c0795164163160a6f9abd966
 ```
 
 ### B. PRINCIPAL COMPONENT ANALYSIS

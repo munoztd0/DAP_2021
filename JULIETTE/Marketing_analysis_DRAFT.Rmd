@@ -9,14 +9,16 @@ output:
 ## I- General introduction
 
 **Origin**
-The present dataframe has been created for marketing analysis purposes. It assembles various personal information about 2239 customers, such as their education level, income, age, marital status, number of children at home... 
+
+the present dataframe has been created for marketing analysis purposes. It assembles various personal information about 2239 customers, such as their education level, income, age, marital status, number of children at home... 
 It also shows their consuming habits (amount spent on wine, on sweets...) and the number of purchases made on discounted products.
 
 There is very few context concerning this dataframe, since the source is unknown.
 It is not clear when these informations were registered, but probably by 2014 since the date of customers' enrollment within the company doesn't go further than 2014. 
 
 **Aim**
-To predict the customer's behavior (Number of purchases made with a discount) depending on the most significant personal attributes
+
+ *to predict the customer's behavior (Number of purchases in the store) depending on the most significant personal attributes*
 
 
 
@@ -56,7 +58,6 @@ Response: 1 if customer accepted the offer in the last campaign, 0 otherwise
 NumStorePurchases: Number of purchases made directly in stores
 
 
-Before loading the dataset, we want to make sure we have all the necessary packages installed and loaded, and that the code can be run by anybody.
 ```{r setup, include = FALSE}
 if(!require(pacman)) {
   install.packages("pacman")
@@ -82,6 +83,7 @@ data %>%
   facet_wrap(~key, scales = "free") + 
   geom_histogram()
 ``` 
+
 We are only interested in the total number of promotions accepted by the customers, since we don't have details about the nature of each promotion. 
 ```{r}
 data$AcceptedCmpTotal <- data$AcceptedCmp1 + data$AcceptedCmp2 + data$AcceptedCmp3 + data$AcceptedCmp4 + data$AcceptedCmp5 + data$Response 
@@ -90,11 +92,10 @@ The dataframe contains many variables, some are superfluous for our analysis (we
 ```{r}
 data$Complain <- data$NumWebVisitsMonth <- data$NumWebPurchases <- data$NumCatalogPurchases <- data$Z_Revenue <- data$Z_CostContact <- data$AcceptedCmp1 <- data$AcceptedCmp2 <- data$AcceptedCmp3 <- data$AcceptedCmp4 <- data$AcceptedCmp5 <- data$Response <- NULL
 ```
-We want to calculate the age of the customers. If we proceed with : "2021 - data$Year_Birth", we would get their current age. It makes more sense to get their age at the moment the data was registered, so we proceed with 2014 minus dataYear_Birth, although here we are only assuming that it was indeed registered in 2014.
+We want to calculate the age of the customers. If we proceed with : "2021 - dataYear_Birth", we would get their current age. It makes more sense to get their age at the moment the data was registered, so we proceed with 2014 minus dataYear_Birth, although here we are only assuming that it was indeed registered in 2014.
 
 ```{r}
 data$age <- 2014 - data$Year_Birth 
-plot(data$age)
 ``` 
 We see 3 outliers who seems to be older than 110 years old. The corresponding birth years are 1893, 1900 and 1899. The first one could be corrected by 1993, the second one would be due to 2 typing errors which is improbable, and the third could be replaced by 1999 but it corresponds to someone who has a PhD education level, which is unlikely at age 15.
 Since the dataset is very big, we can choose to delete these lines.

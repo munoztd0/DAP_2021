@@ -1,5 +1,5 @@
 #this is to check to see if package are installed and if not to install them or just load them if they are installed!
-if(!require(pacman)) {
+#Before loading the dataset, we want to make sure we have all the necessary packages installed and loaded, and that the code can be run by anybody.if(!require(pacman)) {
   install.packages("pacman")
   library(pacman)
 }
@@ -179,7 +179,7 @@ summary(m4)
 
 
 
-# filter on non-missing values
+
   pm1 <- prcomp(~ "ID"  + "Year_Birth"  +  "Education"  +  "Marital_Status"  +  "Income"   +        "Kidhome"   + "Teenhome"+   "Dt_Customer"   +     "Recency" 
                + "MntWines"       +    "MntFruits" + "MntMeatProducts"  
                 + "MntFishProducts"  +  "MntSweetProducts" +  "MntGoldProds"   
@@ -196,6 +196,4 @@ names(data)
 #1. is NumStorePurchases normal ? if yes does that justify using it instead of NumDeals?
  # 2. what is : sjPlot::tab_model(finalm1, rm.terms     for ?
      # 3. should i add comments for the lm part ?
-        #4. PCA : part not working. Does it make sense to use PCA knowing 
-      #that my main variables are factors ?
        # 5. Should I do something else ?
