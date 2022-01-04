@@ -192,13 +192,6 @@ ggplot(data, aes(x = NumStorePurchases)) +
                  colour = 1, fill = "white") +
   geom_density(adjust = 1) + labs(title = "Purchases",
  caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
-
-# ggplot(data, aes(x = sqrt(NumStorePurchases))) +
-#   geom_histogram(aes(y = ..density..),
-#                  colour = 1, fill = "white") +
-#   geom_density(adjust = 1) + labs(title = "Purchases",
-#  caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
-#skewness stays the same
 ```
 
 ## IV - Modelling
@@ -211,10 +204,13 @@ m1 <- lm(data=data, NumStorePurchases ~ Kidhome*Income*Education*age)
 plot(m1, c(1:2,4), ask=F)
 ```
 <!-- add comments -->
+Looking at the QQplot, we don't see any specific patterns appearing, which means the residuals are distributed normally. Although we do observe smaller ends for the lowest theoritical quantiles.
+For the Cook's distance, we clearly observe an outlier (observation 2234), while the vast majority of the values are under 1.
+For the comparison of residuals VS fitted values,
+
+
 ```{r, warning=F, message=F}
 ggplot(data, aes(NumStorePurchases, Income)) + geom_point(color="blue", alpha=0.3, position = position_jitter())
-# plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data)
-# text(Income ~NumStorePurchases, labels=ID,data, cex=0.9, font=1)
 ```
 
 Here we observe peculiar outliers for "Income". One income is equal to 666'666, and for income values higher than 150'000, people did not respond. We choose to remove the responses of these customers because they probably did not write the true value of their income.
@@ -230,11 +226,11 @@ newdf = data %>%
 m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age)
 plot(m1, c(1:2,4), ask=F)
 ```
-<!-- add comments -->
+Paying attention to the QQplot, we see that extreme points are more normal. The Cook's distance graph also doesn't show values higher than 0,5.
 
 ### **A.3. Model selection**
 
-Here we use the stepAIC function to filter the variables to keep, by choosing the best AIC.
+Here, we use the stepAIC function to filter the variables to keep, by choosing the best AIC.
 ```{r}
 ms <- MASS::stepAIC(m1, direction = "both", trace = FALSE) 
 ms$anova
@@ -252,21 +248,17 @@ finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age 
 
 We first use the eta_squared function to compute the effect sizes: everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
 <!-- what is effect size and why use it ? -->
->>>>>>> 
 ```{r}
 parameters::model_parameters(anova(finalm1))
 effectsize::eta_squared(car::Anova(finalm1, type = 2), ci = 0.9, alternative = "two") 
 ```
-<<<<<<< HEAD
-```{r, fig.show="hold", out.width="50%", fig.align = 'center'}
-
 #<!-- add comments -->
 
 ### **A.6. Plots and summary estimates** {.tabset}
 
 #### Plot estimates
-```{r, fig.show="hold", fig.align="center"}
->>>>>>> 
+
+```{r, fig.show="hold", out.width="50%", fig.align = 'center'}
 sjPlot::plot_model(finalm1) 
 ```
 
