@@ -1,3 +1,5 @@
+I am not working on the draft Rmarkdown. I want to delete it 
+
 Liem pour toi : https://www.r-bloggers.com/2019/06/how-to-perform-ordinal-logistic-regression-in-r/
 
 This dataframe has been created for marketing analysis purposes. It assembles various perosnal information about 2239 customers, such as their education level, income, age, maritla status, number of children at home... 
