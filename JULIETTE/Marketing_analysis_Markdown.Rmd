@@ -1,5 +1,5 @@
 ---
-title: "Data Analysis Project"
+title: "Data Analysis Project :"
 author: "Juliette Faure"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -13,7 +13,7 @@ output:
 ---
 
 # Marketing analysis 
-<!-- this `<br>` is to add breaklines, use it to make it less suffocating -->
+
 <br>
 
 ## I - General introduction
@@ -30,8 +30,8 @@ It is not clear when these informations were registered, but probably by 2014 si
 <br>
 
 **Aims**
+<br>
 *To predict the customer's behavior (Number of purchases made with a discount) depending on the most significant personal attributes
-*To categorize participants in a few typical profiles (probably with PCA)
 
 
 **Attributes** 
@@ -70,7 +70,6 @@ Response: 1 if customer accepted the offer in the last campaign, 0 otherwise
 NumStorePurchases: Number of purchases made directly in stores
 
 
-Before loading the dataset, we want to make sure we have all the necessary packages installed and loaded, and that the code can be run by anybody.
 ```{r, warning=F, message=F}
 
 if(!require(pacman)) {
@@ -184,9 +183,8 @@ ggplot(data, aes(x=MntWines, y=Marital_Status)) +
 
 ```
 
-<!-- Refer to the real name of variblke instead of abbreviation -->
-NumStorePurchases seems to be the most useful variable to analyse since marketing analysis might want to determine which profils buy the most in the store. In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. 
-<!-- Here, skewness appears to be 0,7 which is at an acceptable level. NO, you should say something more like: Skewness is quite high (0.7) BUT remains tolerable since this data is intrisincally skewed (no negative values possible), we will keep that in mind while making the model assumtpion checks ..-->
+The number of store purchases seems to be the most useful variable to analyse since we might want to determine which profils buy the most in the store. In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. 
+In this case, the data is intrisincally skewed because there are no negative values possible. Skewness is quite high (0.7) but remains tolerable regarding the nature of the data. It has to be kept in mind while performing the model assumption checks.
 
 ```{r, fig.show="hold", out.width="50%", fig.align="center", warning=F, message=F}
 ggplot(data, aes(x = NumStorePurchases)) +
@@ -195,14 +193,12 @@ ggplot(data, aes(x = NumStorePurchases)) +
   geom_density(adjust = 1) + labs(title = "Purchases",
  caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
 
-
-# put that into appendix!
-
 # ggplot(data, aes(x = sqrt(NumStorePurchases))) +
 #   geom_histogram(aes(y = ..density..),
 #                  colour = 1, fill = "white") +
 #   geom_density(adjust = 1) + labs(title = "Purchases",
 #  caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
+#skewness stays the same
 ```
 
 ## IV - Modelling
@@ -221,15 +217,11 @@ ggplot(data, aes(NumStorePurchases, Income)) + geom_point(color="blue", alpha=0.
 # text(Income ~NumStorePurchases, labels=ID,data, cex=0.9, font=1)
 ```
 
-Here we observe peculiar outliers for "Income". One income is equal to 666'666, and when income is higher than 150'000
-
-<!-- , people probably don't respond. We can safely remove these outliers. -->
-<!-- more like:  people didn't respond. We CHOOSE to remove these responses because we think they where not responding truthfully OR anything like thjat. -->
+Here we observe peculiar outliers for "Income". One income is equal to 666'666, and for income values higher than 150'000, people did not respond. We choose to remove the responses of these customers because they probably did not write the true value of their income.
 
 ```{r}
 newdf = data %>%
   filter(!ID %in% c(9432, 5555, 4619, 5336, 1501, 1503, 8475, 4931, 11181) ) 
-# plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data=newdf) # odnt need that anbynmore
 ```
 
 ### **A.2. Reassessing without the outliers**
@@ -242,10 +234,9 @@ plot(m1, c(1:2,4), ask=F)
 
 ### **A.3. Model selection**
 
-Here we use the stepAIC function to select the model that has the best AIC.
-<!-- : filtering the variables to keep by choosing best AIC | integrate that into the above senmtence-->
+Here we use the stepAIC function to filter the variables to keep, by choosing the best AIC.
 ```{r}
-ms <- MASS::stepAIC(m1, direction = "both", trace = FALSE) #il choisit le meilleur AIC
+ms <- MASS::stepAIC(m1, direction = "both", trace = FALSE) 
 ms$anova
 ```
 
@@ -256,39 +247,31 @@ finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age 
 ```
 <<<<<<< HEAD
 <<<<<<< HEAD
-### **A.6. Checking for interferences**
-We first use the effectsize function : everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
-=======
-**A.6. Checking for interferences**
-We first use the eta_squared function : everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
->>>>>>> 2470a4f (added stuff stadard poaramters)
-We also call the sjPlot function to plot all the estimates or to plot only one term at a time.
-=======
 
-### **A.5. Statisical inference**
+### **A.5. Statistical inference**
 
-We first use the eta_squared function to compute the effect sizes: everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size.
-<!-- but we still keep them on the model. -->
+We first use the eta_squared function to compute the effect sizes: everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
 <!-- what is effect size and why use it ? -->
->>>>>>> 358b61172573a8471ea7704ed00b42bc57b4fb09
+>>>>>>> 
 ```{r}
 parameters::model_parameters(anova(finalm1))
-effectsize::eta_squared(car::Anova(finalm1, type = 2), ci = 0.9, alternative = "two") #modified this a bit
+effectsize::eta_squared(car::Anova(finalm1, type = 2), ci = 0.9, alternative = "two") 
 ```
 <<<<<<< HEAD
 ```{r, fig.show="hold", out.width="50%", fig.align = 'center'}
-=======
-<!-- add comments -->
+
+#<!-- add comments -->
 
 ### **A.6. Plots and summary estimates** {.tabset}
 
 #### Plot estimates
 ```{r, fig.show="hold", fig.align="center"}
->>>>>>> 358b61172573a8471ea7704ed00b42bc57b4fb09
+>>>>>>> 
 sjPlot::plot_model(finalm1) 
 ```
 
 #### Plot marginal effects
+We call the sjPlot function to plot all the estimates or to plot only one term at a time.
 ```{r, fig.show="hold", out.width="50%"}
 sjPlot::plot_model(finalm1, type = "pred", terms = "Kidhome", show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = "Income", show.data  = T, jitter = 1) 
@@ -298,20 +281,16 @@ sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "age"), show.data
 sjPlot::plot_model(finalm1, type = "pred", terms = c("age", "Kidhome"), show.data  = T, jitter = 1) 
 <<<<<<< HEAD
 <<<<<<< HEAD
-sjPlot::tab_model(finalm1, rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"))
+
 =======
-```
-```{r}
-sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"), show.intercept = F) #what is this for? # this to show all the STANDARDIZED estimates on a numeric form in a table summarizing all thE information
->>>>>>> 823e7fc6feafb7f0c0795164163160a6f9abd966
-=======
->>>>>>> 358b61172573a8471ea7704ed00b42bc57b4fb09
 ```
 <!--add comments -->
 
 #### Summary table of standardized estimates
+
+We then want a table that summarizes all the standardized estimates in a numeric form.
 ```{r}
-sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"), show.intercept = F)  #what is this for? # this to show all the STANDARDIZED estimates on a numeric form in a table summarizing all thE information
+sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"), show.intercept = F)   #
 ```
 <!--add comments for example the Rsquared is good-->
 
@@ -320,18 +299,21 @@ sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q",
 
 ```{r}
 clean_data <-data[rowSums(is.na(data))==0, ]
-pm1<-prcomp(clean_data[,-c(1,3,4,6,7,8,18)], scale=TRUE)
-# summary(pm1)
+pm1<-prcomp(clean_data[,-c(1,3,4,6,7,8,18)],  scale=TRUE)
+summary(pm1)
 
-data2 <- cbind(clean_data, pm1$x) #double check!
-# str(data2)
+data2 <- cbind(clean_data, pm1$x)
+m2 <- lm(data=data2, NumStorePurchases ~ PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8)
+summary(m2)
+m3 <- update(m2, . ~ . - PC6)
+anova(m3, m2)
+summary(m3)
 ```
-
-<!-- added that show pca nicely -->
+We need 8 principal components to reach 0,90.
+We see that PC6 is non-significant.
+We delete PC6 from the model, and this new model m3 is not significantly different from m2. Therefore we keep the simplest, which is m3. With summary(m3), we see that all PCs are significant. We keep the model m3.
+```
 ```{r, warning=F, message=F}
 sjPlot::tab_pca(pm1, show.cronb = F, show.var = T, nmbr.fctr = 8)
 ```
-We need 8 principal components to attain 0,90
-
-<!-- #scale= standardise tout, car certains var. ont des échelles très différentes -->
 
