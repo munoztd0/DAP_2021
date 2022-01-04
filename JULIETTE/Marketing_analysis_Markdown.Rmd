@@ -1,23 +1,37 @@
 ---
+title: "Data Analysis Project"
+author: "Juliette Faure"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  html_document: default
-  pdf_document: default
-  title             : "Prediction of clients' purchases for marketing purposes"
-  author: 
-  - name          : "Juliette Faure"
+  html_document:
+    includes:
+    code_folding: "hide"
+    toc: true
+    toc_float: true
+    number_sections: false
+  # pdf_document: default
 ---
-## I- General introduction
+
+# Marketing analysis 
+<!-- this `<br>` is to add breaklines, use it to make it less suffocating -->
+<br>
+
+## I - General introduction
 
 **Origin**
 The present dataframe has been created for marketing analysis purposes. It assembles various personal information about 2239 customers, such as their education level, income, age, marital status, number of children at home... 
+<br>
+
 It also shows their consuming habits (amount spent on wine, on sweets...) and the number of purchases made on discounted products.
+<br>
 
 There is very few context concerning this dataframe, since the source is unknown.
 It is not clear when these informations were registered, but probably by 2014 since the date of customers' enrollment within the company doesn't go further than 2014. 
+<br>
 
-**Aim**
-To predict the customer's behavior (Number of purchases made with a discount) depending on the most significant personal attributes
-
+**Aims**
+*To predict the customer's behavior (Number of purchases made with a discount) depending on the most significant personal attributes
+*To categorize participants in a few typical profiles (probably with PCA)
 
 
 **Attributes** 
@@ -57,24 +71,33 @@ NumStorePurchases: Number of purchases made directly in stores
 
 
 Before loading the dataset, we want to make sure we have all the necessary packages installed and loaded, and that the code can be run by anybody.
-```{r setup, include = FALSE}
+```{r, warning=F, message=F}
+
 if(!require(pacman)) {
   install.packages("pacman")
   library(pacman)
 }
-pacman::p_load(tidyverse, gtsummary, ggpubr, moments, here, sjPlot, parameters, effectsize)
+suppressPackageStartupMessages(pacman::p_load(tidyverse, gtsummary, ggpubr, moments, here, sjPlot, parameters, effectsize, pander))
 
 path =  here("JULIETTE") 
 setwd(path)
 data <- read.table("marketing_campaign.csv", header=T, sep="\t")
 ```
 
-\clearpage
+## II - Data overview and cleaning {.tabset}
 
-## II - Data overview and clearing
+### Structure
 ```{r}
-summary(data)
 str(data)
+```
+
+### Summary
+```{r}
+pander(summary(data))
+```
+
+### Densities
+```{r, warning=F, message=F}
 data %>% 
   keep(is.numeric) %>%
   gather() %>%
@@ -82,42 +105,55 @@ data %>%
   facet_wrap(~key, scales = "free") + 
   geom_histogram()
 ``` 
+
 We are only interested in the total number of promotions accepted by the customers, since we don't have details about the nature of each promotion. 
 ```{r}
 data$AcceptedCmpTotal <- data$AcceptedCmp1 + data$AcceptedCmp2 + data$AcceptedCmp3 + data$AcceptedCmp4 + data$AcceptedCmp5 + data$Response 
 ``` 
+
 The dataframe contains many variables, some are superfluous for our analysis (web visits and purchases, cumplains, catalog purchases, Z_Revenus and Z_CostContact which we don't have information about)
 ```{r}
 data$Complain <- data$NumWebVisitsMonth <- data$NumWebPurchases <- data$NumCatalogPurchases <- data$Z_Revenue <- data$Z_CostContact <- data$AcceptedCmp1 <- data$AcceptedCmp2 <- data$AcceptedCmp3 <- data$AcceptedCmp4 <- data$AcceptedCmp5 <- data$Response <- NULL
 ```
+
 We want to calculate the age of the customers. If we proceed with : "2021 - data$Year_Birth", we would get their current age. It makes more sense to get their age at the moment the data was registered, so we proceed with 2014 minus dataYear_Birth, although here we are only assuming that it was indeed registered in 2014.
 
 ```{r}
 data$age <- 2014 - data$Year_Birth 
 plot(data$age)
 ``` 
+
 We see 3 outliers who seems to be older than 110 years old. The corresponding birth years are 1893, 1900 and 1899. The first one could be corrected by 1993, the second one would be due to 2 typing errors which is improbable, and the third could be replaced by 1999 but it corresponds to someone who has a PhD education level, which is unlikely at age 15.
 Since the dataset is very big, we can choose to delete these lines.
+
 ```{r}
-which(data$age>110)
+# which(data$age>110)
 data <- data[-c(193, 240, 340),]
 ```
+<<<<<<< HEAD
+=======
+
+>>>>>>> 358b61172573a8471ea7704ed00b42bc57b4fb09
 Marital status can be simplified in only a few levels, and transformed into a factor.
 Since the "other" section represents less than 1% of the participants, it is not enough to model it as a factor.
+
 We then transform some relevant variables into factors.
+
 ```{r}
 data$Marital_Status <-  factor(data$Marital_Status, labels = c("Other", "Single", "Single", "Married", "Single", "Together", "Single", "Other"))
 data$Marital_Status[data$Marital_Status=="Other"] <- NA; data$Marital_Status = droplevels(data$Marital_Status)
-
+data$ID <- factor(data$ID) 
 data$Education <- factor(data$Education) 
 data$Teenhome <-  factor(data$Teenhome)
 data$AcceptedCmpTotal <-  factor(data$AcceptedCmpTotal)
 data$Kidhome <-  factor(data$Kidhome, labels = c("no", "yes", "yes"))
 ```
+
 For Kidhome, we fused the answers "1" and "2" because there are only 2% of "2" which is not enough information to model it a one separate factor.
 
 We now want to plot all the variables again, and check again whether anything is abnormal.
-```{r}
+
+```{r, warning=F, message=F}
 data %>% 
   keep(is.numeric) %>%
   gather() %>%
@@ -129,12 +165,12 @@ data %>%
 ## III - Hypotheses 
 
 Here we will be eyeballing the relationship between various variables, and determine those that seem the most relevant for further analysis.
-```{r}
+  
+```{r, fig.show="hold", out.width="50%", warning=F, message=F}
 
 data %>% 
       filter(!is.na(Marital_Status)) %>% 
-
-ggplot(aes(MntWines, Marital_Status)) + geom_boxplot(na.rm = TRUE)
+      ggplot(aes(MntWines, Marital_Status)) + geom_boxplot(na.rm = TRUE)
 
 ggplot(data, aes(Kidhome, MntSweetProducts))+ geom_boxplot(outlier.colour =  "red") +  geom_point(position = position_jitter()) 
 
@@ -147,53 +183,78 @@ ggplot(data, aes(x=MntWines, y=Marital_Status)) +
   geom_boxplot(width=0.05) + theme_minimal()
 
 ```
-NumStorePurchases seems to be the most useful variable to analyse since marketing analysis might want to determine which profils buy the most in the store. In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. Here, skewness appears to be 0,7 which is at an acceptable level.
-```{r}
+
+<!-- Refer to the real name of variblke instead of abbreviation -->
+NumStorePurchases seems to be the most useful variable to analyse since marketing analysis might want to determine which profils buy the most in the store. In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. 
+<!-- Here, skewness appears to be 0,7 which is at an acceptable level. NO, you should say something more like: Skewness is quite high (0.7) BUT remains tolerable since this data is intrisincally skewed (no negative values possible), we will keep that in mind while making the model assumtpion checks ..-->
+
+```{r, fig.show="hold", out.width="50%", fig.align="center", warning=F, message=F}
 ggplot(data, aes(x = NumStorePurchases)) +
   geom_histogram(aes(y = ..density..),
                  colour = 1, fill = "white") +
   geom_density(adjust = 1) + labs(title = "Purchases",
  caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
 
-ggplot(data, aes(x = sqrt(NumStorePurchases))) +
-  geom_histogram(aes(y = ..density..),
-                 colour = 1, fill = "white") +
-  geom_density(adjust = 1) + labs(title = "Purchases",
- caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
+
+# put that into appendix!
+
+# ggplot(data, aes(x = sqrt(NumStorePurchases))) +
+#   geom_histogram(aes(y = ..density..),
+#                  colour = 1, fill = "white") +
+#   geom_density(adjust = 1) + labs(title = "Purchases",
+#  caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
 ```
+
 ## IV - Modelling
 
 ### A. LINEAR MODEL
 
-### **A.1. Creating the model**
-```{r}
+### **A.1. Creating the model and assessing assumptions**
+```{r, out.width="50%", warning=F, message=F}
 m1 <- lm(data=data, NumStorePurchases ~ Kidhome*Income*Education*age) 
 plot(m1, c(1:2,4), ask=F)
-plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data)
-text(Income ~NumStorePurchases, labels=ID,data, cex=0.9, font=1)
 ```
-### **A.2. Assessing outliers :** here we observe peculiar outliers for "Income". One income is equal to 666 666, and when income is higher than 150 000, people probably don't respond. We can safely remove these outliers.
+<!-- add comments -->
+```{r, warning=F, message=F}
+ggplot(data, aes(NumStorePurchases, Income)) + geom_point(color="blue", alpha=0.3, position = position_jitter())
+# plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data)
+# text(Income ~NumStorePurchases, labels=ID,data, cex=0.9, font=1)
+```
+
+Here we observe peculiar outliers for "Income". One income is equal to 666'666, and when income is higher than 150'000
+
+<!-- , people probably don't respond. We can safely remove these outliers. -->
+<!-- more like:  people didn't respond. We CHOOSE to remove these responses because we think they where not responding truthfully OR anything like thjat. -->
+
 ```{r}
 newdf = data %>%
   filter(!ID %in% c(9432, 5555, 4619, 5336, 1501, 1503, 8475, 4931, 11181) ) 
-
-plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data=newdf)
+# plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data=newdf) # odnt need that anbynmore
 ```
-### **A.3. Reassessing without the outliers**
-```{r}
+
+### **A.2. Reassessing without the outliers**
+
+```{r, out.width="50%", warning=F, message=F}
 m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age)
 plot(m1, c(1:2,4), ask=F)
 ```
-### **A.4. Filtering the variables to keep : AIC**
+<!-- add comments -->
+
+### **A.3. Model selection**
+
 Here we use the stepAIC function to select the model that has the best AIC.
+<!-- : filtering the variables to keep by choosing best AIC | integrate that into the above senmtence-->
 ```{r}
 ms <- MASS::stepAIC(m1, direction = "both", trace = FALSE) #il choisit le meilleur AIC
 ms$anova
 ```
-### **A.5. Computing the final model**
+
+### **A.4. Computing the final model**
+
 ```{r}
 finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age + Kidhome:Income + Kidhome:Education + Income:Education + Kidhome:age + Income:age + Education:age + Kidhome:Income:Education + Income:Education:age)
 ```
+<<<<<<< HEAD
 <<<<<<< HEAD
 ### **A.6. Checking for interferences**
 We first use the effectsize function : everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
@@ -202,12 +263,33 @@ We first use the effectsize function : everything that has 0.00 on the left of t
 We first use the eta_squared function : everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
 >>>>>>> 2470a4f (added stuff stadard poaramters)
 We also call the sjPlot function to plot all the estimates or to plot only one term at a time.
+=======
+
+### **A.5. Statisical inference**
+
+We first use the eta_squared function to compute the effect sizes: everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size.
+<!-- but we still keep them on the model. -->
+<!-- what is effect size and why use it ? -->
+>>>>>>> 358b61172573a8471ea7704ed00b42bc57b4fb09
 ```{r}
 parameters::model_parameters(anova(finalm1))
 effectsize::eta_squared(car::Anova(finalm1, type = 2), ci = 0.9, alternative = "two") #modified this a bit
 ```
+<<<<<<< HEAD
 ```{r, fig.show="hold", out.width="50%", fig.align = 'center'}
+=======
+<!-- add comments -->
+
+### **A.6. Plots and summary estimates** {.tabset}
+
+#### Plot estimates
+```{r, fig.show="hold", fig.align="center"}
+>>>>>>> 358b61172573a8471ea7704ed00b42bc57b4fb09
 sjPlot::plot_model(finalm1) 
+```
+
+#### Plot marginal effects
+```{r, fig.show="hold", out.width="50%"}
 sjPlot::plot_model(finalm1, type = "pred", terms = "Kidhome", show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = "Income", show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Kidhome"), show.data  = T, jitter = 1) 
@@ -215,31 +297,41 @@ sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "Education"), sho
 sjPlot::plot_model(finalm1, type = "pred", terms = c("Income", "age"), show.data  = T, jitter = 1) 
 sjPlot::plot_model(finalm1, type = "pred", terms = c("age", "Kidhome"), show.data  = T, jitter = 1) 
 <<<<<<< HEAD
+<<<<<<< HEAD
 sjPlot::tab_model(finalm1, rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"))
 =======
 ```
 ```{r}
 sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"), show.intercept = F) #what is this for? # this to show all the STANDARDIZED estimates on a numeric form in a table summarizing all thE information
 >>>>>>> 823e7fc6feafb7f0c0795164163160a6f9abd966
+=======
+>>>>>>> 358b61172573a8471ea7704ed00b42bc57b4fb09
 ```
+<!--add comments -->
+
+#### Summary table of standardized estimates
+```{r}
+sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"), show.intercept = F)  #what is this for? # this to show all the STANDARDIZED estimates on a numeric form in a table summarizing all thE information
+```
+<!--add comments for example the Rsquared is good-->
 
 ### B. PRINCIPAL COMPONENT ANALYSIS
 
 
 ```{r}
 clean_data <-data[rowSums(is.na(data))==0, ]
-pm1<-prcomp(clean_data[,-c(1,3,4,6,7,8,18)],  scale=TRUE)
-summary(pm1)
+pm1<-prcomp(clean_data[,-c(1,3,4,6,7,8,18)], scale=TRUE)
+# summary(pm1)
 
-data2 <- cbind(clean_data, pm1$x)
-m2 <- lm(data=data2, NumStorePurchases ~ PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8)
-summary(m2)
-m3 <- update(m2, . ~ . - PC6)
-anova(m3, m2)
-summary(m3)
+data2 <- cbind(clean_data, pm1$x) #double check!
+# str(data2)
 ```
-We need 8 principal components to reach 0,90.
-We see that PC6 is non-significant.
-We delete PC6 from the model, and this new model m3 is not significantly different from m2. Therefore we keep the simplest, which is m3. With summary(m3), we see that all PCs are significant. We keep the model m3.
 
+<!-- added that show pca nicely -->
+```{r, warning=F, message=F}
+sjPlot::tab_pca(pm1, show.cronb = F, show.var = T, nmbr.fctr = 8)
+```
+We need 8 principal components to attain 0,90
+
+<!-- #scale= standardise tout, car certains var. ont des échelles très différentes -->
 
