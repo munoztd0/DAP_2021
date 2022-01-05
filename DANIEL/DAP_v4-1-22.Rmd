@@ -20,7 +20,7 @@ path =  here("DANIEL")
 
  
 #data scanning 
-Raw_data <- read.csv2("Raw_data.csv")
+Raw_data <- read.csv2("Raw_data2.csv")
 ```
 
 
@@ -56,7 +56,7 @@ Here is a description of the different variables:
 #Creating a working dataset
 #Giving nice names to variables
 
-subjects<-Raw_data$ï..code
+subjects<-Raw_data$code
 wordpairs<-Raw_data$wordpair
 emotion<-Raw_data$emotion
 gender<-Raw_data$sex
