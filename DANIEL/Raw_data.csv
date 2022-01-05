@@ -6004,7 +6004,7 @@ km0404;łazienka - grzebień;3;1;3,75;1;3;1;miss; ; ;2;6,7598;lcgv;8;1;1;2;2;2;m
 km0404;patelnia - łyżka;3;1;4,5;1;3;1;miss; ; ;3;6,0565;lcgv;8;6;5;1;4;2;m;0
 km0404;słowo - łaciński;3;3;3,5;1;3;1;miss; ; ;3;5,1779;lcgv;9;1;1;3;3;2;m;0
 km0404;stempel - kopia;3;1;3,25;1;3;1;miss; ; ; ; ;lcgv;7;1;1;0;1;2;m;0
-km0404;celebryta - pycha;1;1;3,25;3;1;2;incorrect;2;,4706; ; ;lcgv;7;4;1;-2;5;0;m;1
+km0404;celebryta - pycha;1;1;3,25;3;1;2;incorrect;2;0,4706; ; ;lcgv;7;4;1;-2;5;0;m;1
 km0404;szczęka - obślinić;1;2;3;3;1;2;incorrect;2;1,0906;2;5,7385;lcgv;7;6;1;-1;3;0;m;1
 km0404;ocet - kwas;1;3;4,75;3;1;2;incorrect;2;2,628;2;5,1079;lcgv;7;1;1;0;2;0;m;1
 km0404;masa - prymitywny;1;3;3;3;1;2;incorrect;2;2,6892;3;5,2092;lcgv;4;4;1;-2;4;0;m;1
@@ -6054,7 +6054,7 @@ km0404;celnik - taryfa;2;1;3;3;2;2;miss; ; ;2;5,4539;lcgv;5;1;4;-1;4;2;m;0
 km0404;krawędź - spadzisty;2;3;3,5;3;2;2;miss; ; ;2;6,5277;lcgv;6;1;1;1;2;2;m;0
 km0404;łańcuch - maczuga;2;1;3;3;2;2;miss; ; ; ; ;lcgv;5;1;1;0;2;2;m;0
 km0404;sztylet - kłuć;2;2;4;3;2;2;miss; ; ; ; ;lcgv;7;1;6;-2;4;2;m;0
-km0404;dialekt - płynny;3;3;3;3;3;2;incorrect;2;,6305;2;6,7103;lcgv;9;1;1;3;4;0;m;1
+km0404;dialekt - płynny;3;3;3;3;3;2;incorrect;2;0,6305;2;6,7103;lcgv;9;1;1;3;4;0;m;1
 km0404;wytwórca - produkt;3;1;4;3;3;2;incorrect;2;1,0848;2;5,7327;lcgv;8;1;1;3;4;0;m;1
 km0404;dziedzina - tematyczny;3;3;3,75;3;3;2;incorrect;2;2,2434;2;5,4993;lcgv;8;1;1;2;3;0;m;1
 km0404;pompa - filtr;3;1;3,75;3;3;2;incorrect;2;2,3797;3;5,4357;lcgv;5;1;1;2;2;0;m;1
