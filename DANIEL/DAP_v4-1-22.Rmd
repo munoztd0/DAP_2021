@@ -23,14 +23,10 @@ pacman::p_load(here, ggplot2, ordinal, ggfortify, GGally, plyr, sjPlot, likert, 
 #get relative path
 path =here("DANIEL")
 
-<<<<<<< HEAD
  
-#data scanning 
-Raw_data <- read.csv2("Raw_data2.csv")
-=======
+
 #load data 
 Raw_data <- read.csv2("Raw_data.csv")
->>>>>>> fd3180a (comments Daniel)
 ```
 
 
@@ -81,14 +77,8 @@ Here is a description of the different variables:
 ```{r}
 #Creating a working dataset
 #Giving nice names to variables
-<<<<<<< HEAD
 
 subjects<-Raw_data$code
-=======
-subjects<-Raw_data$code
-# subjects<-Raw_data$ï..code
-#bug to fix !
->>>>>>> fd3180a (comments Daniel)
 wordpairs<-Raw_data$wordpair
 emotion<-Raw_data$emotion
 gender<-Raw_data$sex
