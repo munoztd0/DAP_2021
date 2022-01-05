@@ -20,7 +20,7 @@ path =  here("DANIEL")
 
  
 #data scanning 
-Raw_data <- read.csv2("Raw_data2.csv")
+Raw_data <- read.csv2("Raw_data.csv")
 ```
 
 
