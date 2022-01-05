@@ -54,7 +54,7 @@ documentclass     : "apa6"
 classoption       : "doc"
 output            : papaja::apa6_pdf
 ---
-
+<!-- maybe changin the shorttitle to DAP porject or somehting alike but nice header btw -->
 ```{r setup, include = FALSE}
 if (!require(pacman)) {
     install.packages(
@@ -67,10 +67,10 @@ if (!require(papaja)) {
 }
 
 pacman::p_load(
-    here, tinylabels, apaTables, tidyverse, gtsummary, car, GGally,
+    tinylabels, apaTables, tidyverse, gtsummary, car, GGally,
     ggfortify, MASS, rcompanion, moments, utils, sjPlot, interactions,
     kableExtra, report, papaja, bookdown, vtable, captioner, reshape2,
-    ggpubr, nnet, patchwork, stargazer, MuMIn
+    ggpubr, nnet, patchwork, stargazer, MuMIn, magick 
 )
 r_refs("r-references.bib")
 ```
@@ -78,7 +78,7 @@ r_refs("r-references.bib")
 ```{r analysis-preferences}
 # Seed for random number generation
 set.seed(42)
-knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed, comment = NA)
 ```
 
 \clearpage
@@ -181,8 +181,9 @@ For each sample in this data set ($n=130$), we have the following information:
 sumtable(df, out = "latex", anchor = "tab:summarize-data-frame", title = "Summary of the Data Set used in this Analysis")
 ```
 
-```{R describe data frame variables}
+```{R describe data frame variables, comment=NA}
 str(df)
+#frame overflow, not serious problem but not nice// check -> https://bookdown.org/yihui/rmarkdown-cookbook/text-width.html for hwo to fix it
 ```
 
 \clearpage
@@ -226,10 +227,16 @@ ggplot(df.melted, aes(x = Group, y = value)) +
             size = 7
         )
     )
+# nice plots ! but.. we can't see the variable 
+#try to shorten the names like so..
+#labels <- c("Age" = "Age", "Speech.Timing.Rate.Reading" = "Reading", ....)
+#facet_wrap(~variable, ncol = 5, scales = "free", labeller=labeller(variable = labels))
 ```
 
 Based on the empirical variables chosen, I excpected them to correlate. Indeed, Figure \ref{fig:correlate-ggpairs-plot} shows
-a relatively strong correlation between these variables.
+a relatively strong correlation between these variables. Based on visual inspection of the boxplots (Figure \ref{fig:boxplots-and-correlations}), I chose to remove outliers
+in the following way: 
+<!-- changed here to fit paginatiuon better -->
 
 ```{r correlate-ggpairs-plot, echo=FALSE, warning=FALSE, results='hide', fig.align = 'center', fig.cap = 'Plot based on ggpairs, colored by the response variable Group. The empirically collected speech data shows strong correlations (both positive and negative). In addition the density plots show the skewed distributions that were already seen in the boxplots.'}
 ggpairs(
@@ -241,8 +248,8 @@ ggpairs(
 ) + theme_light(base_size = 7)
 ```
 
-Based on visual inspection of the boxplots (Figure \ref{fig:boxplots-and-correlations}), I chose to remove outliers
-in the following way:
+<!-- Based on visual inspection of the boxplots (Figure \ref{fig:boxplots-and-correlations}), I chose to remove outliers -->
+<!-- in the following way:  put it above-->
 ```{r outlier-removal, echo=TRUE, results='hide'}
 df <- df[df$Pause.Interval.Duration.Monologue < 600, ]
 df <- df[(df$Group != "HC" | df$Pause.Interval.Duration.Monologue < 450), ]
@@ -366,6 +373,8 @@ d <- dredge(m.full, rank = "AIC")
 m.best.no.interactions <- get.models(d, 1)[[1]]
 summary(m.best.no.interactions)
 ```
+<!-- why dont you show the results ? either put them or put them in appendix, but I think a short sentence describing them is needed -->
+<br> 
 
 ```{R table-best-model-dredge, echo=FALSE}
 m.best.no.interactions.apa <- apa_print(m.best.no.interactions)
@@ -391,21 +400,26 @@ apa_table(
     m.interactions.apa$table,
     caption = "A full regression table of a manually created model with based on an interaction between the variables Pause Interval Duration Reading and Pause Interval Duration Monologue."
 )
+
+# here the table goes berkserk too check first comment on wrapping text
 ```
 
-### PCA
+<!-- good but not enough to show the table, now describe and interpret the results _. see the discussion on statistical inference on github + how good is the model, explained variance? effect size? -->
 
+## PCA
+
+<!-- why PCA?, what it does differnewlty briefly, and this section needs polishing-->
 As there has been significant correlation between the predictors in the ggpairs plot
 as well as some extreme changes in coefficients when adding additional variables,
 there exists the possbility of collinearity negatively affecting the models. Indeed,
 we observe variance inflation factors of more than 2.5 between all experimental predictors.
 This warrants and attempt at solving the potential collinearity issue.
 
-```{r vif}
+```{r vif, comment=NA}
 vif(glm(data = df.binom, Group ~ ., family = binomial))
 ```
 
-```{r run-pca}
+```{r run-pca, comment=NA}
 # PCA
 df.binom.pca <- prcomp(df.binom[, c(3, 4, 5, 6)], scale. = TRUE, center = TRUE)
 summary(df.binom.pca)
@@ -414,6 +428,7 @@ summary(df.binom.pca)
 Figure \ref{fig:pca-loadings} shows the loadings of the PCA. 
 
 ```{R pca-loadings, fig.align = 'center', fig.cap="PCA autoplot of PCs 1 and 2. It once again shows that there exists a strong correlation between the variables."}
+# what else does it shows?
 autoplot(
     df.binom.pca,
     data = df.binom,
@@ -444,7 +459,7 @@ ggpairs(
 A comparison between the interaction model with a model based on PC1 and the variable gender, 
 does not show a significant difference.
 
-```{R, compare PCA-based model to best model from eval}
+```{R, compare PCA-based model to best model from eval, comment=NA}
 model.binom.pca <- glm(
     data = df.biom.pca.joined,
     Group ~ PC1 + Gender,
@@ -464,11 +479,12 @@ print(a)
 ## Multinomial Regression
 
 To predict over all three groups (HC, PD, RBD), we have to use a more complex
-multinomial model. In order to evaluate the multinomial model, I created a train and
-test set. The training set contains 70% of the observations, while the test set contains the
-remaining 30%. Using the formula `Group ~ . - Age - Gender` results in the best performance.
+multinomial model. In order to evaluate the multinomial model, I created a train and test set. The training set contains 70% of the observations, while the test set contains the
+remaining 30%. 
+Using the formula `Group ~ . - Age - Gender` results in the best performance.
+<!-- do you shgow it somewhere in the papendix or >? -->
 
-```{r multinomial-regression, echo=TRUE}
+```{r multinomial-regression, echo=TRUE, comment=NA}
 # Set reference level explicitly
 df$Group <- relevel(df$Group, ref = "HC")
 
@@ -494,15 +510,20 @@ df.train$Group.Predicted <- predict(
 
 tab <- table(df.train$Group, df.train$Group.Predicted)
 tab
+# nicer way ot output a confusion matrix
+# calculate ratios instead of raw number to asses if True positive and false negative are high/low ? # check Lucile's DAP
 accuracy <- round((sum(diag(tab)) / sum(tab)) * 100, 2)
 ```
 
-The performance of this simple model of `r accuracy`% is interesting, especially when inspecting the
-table above. None of the healthy subjects were diagnosed with Parkinson's disease, which is discrimination
-important in a clinical setting. However, only 2 out of 17 subjects with PD were diagnosed correctly. In
+The performance of this simple model is `r accuracy`%, this is especially interesting when inspecting the
+confusion matrix above. None of the healthy subjects were diagnosed with Parkinson's disease, which is discrimination
+important in a clinical setting. However, only 2 out of 17
+<!-- ratios -->
+subjects with PD were diagnosed correctly. In
 addition, only 1 out of 35 subjects with RBD was misdiagnosed with PD.
+<!-- what does all of that mean ? how could you chnage that ? hint: are the proportions of each categories the same ? -->
 
-\clearpage
+<!-- \clearpage not tneccesary here --> 
 
 # Conclusion
 Given the challenging nature of the data set, as well as the collinearity within it, the multinomial model
@@ -512,9 +533,11 @@ healthy controls and subjects suffering from Parkinson's Disease, did not expres
 difference combinations of predictors only had a small influence on the outcome. While I attribute this to
 the highly correlated predictors, a PCA-based model could not improve the situation and did not result in
 significantly better performance.
+<!-- ar eyou sure the correlation is the only thing to blame ? hint: are the proportions of each categories represneted equally? -->
 
 \clearpage
-```{R, include=FALSE}
+<!-- i see the model selectio is here, good -->
+```{R, include=FALSE, comment=NA}
 # Appendix
 ## Manual Model Selection
 model.binom.all.3 <- glm(
@@ -585,7 +608,7 @@ summary(model.binom.all.10)
 ```
 
 ## Manual Model Plot
-
+<!-- put the model diagnostic plot and ocmment them birefly -->
 ```{R, include=FALSE}
 
 # Move to appendix as example of how to do this "manually"

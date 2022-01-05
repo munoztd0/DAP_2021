@@ -92,6 +92,7 @@ fear<-Raw_data$fear
 #Creating a dataset
 Data<-data.frame(subjects, wordpairs, emotion, gender, disgust)
 ```
+
 ```{r}
 #Adapting the variables
 Data$emotion<-as.factor(Data$emotion)

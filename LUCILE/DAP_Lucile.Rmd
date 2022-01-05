@@ -12,6 +12,7 @@ urlcolor: blue
 bibliography: ref.bib
 csl: ieee.csl
 ---
+think about putting "comment=NA"in your chunks, to remove
 # Introduction 
 
 ## Context 
@@ -115,6 +116,7 @@ suppressPackageStartupMessages(pacman::p_load(pander,       # Rmarkdown visualiz
                caret         # for the confusion matrix
                
 ))
+knitr::opts_chunk$set( comment = NA)
 ```
 ## 2. Import data
 ```{r, cache = TRUE}

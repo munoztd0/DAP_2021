@@ -125,9 +125,9 @@
 
 % Create new environments so endfloat can handle them
 % \newenvironment{ltable}
-%   {\begin{landscape}\centering\begin{threeparttable}}
-%   {\end{threeparttable}\end{landscape}}
-\newenvironment{lltable}{\begin{landscape}\centering\begin{ThreePartTable}}{\end{ThreePartTable}\end{landscape}}
+%   {\begin{landscape}\begin{center}\begin{threeparttable}}
+%   {\end{threeparttable}\end{center}\end{landscape}}
+\newenvironment{lltable}{\begin{landscape}\begin{center}\begin{ThreePartTable}}{\end{ThreePartTable}\end{center}\end{landscape}}
 
 % Enables adjusting longtable caption width to table width
 % Solution found at http://golatex.de/longtable-mit-caption-so-breit-wie-die-tabelle-t15767.html
@@ -140,6 +140,20 @@
 % \setlength{\parindent}{0.5in}
 % \setlength{\parskip}{0pt plus 0pt minus 0pt}
 
+% Overwrite redefinition of paragraph and subparagraph by the default LaTeX template
+% See https://github.com/crsh/papaja/issues/292
+\makeatletter
+\renewcommand{\paragraph}{\@startsection{paragraph}{4}{\parindent}%
+  {0\baselineskip \@plus 0.2ex \@minus 0.2ex}%
+  {-1em}%
+  {\normalfont\normalsize\bfseries\itshape\typesectitle}}
+
+\renewcommand{\subparagraph}[1]{\@startsection{subparagraph}{5}{1em}%
+  {0\baselineskip \@plus 0.2ex \@minus 0.2ex}%
+  {-\z@\relax}%
+  {\normalfont\normalsize\itshape\hspace{\parindent}{#1}\textit{\addperi}}{\relax}}
+\makeatother
+
 % \usepackage{etoolbox}
 \makeatletter
 \patchcmd{\HyOrg@maketitle}
@@ -151,7 +165,6 @@
   {\section*{\protect\normalfont{\@title}}}
   {}{\typeout{Failed to patch title.}}
 \makeatother
-\shorttitle{Biomarkers of Parkinson's Disease}
 \keywords{keywords\newline\indent Word count: X}
 \usepackage{csquotes}
 \ifxetex
@@ -192,6 +205,8 @@
 \author{Anja Probst\textsuperscript{1}}
 \date{}
 
+
+\shorttitle{Biomarkers of Parkinson's Disease}
 
 \authornote{
 
@@ -381,14 +396,14 @@ Group & 130 &  &  &  &  &  &  \\
 \end{table}
 
 \begin{verbatim}
-## 'data.frame':    130 obs. of  7 variables:
-##  $ Age                              : int  58 68 68 75 61 58 79 59 73 66 ...
-##  $ Gender                           : Factor w/ 2 levels "F","M": 1 1 2 2 2 2 2 1 2 2 ...
-##  $ Speech.Timing.Rate.Reading       : int  354 340 211 140 269 317 269 338 374 281 ...
-##  $ Speech.Timing.Rate.Monologue     : int  333 285 247 112 230 181 289 370 288 258 ...
-##  $ Pause.Interval.Duration.Reading  : int  146 173 377 360 211 186 214 145 117 213 ...
-##  $ Pause.Interval.Duration.Monologue: int  158 295 280 397 206 611 251 118 194 246 ...
-##  $ Group                            : Factor w/ 3 levels "HC","PD","RBD": 2 2 2 2 2 2 2 2 2 2 ...
+'data.frame':   130 obs. of  7 variables:
+ $ Age                              : int  58 68 68 75 61 58 79 59 73 66 ...
+ $ Gender                           : Factor w/ 2 levels "F","M": 1 1 2 2 2 2 2 1 2 2 ...
+ $ Speech.Timing.Rate.Reading       : int  354 340 211 140 269 317 269 338 374 281 ...
+ $ Speech.Timing.Rate.Monologue     : int  333 285 247 112 230 181 289 370 288 258 ...
+ $ Pause.Interval.Duration.Reading  : int  146 173 377 360 211 186 214 145 117 213 ...
+ $ Pause.Interval.Duration.Monologue: int  158 295 280 397 206 611 251 118 194 246 ...
+ $ Group                            : Factor w/ 3 levels "HC","PD","RBD": 2 2 2 2 2 2 2 2 2 2 ...
 \end{verbatim}
 
 \clearpage
@@ -417,7 +432,8 @@ between all three groups (HC, PD, and RBD).
 \end{figure}
 
 Based on the empirical variables chosen, I excpected them to correlate. Indeed, Figure \ref{fig:correlate-ggpairs-plot} shows
-a relatively strong correlation between these variables.
+a relatively strong correlation between these variables. Based on visual inspection of the boxplots (Figure \ref{fig:boxplots-and-correlations}), I chose to remove outliers
+in the following way:
 
 \begin{figure}
 
@@ -427,9 +443,6 @@ a relatively strong correlation between these variables.
 
 \caption{Plot based on ggpairs, colored by the response variable Group. The empirically collected speech data shows strong correlations (both positive and negative). In addition the density plots show the skewed distributions that were already seen in the boxplots.}\label{fig:correlate-ggpairs-plot}
 \end{figure}
-
-Based on visual inspection of the boxplots (Figure \ref{fig:boxplots-and-correlations}), I chose to remove outliers
-in the following way:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -510,10 +523,10 @@ selection function \texttt{dredge} from the R package \texttt{MuMIn}. Starting f
 \toprule
 Predictor & \multicolumn{1}{c}{$b$} & \multicolumn{1}{c}{95\% CI} & \multicolumn{1}{c}{$z$} & \multicolumn{1}{c}{$p$}\\
 \midrule
-Intercept & -5.53 & $[-8.93$, $-2.73]$ & -3.50 & < .001\\
-GenderM & -1.79 & $[-3.22$, $-0.49]$ & -2.61 & .009\\
-Pause Interval Duration Monologue & 0.01 & $[0.00$, $0.03]$ & 2.33 & .020\\
-Pause Interval Duration Reading & 0.02 & $[0.00$, $0.04]$ & 1.98 & .048\\
+Intercept & -5.53 & {}[-8.93, -2.73] & -3.50 & < .001\\
+GenderM & -1.79 & {}[-3.22, -0.49] & -2.61 & .009\\
+Pause Interval Duration Monologue & 0.01 & {}[0.00, 0.03] & 2.33 & .020\\
+Pause Interval Duration Reading & 0.02 & {}[0.00, 0.04] & 1.98 & .048\\
 \bottomrule
 \end{tabular}
 
@@ -538,9 +551,9 @@ a better model. Indeed, the model below shows that solely focusing on the intera
 \toprule
 Predictor & \multicolumn{1}{c}{$b$} & \multicolumn{1}{c}{95\% CI} & \multicolumn{1}{c}{$z$} & \multicolumn{1}{c}{$p$}\\
 \midrule
-Intercept & -2.29 & $[-3.94$, $-0.82]$ & -2.90 & .004\\
-GenderM & -1.72 & $[-3.10$, $-0.44]$ & -2.57 & .010\\
-Pause Interval Duration Reading $\times$ Pause Interval Duration Monologue & 0.00 & $[0.00$, $0.00]$ & 3.67 & < .001\\
+Intercept & -2.29 & {}[-3.94, -0.82] & -2.90 & .004\\
+GenderM & -1.72 & {}[-3.10, -0.44] & -2.57 & .010\\
+Pause Interval Duration Reading $\times$ Pause Interval Duration Monologue & 0.00 & {}[0.00, 0.00] & 3.67 & < .001\\
 \bottomrule
 \end{tabular}
 
@@ -550,7 +563,7 @@ Pause Interval Duration Reading $\times$ Pause Interval Duration Monologue & 0.0
 \end{table}
 
 \hypertarget{pca}{%
-\subsubsection{PCA}\label{pca}}
+\subsection{PCA}\label{pca}}
 
 As there has been significant correlation between the predictors in the ggpairs plot
 as well as some extreme changes in coefficients when adding additional variables,
@@ -559,20 +572,20 @@ we observe variance inflation factors of more than 2.5 between all experimental 
 This warrants and attempt at solving the potential collinearity issue.
 
 \begin{verbatim}
-##                               Age                            Gender 
-##                          1.210068                          1.417044 
-##        Speech.Timing.Rate.Reading      Speech.Timing.Rate.Monologue 
-##                          3.099071                          2.417658 
-##   Pause.Interval.Duration.Reading Pause.Interval.Duration.Monologue 
-##                          2.722974                          2.340769
+                              Age                            Gender 
+                         1.210068                          1.417044 
+       Speech.Timing.Rate.Reading      Speech.Timing.Rate.Monologue 
+                         3.099071                          2.417658 
+  Pause.Interval.Duration.Reading Pause.Interval.Duration.Monologue 
+                         2.722974                          2.340769 
 \end{verbatim}
 
 \begin{verbatim}
-## Importance of components:
-##                           PC1    PC2     PC3     PC4
-## Standard deviation     1.7106 0.8041 0.54100 0.36693
-## Proportion of Variance 0.7315 0.1616 0.07317 0.03366
-## Cumulative Proportion  0.7315 0.8932 0.96634 1.00000
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.7106 0.8041 0.54100 0.36693
+Proportion of Variance 0.7315 0.1616 0.07317 0.03366
+Cumulative Proportion  0.7315 0.8932 0.96634 1.00000
 \end{verbatim}
 
 Figure \ref{fig:pca-loadings} shows the loadings of the PCA.
@@ -598,23 +611,23 @@ A comparison between the interaction model with a model based on PC1 and the var
 does not show a significant difference.
 
 \begin{verbatim}
-## Analysis of Deviance Table
-## 
-## Model 1: Group ~ PC1 + Gender
-## Model 2: Group ~ Pause.Interval.Duration.Reading:Pause.Interval.Duration.Monologue + 
-##     Gender
-##   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
-## 1        75     77.765                     
-## 2        75     77.694  0    0.071
+Analysis of Deviance Table
+
+Model 1: Group ~ PC1 + Gender
+Model 2: Group ~ Pause.Interval.Duration.Reading:Pause.Interval.Duration.Monologue + 
+    Gender
+  Resid. Df Resid. Dev Df Deviance Pr(>Chi)
+1        75     77.765                     
+2        75     77.694  0    0.071         
 \end{verbatim}
 
 \hypertarget{multinomial-regression}{%
 \subsection{Multinomial Regression}\label{multinomial-regression}}
 
 To predict over all three groups (HC, PD, RBD), we have to use a more complex
-multinomial model. In order to evaluate the multinomial model, I created a train and
-test set. The training set contains 70\% of the observations, while the test set contains the
-remaining 30\%. Using the formula \texttt{Group\ \textasciitilde{}\ .\ -\ Age\ -\ Gender} results in the best performance.
+multinomial model. In order to evaluate the multinomial model, I created a train and test set. The training set contains 70\% of the observations, while the test set contains the
+remaining 30\%.
+Using the formula \texttt{Group\ \textasciitilde{}\ .\ -\ Age\ -\ Gender} results in the best performance.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -639,12 +652,12 @@ remaining 30\%. Using the formula \texttt{Group\ \textasciitilde{}\ .\ -\ Age\ -
 \end{Shaded}
 
 \begin{verbatim}
-## # weights:  18 (10 variable)
-## initial  value 97.776494 
-## iter  10 value 78.995920
-## iter  20 value 77.591907
-## final  value 77.591844 
-## converged
+# weights:  18 (10 variable)
+initial  value 97.776494 
+iter  10 value 78.995920
+iter  20 value 77.591907
+final  value 77.591844 
+converged
 \end{verbatim}
 
 \begin{Shaded}
@@ -660,25 +673,26 @@ remaining 30\%. Using the formula \texttt{Group\ \textasciitilde{}\ .\ -\ Age\ -
 \end{Shaded}
 
 \begin{verbatim}
-##      
-##       HC PD RBD
-##   HC  30  0   7
-##   PD   5  2  10
-##   RBD 11  1  23
+     
+      HC PD RBD
+  HC  30  0   7
+  PD   5  2  10
+  RBD 11  1  23
 \end{verbatim}
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{\# nicer way ot output a confusion matrix}
+\CommentTok{\# calculate ratios instead of raw number to asses if True positive and false negative are high/low ? \# check Lucile\textquotesingle{}s DAP}
 \NormalTok{accuracy }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{((}\FunctionTok{sum}\NormalTok{(}\FunctionTok{diag}\NormalTok{(tab)) }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(tab)) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{, }\DecValTok{2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-The performance of this simple model of 61.80\% is interesting, especially when inspecting the
-table above. None of the healthy subjects were diagnosed with Parkinson's disease, which is discrimination
-important in a clinical setting. However, only 2 out of 17 subjects with PD were diagnosed correctly. In
+The performance of this simple model is 61.80\%, this is especially interesting when inspecting the
+confusion matrix above. None of the healthy subjects were diagnosed with Parkinson's disease, which is discrimination
+important in a clinical setting. However, only 2 out of 17
+subjects with PD were diagnosed correctly. In
 addition, only 1 out of 35 subjects with RBD was misdiagnosed with PD.
-
-\clearpage
 
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
