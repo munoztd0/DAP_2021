@@ -12,7 +12,7 @@ urlcolor: blue
 bibliography: ref.bib
 csl: ieee.csl
 ---
-think about putting "comment=NA"in your chunks, to remove
+
 # Introduction 
 
 ## Context 
