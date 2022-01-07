@@ -10,7 +10,7 @@
 
 
 ## Lucile Favero
-[Breast Cancer Wisconsin Diagnostic](https://munoztd0.github.io/LUCILE/DAP_Lucile)
+[Breast Cancer Wisconsin Diagnostic](https://munoztd0.github.io/DAP_2021/LUCILE/DAP_Lucile)
 
 
 ## Juliette Faure
