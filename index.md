@@ -2,11 +2,11 @@
 
 
 ## Anja Probst
-[Early Biomarkers of Parkinson’s Disease Based on Natural Connected Speech](https://munoztd0.github.io/DAP_2021/ANJA/draft/dap_report_anja_probst.pdf) : munoztd0.github.io/DAP_2021/ANJA/draft/dap_report_anja_probst.pdf
+[Early Biomarkers of Parkinson’s Disease Based on Natural Connected Speech](https://munoztd0.github.io/DAP_2021/ANJA/draft/dap_report_anja_probst.pdf): munoztd0.github.io/DAP_2021/ANJA/draft/dap_report_anja_probst.pdf
 
 
 ## Daniel Granja
-[Emotion Eliciation](https://munoztd0.github.io/DAP_2021/DANIEL/DAP_v4-1-22):munoztd0.github.io/DAP_2021/DANIEL/DAP_v4-1-22
+[Emotion Eliciation](https://munoztd0.github.io/DAP_2021/DANIEL/DAP_v4-1-22): munoztd0.github.io/DAP_2021/DANIEL/DAP_v4-1-22
 
 
 ## Lucile Favero
