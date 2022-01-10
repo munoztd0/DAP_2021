@@ -82,7 +82,6 @@ In the annex, we build a GLM model with the library "glmnet" and we find a simil
 
 ## 1. Required libraries 
 
-
 ```{r, warning = FALSE, message=FALSE}
 # Check if packages are installed and if not install them
 if(!require(pacman)) {
@@ -92,7 +91,6 @@ if (!require(papaja)) {
   remotes::install_github("crsh/papaja")
   remotes::install_github("kassambara/factoextra")
 }
-
 # if(!require(devtools)) {
 #   install.packages("devtools")
 #   
@@ -100,7 +98,6 @@ if (!require(papaja)) {
 # if(!require(caret)) {
 #   install.packages("caret")
 # }
-
 suppressPackageStartupMessages(pacman::p_load(pander,       # Rmarkdown visualization
                GGally, 
                ggfortify,
@@ -216,8 +213,8 @@ This first observation supports the hypothesis that the value of some features i
 ### ggcorr
 The following function permits to visualize better the correlation.
 ```{r, warning=F, cache=TRUE}
-ggcorr(df_mean,geom = "text",nbreaks = 5,hjust = 1,label = FALSE,
-       label_alpha = 0.7) +
+ggcorr(df_mean, nbreaks = 10,hjust = 1,label = TRUE,
+       label_alpha = TRUE) +
       labs(title = " Breath cancer features Pearson correlation") +
       theme(legend.position ="none")
 
@@ -394,6 +391,7 @@ These two values are close, we can validate this model.
 See in annex another GLM modelization with glmnet. 
 
 ## 4.  Confusion matrix 
+
 First, let's separate the data into train and test sets.
 ```{r,message = FALSE,cache=TRUE}
 # set the seed to make partition reproducible
@@ -406,8 +404,6 @@ train <- df_mean_reduc[train_ind, ]
 test <- df_mean_reduc[-train_ind, ]
 y_test<- as.numeric(test$diagnosis)-1
 ```
-
-#Perform train / test split on the data
 
 Built the model with the data of the train set
 ```{r,cache=TRUE}
@@ -427,7 +423,7 @@ colnames(conf_mat$table) =c("B","M")
 kable(prop.table(conf_mat$table))
 ```
 * True positive and false negative are high ($TP \approx 0.59$,$FN \approx 0.36$)
-* True negative and false positive are low ($ \approx 0.03$ )
+* True negative and false positive are low ($ TN \approx 0.03$, $ FP \approx 0.03$ )
 
 ```{r,cache=TRUE}
 conf_mat
@@ -518,8 +514,19 @@ This model permits to predict breast cancer with quite a good accuracy.
 
 
 # Annex
+## 1.diagnostic plot of retained glm model
+```{r, cache=TRUE}
+ autoplot(m_selected_quas,1:4)+ theme_minimal()
+```
+* The "residual vs fitted" and "scale-location" subplots show a local regression curve close to 0.
 
-##  Glmnet{.tabset} 
+* In the "Q-Q plot", the central points seem to follow well the normality but it is not the case at the extremes of the distribution.
+
+* In the "Cook's distance" plot there is no observation with a high influence on the model: all distances are smaller than 0.5.
+
+These observations allow us to conclude that this model can be validated.
+
+## 1. Glmnet{.tabset} 
 
 First, let's separate the data into train and test sets. (This will permit us to be more accurate when we test the goodness of the model)
 ```{r,message = FALSE,cache=TRUE}
