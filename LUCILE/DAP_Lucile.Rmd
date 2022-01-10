@@ -91,13 +91,6 @@ if (!require(papaja)) {
   remotes::install_github("crsh/papaja")
   remotes::install_github("kassambara/factoextra")
 }
-# if(!require(devtools)) {
-#   install.packages("devtools")
-#   
-# }
-# if(!require(caret)) {
-#   install.packages("caret")
-# }
 suppressPackageStartupMessages(pacman::p_load(pander,       # Rmarkdown visualization
                GGally, 
                ggfortify,
@@ -301,6 +294,7 @@ summary(m)
 * There is a lot of variables not significant. To solve this we can try to remove them.
 * The ratio of the residual deviance by its degrees of freedom is $153/561 = 0.272$ where the dispersion parameter is 1. There is underdispersion. To solve this we can use the quasibinomial family.
 
+Note: In annex a GLM model will be found with interactions.
 
 ## 2. Model selection{.tabset} 
 By performing several anova test, we will see that we can remove the features concavity, symmetry and fractal_dimension, because there is not a significant difference between the model with these variables and the one without.
@@ -386,9 +380,9 @@ extract_eq(m_selected_quas, use_coefs = TRUE, wrap = TRUE, terms_per_line = 2)
 ```
  
 The ratio of the residual deviance by its degrees of freedom is $160.32/564 = 0.284$ where the dispersion parameter is 0.458.
-These two values are close, we can validate this model.
+These two values are close, we can validate this model. 
 
-See in annex another GLM modelization with glmnet. 
+See in annex the diagnostic plot of this model and another GLM modelization with glmnet. 
 
 ## 4.  Confusion matrix 
 
@@ -493,6 +487,7 @@ summary(glm_pca)
 * The p-value of the two PC is significant. 
 * The ratio of the residual deviance by its degrees of freedom is $162.50/565 = 0.288$ where the dispersion parameter is 0.618.
 These two values are close, we can validate this model.
+See in annex the diagnostic plot of this model.
 
 # Conclusion
 
@@ -514,7 +509,25 @@ This model permits to predict breast cancer with quite a good accuracy.
 
 
 # Annex
-## 1.diagnostic plot of retained glm model
+## 1. GLM model with interactions 
+
+We will add interactions to the retained GLM model.
+```{r,cache=TRUE}
+m_selected_quas_inter <-
+  glm(
+    data = df_mean_reduc,
+    diagnosis ~ radius * texture * smoothness * concave.points,
+    family = quasibinomial
+  )
+(summary(m_selected_quas_inter))
+```
+* The ratio of the residual deviance by its degrees of freedom is reasonably close to the dispersion parameter.
+* The number of Fisher Scoring iterations is small.
+* From the p-value of each variable we see that there are no significant interactions. 
+
+So, adding interactions to our selected model doesn't give us a better modelization. 
+
+## 2. Diagnostic plots of retained GLM model
 ```{r, cache=TRUE}
  autoplot(m_selected_quas,1:4)+ theme_minimal()
 ```
@@ -522,11 +535,18 @@ This model permits to predict breast cancer with quite a good accuracy.
 
 * In the "Q-Q plot", the central points seem to follow well the normality but it is not the case at the extremes of the distribution.
 
-* In the "Cook's distance" plot there is no observation with a high influence on the model: all distances are smaller than 0.5.
+* In the "Cook's distance" plot there is no observation with a high influence on the model: all distances are smaller than 0.3.
 
 These observations allow us to conclude that this model can be validated.
 
-## 1. Glmnet{.tabset} 
+## 3. Diagnostic plots of the PCA GLM model
+
+```{r, cache=TRUE}
+ autoplot(glm_pca,1:4)+ theme_minimal()
+```
+The diagnostic plots are similar to the previous one. This leads to the same conclusion: this model can be validated.
+
+## 4. GLM model with the library Glmnet{.tabset} 
 
 First, let's separate the data into train and test sets. (This will permit us to be more accurate when we test the goodness of the model)
 ```{r,message = FALSE,cache=TRUE}
@@ -545,6 +565,7 @@ y_train <- train$diagnosis
 x_test <-  test[,-1]
 y_test <-  test$diagnosis
 ```
+
 Apply GLM with cross validation
 ```{r, cache=TRUE}
 library("glmnet")
@@ -553,6 +574,7 @@ tol_length=length(levels(y_train))
 cvfit<-cv.glmnet(as.matrix(x_train), y_train,family = "binomial",
                  type.measure="class")
 ```
+
 Show the misclassification error according to the regularization hyperparameter $\lambda$.
 ```{r, cache=TRUE}
 plot(cvfit)
@@ -616,6 +638,12 @@ Let's see the features retained by this model :
 coef(cvfit, s="lambda.1se")
 ```
 Again, this model is less conservative than our previous GLM model.
+
+## 5. Version of R used 
+
+```{r echo = FALSE}
+pander(sessionInfo())
+```
 
 # References
 
