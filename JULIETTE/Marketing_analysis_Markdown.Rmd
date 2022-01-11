@@ -2,13 +2,13 @@
 title: "Data Analysis Project :"
 author: "Juliette Faure"
 output:
+  # pdf_document: default
   html_document:
     includes:
     code_folding: "hide"
     toc: true
     toc_float: true
     number_sections: false
-  # pdf_document: default
 ---
 
 # Marketing analysis 
