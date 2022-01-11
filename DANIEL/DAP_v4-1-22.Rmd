@@ -23,11 +23,6 @@ pacman::p_load(here, ggplot2, ordinal, ggfortify, GGally, plyr, sjPlot, likert, 
 #get relative path
 path =here("DANIEL")
 
- 
-
-#data scanning 
-
-
 #load data 
 
 Raw_data <- read.csv2("Raw_data.csv")
@@ -41,7 +36,6 @@ Raw_data <- read.csv2("Raw_data.csv")
 
 
 According to the American Psychological Association (APA), emotion is defined as “a complex reaction pattern, involving experiential, behavioral and physiological elements.”
-<!-- use `<br>` to put brealine in your parapgraph so it is not suffocating -->
 <br>
 
 Researchers have been studying the impact of emotions on cognitive functions, such as memory, and have shown that emotional activation, and specifically emotions of negative valence, favours the retrieval processes of associative memory for single items, but impairs it for associated items or contexts (Schmidt, Patnaik & Kensinger, 2010).
@@ -364,7 +358,7 @@ Schmidt, K., Patnaik, P., & Kensinger, E. A. (2011). Emotion’s influence on me
 ### 1. Alternative graph
 ```{r alternate graph}
 ##Disgust depending on emotion presented
-ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter(alpha=0.1)+
+ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter(alpha=0.3)+
   labs(title = "Distribution of disgust evaluation", x = "Wordpairs' emotions", y = "Likert scale of subjective disgust evaluation (1-7)") + theme(plot.title = element_text(hjust = 0.75)) + labs(colour = "Gender")+ theme(plot.title = element_text(size = rel(2)))
 ```
 
