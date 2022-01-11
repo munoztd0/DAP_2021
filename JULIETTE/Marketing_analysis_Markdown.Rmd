@@ -183,7 +183,7 @@ data %>%
 ```
 
 ## III - Hypotheses 
-
+<!-- comment: Here you should clean that up, what are you rhypthesis ? why these graphs are important or not ? what are they saying ? why are they pltted differenlty ?  -->
 Here we will be eyeballing the relationship between various variables, and determine those that seem the most relevant for further analysis.
   
 ```{r, fig.show="hold", out.width="50%", warning=F, message=F}
@@ -200,10 +200,12 @@ ggplot(data, aes(x=Income, y=NumStorePurchases)) +
 
 
 ```
+<!-- comment: Here why is NumStorePurchases useful ? based on the plot or not ? if Not, why the plot ? -->
 <br>
 The number of store purchases seems to be the most useful variable to analyse since we might want to determine which profils buy the most in the store. In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. 
 <br>
 In this case, the data is intrisincally skewed because there are no negative values possible. Skewness is quite high (0.7) but remains tolerable regarding the nature of the data. It has to be kept in mind while performing the model assumption checks.
+<!--  PUT THAT INTO ANNEX, THIS IS NOT FUNDAMENTAL INFORMATION + YOU ALREADY HAVE THE SAME PLOT JUST ABOVE-->
 
 ```{r, fig.show="hold", out.width="50%", fig.align="center", warning=F, message=F}
 ggplot(data, aes(x = NumStorePurchases)) +
@@ -223,6 +225,7 @@ ggplot(data, aes(x = NumStorePurchases)) +
 m1 <- lm(data=data, NumStorePurchases ~ Kidhome*Income*Education*age) 
 plot(m1, c(1:2,4), ask=F)
 ```
+<!-- comments: Here put it in annex-->
 <!-- add comments -->
 <br>
 <br>
@@ -240,12 +243,14 @@ ggplot(data, aes(NumStorePurchases, Income)) + geom_point(color="blue", alpha=0.
 ```
 
 Here we observe peculiar outliers for "Income". One income is equal to 666'666, and for income values higher than 150'000, people did not respond. We choose to remove the responses of these customers because they probably did not write the true value of their income.
+<!-- because they probably did not write the true value of their income. comment: Mhh that's very speculative why not the opposite ? -->
 
 ```{r}
 newdf = data %>%
   filter(!ID %in% c(9432, 5555, 4619, 5336, 1501, 1503, 8475, 4931, 11181) ) 
 ```
 
+<!-- comment: Here put all of this in annex too -->
 ### **A.2. Reassessing without the outliers**
 <br>
 
@@ -255,7 +260,9 @@ plot(m1, c(1:2,4), ask=F)
 ```
 <br>
 <br>
-Paying attention to the QQplot, we see that extreme points are more normal. The Cook's distance graph also doesn't show values higher than 0,5.
+Paying attention to the QQplot, we see that extreme points are more normal. 
+<!-- comment: that's not that, lets talk about it or see this https://moodle.unige.ch/mod/page/view.php?id=504355  -->
+The Cook's distance graph also doesn't show values higher than 0,5.
 
 ### **A.3. Model selection**
 
@@ -280,7 +287,7 @@ We first use the eta_squared function to compute the effect sizes: everything th
 parameters::model_parameters(anova(finalm1))
 effectsize::eta_squared(car::Anova(finalm1, type = 2), ci = 0.9, alternative = "two") 
 ```
-#<!-- add comments -->
+<!-- add comments -->
 
 ### **A.6. Plots and summary estimates** {.tabset}
 
@@ -322,11 +329,13 @@ Finally, over time, the augmentation of the number of store purchases proportion
 #### Summary table of standardized estimates
 
 We want a table that summarizes all the standardized estimates in a numeric form.
+<!-- "We want a": sounds weird..  -->
 ```{r}
 sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"), show.intercept = F)   #
 ```
 <br>
 We see that R^2 and adjusted R^2 have acceptable values. 
+<!-- comment: Why, what doies it meant ? -->
 
 ### B. Principal component analysis
 

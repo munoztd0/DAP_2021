@@ -129,7 +129,7 @@ data %>%
 ```
 
 ## III - Hypotheses 
-
+<!-- comment: Here you should clean that up, what are you rhypthesis ? why these graphs are important or not ? what are they saying ? why are they pltted differenlty ?  -->
 Here we will be eyeballing the relationship between various variables, and determine those that seem the most relevant for further analysis.
 ```{r}
 
@@ -149,19 +149,21 @@ ggplot(data, aes(x=MntWines, y=Marital_Status)) +
   geom_boxplot(width=0.05) + theme_minimal()
 
 ```
-NumStorePurchases seems to be the most useful variable to analyse since marketing analysis might want to determine which profils buy the most in the store. In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. Here, skewness appears to be 0,7 which is at an acceptable level.
+<!-- comment: Here why is NumStorePurchases useful ? based on the plot or not ? if Not, why the plot ? -->
+NumStorePurchases seems to be the most useful variable to analyse since marketing analysis might want to determine which profils buy the most in the store. 
+<!-- In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. Here, skewness appears to be 0,7 which is at an acceptable level. PUT THAT INTO ANNEX, THIS IS NOT FUNDAMENTAL INFORMATION + YOU ALREADY HAVE THE SAME PLOT JUST ABOVE-->
 ```{r}
-ggplot(data, aes(x = NumStorePurchases)) +
-  geom_histogram(aes(y = ..density..),
-                 colour = 1, fill = "white") +
-  geom_density(adjust = 1) + labs(title = "Purchases",
- caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
-
-ggplot(data, aes(x = sqrt(NumStorePurchases))) +
-  geom_histogram(aes(y = ..density..),
-                 colour = 1, fill = "white") +
-  geom_density(adjust = 1) + labs(title = "Purchases",
- caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
+# ggplot(data, aes(x = NumStorePurchases)) +
+#   geom_histogram(aes(y = ..density..),
+#                  colour = 1, fill = "white") +
+#   geom_density(adjust = 1) + labs(title = "Purchases",
+#  caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
+# 
+# ggplot(data, aes(x = sqrt(NumStorePurchases))) +
+#   geom_histogram(aes(y = ..density..),
+#                  colour = 1, fill = "white") +
+#   geom_density(adjust = 1) + labs(title = "Purchases",
+#  caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
 ```
 ## IV - Modelling
 
@@ -174,7 +176,11 @@ plot(m1, c(1:2,4), ask=F)
 plot(Income ~NumStorePurchases, col="lightblue", pch=19, cex=2,data)
 text(Income ~NumStorePurchases, labels=ID,data, cex=0.9, font=1)
 ```
-### **A.2. Assessing outliers :** here we observe peculiar outliers for "Income". One income is equal to 666 666, and when income is higher than 150 000, people probably don't respond. We can safely remove these outliers.
+
+<!-- comment: Here put all of this in annex -->
+### **A.2. Assessing outliers :** 
+
+Here we observe peculiar outliers for "Income". One income is equal to 666 666, and when income is higher than 150 000, people probably don't respond. We can safely remove these outliers.
 ```{r}
 newdf = data %>%
   filter(!ID %in% c(9432, 5555, 4619, 5336, 1501, 1503, 8475, 4931, 11181) ) 
