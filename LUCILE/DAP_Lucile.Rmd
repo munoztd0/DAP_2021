@@ -20,14 +20,16 @@ csl: ieee.csl
  
 One of the biggest causes of mortality among women is breast cancer @ibrahim_feature_2021. The more the detection is delayed, the lower the chance of survival is. That is why efficient diagnosis is critical to provide personalized care and treatment, and to improve cancer outcomes. However, it is quite difficult due to the complexity and diversity of this disease. 
 
-A major concern of the field is to be able to classify the type of tumor with very good accuracy and determine critical features that allow this classification.  Particular attention is paid to the false positive rate of this classification since  it is a vital issue.
+A major concern of the field is to be able to classify the type of tumor with very good accuracy and determine critical features that allow this classification.  Particular attention is paid to the false positive rate of this classification since the issue is vital.
 
 ## 1. Information about the dataset 
 We propose to study the Wisconsin Breast Cancer Dataset. 
 
-To understand the feature of the selected dataset, we will need first some definitions:
+To understand the features of the selected dataset, we will need first some definitions.
 
-* According to @noauthor_definition_2011, a tumor is "An abnormal mass of tissue that forms when cells grow and divide more than they should or do not die when they should. Tumors may be benign (not cancer) or malignant (cancer). Benign tumors may grow large but do not spread into, or invade, nearby tissues or other parts of the body. Malignant tumors can spread into, or invade, nearby tissues"
+### Definitions
+
+* According to @noauthor_definition_2011, a tumor is "An abnormal mass of tissue that forms when cells grow and divide more than they should or do not die when they should. Tumors may be benign (not cancer) or malignant (cancer). Benign tumors may grow large but do not spread into, or invade, nearby tissues or other parts of the body. Malignant tumors can spread into, or invade, nearby tissues."
 
 * Specifically, breast cancer is a malignant tumor located in breast cells of the fatty tissues or the fibrous connective tissues within the breast. @noauthor_what_2018 
 
@@ -35,7 +37,9 @@ To understand the feature of the selected dataset, we will need first some defin
 
 ![Benign and malignant tumor of a breast mass, fine needle aspiration @sumbria_breast_2021](benign_malignant.png){style="float: center;margin-right: 7px; margin-left: 7px;margin-top: 7px; width:60%;"}
   
-According to data description, "the features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. "
+### Description of the data
+
+"Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image. " [Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) 
 
 There are ten real-valued features computed for each cell nucleus:
 
@@ -61,7 +65,6 @@ All feature values are recorded with four significant digits.
 Note: 
 The following analysis has been done with the full dataset. However, the mean of each feature has shown to be more relevant, so we decide to present the analysis only with the mean variables.
 
-[Link to dataset](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29) 
 
 ##  2. Question of interest 
 
@@ -91,7 +94,7 @@ if (!require(papaja)) {
   remotes::install_github("crsh/papaja")
   remotes::install_github("kassambara/factoextra")
 }
-suppressPackageStartupMessages(pacman::p_load(pander,       # Rmarkdown visualization
+suppressPackageStartupMessages(pacman::p_load(pander, # Rmarkdown visualization
                GGally, 
                ggfortify,
                ggplot2,
@@ -220,9 +223,7 @@ ggcorr(df_mean, nbreaks = 10,hjust = 1,label = TRUE,
 
 * Surprisingly, concavity, compactness and concave.points have a strong correlation.( $r \approx 0.8$ or $r \approx 0.9$)
 
-Note:
-
-Even if compactness is defined as $perimeter^2 / area - 1.0$ the r between this variable and area or perimeter is not 1 because the correlation shows only the linear dependency and their relationship is not linear.
+Note: Even if compactness is defined as perimeter<sup>2</sup> / area - 1, the r between this variable and area or perimeter is not 1 because the correlation shows only the linear dependency and their relationship is not linear.
 
 ### Linear models of correlated variables{.tabset}
 
@@ -292,9 +293,7 @@ summary(m)
 
 * The algorithm converges: the number of fisher scoring iterations is reasonable.
 * There is a lot of variables not significant. To solve this we can try to remove them.
-* The ratio of the residual deviance by its degrees of freedom is $153/561 = 0.272$ where the dispersion parameter is 1. There is underdispersion. To solve this we can use the quasibinomial family.
-
-Note: In annex a GLM model will be found with interactions.
+* The ratio of the residual deviance by its degrees of freedom is 153/561 = 0.272 where the dispersion parameter is 1. There is underdispersion. To solve this we can use the quasibinomial family.
 
 ## 2. Model selection{.tabset} 
 By performing several anova test, we will see that we can remove the features concavity, symmetry and fractal_dimension, because there is not a significant difference between the model with these variables and the one without.
@@ -373,20 +372,30 @@ m_selected_quas <-
 (summary(m_selected_quas))
 ```
 
-The formula of the retained model is: 
+The formula of the model is: 
 
 ```{r,cache=TRUE}
 extract_eq(m_selected_quas, use_coefs = TRUE, wrap = TRUE, terms_per_line = 2)
 ```
+
  
-The ratio of the residual deviance by its degrees of freedom is $160.32/564 = 0.284$ where the dispersion parameter is 0.458.
-These two values are close, we can validate this model. 
+The ratio of the residual deviance by its degrees of freedom is 160.32/564 = 0.284 where the dispersion parameter is 0.458.
+These two values are close, we can keep this model. 
 
-See in annex the diagnostic plot of this model and another GLM modelization with glmnet. 
+Note: 
 
-## 4.  Confusion matrix 
+* In the annex we implement the diagnostic plots of this model. 
+* Also, we try and compare our model with and without interactions. 
+* Moreover, another GLM modelization is done with glmnet. 
+
+## 4. Accuracy and false positive rate
+
+Now, let's address the question of accuracy and false positive rate of the selected model.
+
+### Train and test sets
 
 First, let's separate the data into train and test sets.
+
 ```{r,message = FALSE,cache=TRUE}
 # set the seed to make partition reproducible
 set.seed(6)
@@ -399,7 +408,7 @@ test <- df_mean_reduc[-train_ind, ]
 y_test<- as.numeric(test$diagnosis)-1
 ```
 
-Built the model with the data of the train set
+We built the model with the data of the train set.
 ```{r,cache=TRUE}
 m_selected_quas_test <-glm(data = train,
                           diagnosis ~ 
@@ -407,7 +416,10 @@ m_selected_quas_test <-glm(data = train,
                           family = quasibinomial)
 ```
 
-Test the accuracy of the model with the test set by computing the confusion matrix and other statistics. 
+### Confusion matrix 
+
+We test the accuracy of the model with the test set by computing the confusion matrix and other statistics. 
+
 ```{r,cache=TRUE}
 pdata <- predict(m_selected_quas_test, newdata = test, type = "response")
 pred <- as.numeric(pdata>0.5)
@@ -417,14 +429,16 @@ colnames(conf_mat$table) =c("B","M")
 kable(prop.table(conf_mat$table))
 ```
 * True positive and false negative are high ($TP \approx 0.59$,$FN \approx 0.36$)
-* True negative and false positive are low ($ TN \approx 0.03$, $ FP \approx 0.03$ )
+* True negative and false positive are low ($TN \approx 0.03$, $FP \approx 0.03$ )
 
 ```{r,cache=TRUE}
 conf_mat
 ```
-The accuracy of the model is 0.9441, with a 95% confidence interval:(0.8927, 0.9755).
 
-Further direction: Here we compute the confusion matrix and the other statistics with only one test set. It could be accurate to do this computation for several test set.  
+The accuracy of the model is 0.9441, with a 95% confidence interval:(0.8927, 0.9755). It is quite good.
+
+Further direction: 
+Here we compute the confusion matrix and the other statistics with only one test set. It could be accurate to do this computation for several test set.  
 
 # IV. PCA
 ## 1. Variability explained by each PC{.tabset}
@@ -460,11 +474,9 @@ autoplot(p,x = 1,y = 2, data = df_mean_reduc,colour = "diagnosis",
   theme_minimal()
 ```
 
-By plotting the data in the plan of the first 2 principal components we see a clear separation between benign and  malignant type of cancer. That mean that knowing the location in this plan of a new observation should allow to predict cancer. Let's try this approach by applying a GLM model to the first two PC. 
+By plotting the data in the plan of the first 2 principal components we see a clear separation between benign and  malignant type of tumor. That mean that knowing the location in this plan of a new observation should allow to predict cancer. Let's try this approach by applying a GLM model to the first two PC. 
 
-Note:
-
-We tried to plot the data in all the possible pairs formed by the first four components. The clearest separation between the type of cancer occurs in the plan PC1-PC2.
+Note: We tried to plot the data in all the possible pairs formed by the first four components. The clearest separation between the type of cancer occurs in the plan PC1-PC2.
  
 ## 3. GLM model with PCA
 ### Implementation
@@ -485,9 +497,10 @@ summary(glm_pca)
 
 * The algorithm converges: the number of fisher scoring iterations is reasonable.
 * The p-value of the two PC is significant. 
-* The ratio of the residual deviance by its degrees of freedom is $162.50/565 = 0.288$ where the dispersion parameter is 0.618.
+* The ratio of the residual deviance by its degrees of freedom is 162.50/565 = 0.288 where the dispersion parameter is 0.618.
 These two values are close, we can validate this model.
-See in annex the diagnostic plot of this model.
+
+See in annex the diagnostic plots of this model.
 
 # Conclusion
 
@@ -519,7 +532,7 @@ m_selected_quas_inter <-
     diagnosis ~ radius * texture * smoothness * concave.points,
     family = quasibinomial
   )
-(summary(m_selected_quas_inter))
+summary(m_selected_quas_inter)
 ```
 * The ratio of the residual deviance by its degrees of freedom is reasonably close to the dispersion parameter.
 * The number of Fisher Scoring iterations is small.
@@ -531,13 +544,14 @@ So, adding interactions to our selected model doesn't give us a better modelizat
 ```{r, cache=TRUE}
  autoplot(m_selected_quas,1:4)+ theme_minimal()
 ```
+
 * The "residual vs fitted" and "scale-location" subplots show a local regression curve close to 0.
 
 * In the "Q-Q plot", the central points seem to follow well the normality but it is not the case at the extremes of the distribution.
 
 * In the "Cook's distance" plot there is no observation with a high influence on the model: all distances are smaller than 0.3.
 
-These observations allow us to conclude that this model can be validated.
+All together, these observations allow us to conclude that this model can be validated.
 
 ## 3. Diagnostic plots of the PCA GLM model
 
@@ -548,7 +562,7 @@ The diagnostic plots are similar to the previous one. This leads to the same con
 
 ## 4. GLM model with the library Glmnet{.tabset} 
 
-First, let's separate the data into train and test sets. (This will permit us to be more accurate when we test the goodness of the model)
+First, let's separate the data into train and test sets.
 ```{r,message = FALSE,cache=TRUE}
 # set the seed to make partition reproducible
 set.seed(123)
@@ -566,7 +580,7 @@ x_test <-  test[,-1]
 y_test <-  test$diagnosis
 ```
 
-Apply GLM with cross validation
+We then apply a GLM model with cross validation.
 ```{r, cache=TRUE}
 library("glmnet")
 tol_length=length(levels(y_train))
@@ -575,11 +589,12 @@ cvfit<-cv.glmnet(as.matrix(x_train), y_train,family = "binomial",
                  type.measure="class")
 ```
 
-Show the misclassification error according to the regularization hyperparameter $\lambda$.
+Let's show the misclassification error according to the regularization hyperparameter $\lambda$.
 ```{r, cache=TRUE}
 plot(cvfit)
 ```
-We will now see the for two particular values of this regularization hyperparameter the accuracy of the model with the confusion matrix and which features are retained.
+
+We will now see for two particular values of this regularization hyperparameter the accuracy of the model with the confusion matrix and which features are retained.
 
 ### lambda.min
 Let's choose this particular value of $\lambda$ 
@@ -594,7 +609,7 @@ pander(confusion.glmnet(cvfit, newx =as.matrix(x_test),
                         newy = y_test, s = 'lambda.min'))
 ```
 
-The accuracy is very good: 
+The accuracy is good: 
 
 ```{r, cache=TRUE}
 assess<-assess.glmnet(cvfit,newx=as.matrix(x_test),
@@ -624,7 +639,7 @@ pander(confusion.glmnet(cvfit, newx =as.matrix(x_test), newy = y_test,
                         s = 'lambda.1se'))
 ```
 
-The accuracy is very good: 
+The accuracy is good: 
 
 ```{r,cache=TRUE}
 assess<-assess.glmnet(cvfit,newx=as.matrix(x_test), newy=y_test,
@@ -637,7 +652,7 @@ Let's see the features retained by this model :
 ```{r,cache=TRUE}
 coef(cvfit, s="lambda.1se")
 ```
-Again, this model is less conservative than our previous GLM model.
+This model is less conservative than our previous GLM model. Indeed, the variable "smoothness" is not taken into account.
 
 ## 5. Version of R used 
 
