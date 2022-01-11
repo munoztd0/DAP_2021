@@ -229,7 +229,9 @@ plot(m1, c(1:2,4), ask=F)
 <!-- add comments -->
 <br>
 <br>
-Looking at the QQplot, we don't see any specific patterns appearing, which means the residuals are distributed normally. Although we do observe smaller ends for the lowest theoritical quantiles.
+Looking at the QQplot, we don't see any specific patterns appearing, which means the residuals are distributed normally. 
+<!-- comments: Not really that neither-->
+Although we do observe smaller ends for the lowest theoritical quantiles.
 <br>
 <br>
 For the Cook's distance, we clearly observe an outlier (observation 2234), while the vast majority of the values are under 1.
