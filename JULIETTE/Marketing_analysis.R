@@ -177,6 +177,7 @@ data <- data[data$ID!=3850,]
 m4 <- lm(data=data, Income ~ Education + NumDealsPurchases + Kidhome + MntWines + MntMeatProducts + MntFishProducts + MntSweetProducts + MntFruits)
 summary(m4)
 
+summary(data$NumStorePurchases)
 
 
 

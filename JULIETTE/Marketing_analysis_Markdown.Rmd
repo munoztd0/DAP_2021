@@ -1,7 +1,6 @@
 ---
 title: "Data Analysis Project :"
 author: "Juliette Faure"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
     includes:
@@ -74,7 +73,7 @@ MntSweetProducts: Amount spent on sweets in last 2 years
 <br>
 MntGoldProds: Amount spent on gold in last 2 years
 
-+Promotions
++ Promotions
 
 NumDealsPurchases: Number of purchases made with a discount
 <br>
@@ -190,18 +189,20 @@ Here we will be eyeballing the relationship between various variables, and deter
 
 data %>% 
       filter(!is.na(Marital_Status)) %>% 
-      ggplot(aes(AcceptedCmpTotal, Income)) +  geom_violin(trim=FALSE, fill='#A4A4A4', color  ="darkred") # geom_boxplot(width=0.05, outlier.colour =  "red") + theme_minimal()
+      ggplot(aes(AcceptedCmpTotal, Income)) +  geom_violin(trim=FALSE, fill='#A4A4A4', color  ="darkred") 
 
 ggplot(data, aes(Education, MntWines))+ geom_boxplot(outlier.colour =  "red") +  geom_point(position = position_jitter(), color="coral4") 
 
 ggplot(data, aes(x=Income, y=NumStorePurchases)) +
   geom_violin(trim=FALSE, fill='#A4A4A4', color="darkred")+
   theme_minimal()
-
+# geom_boxplot(width=0.05, outlier.colour =  "red") + theme_minimal()
 
 ```
 <br>
+<br>
 The number of store purchases seems to be the most useful variable to analyse since we might want to determine which profils buy the most in the store. In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. 
+<br>
 <br>
 In this case, the data is intrisincally skewed because there are no negative values possible. Skewness is quite high (0.7) but remains tolerable regarding the nature of the data. It has to be kept in mind while performing the model assumption checks.
 
@@ -214,10 +215,10 @@ ggplot(data, aes(x = NumStorePurchases)) +
 ```
 
 ## IV - Modelling
-<br>
+
 ### A. Linear model
 
-### A.1. Model creating and assumptions
+### A.1. Model creation and assumptions
 <br>
 ```{r, out.width="50%", warning=F, message=F}
 m1 <- lm(data=data, NumStorePurchases ~ Kidhome*Income*Education*age) 
@@ -359,4 +360,4 @@ summary(m3)
 ```{r, warning=F, message=F}
 sjPlot::tab_pca(pm1, show.cronb = F, show.var = T, nmbr.fctr = 8)
 ```
-
+Conclusions
