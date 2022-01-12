@@ -324,7 +324,7 @@ glm1 <- glm(Kidhome ~ Marital_Status + Income + age + NumStorePurchases + MntSwe
 summary(glm1)
 glm2 <-update(glm1, . ~ . - Marital_Status)
 summary(glm2)
-anova(glm1, glm2)
+anova(glm1, glm2)  
 
 ```
 
