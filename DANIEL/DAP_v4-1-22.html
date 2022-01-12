@@ -256,12 +256,12 @@ div.tocify {
 
 <h1 class="title toc-ignore">DAP Project</h1>
 <h4 class="author">Daniel Granja</h4>
-<h4 class="date">11 janvier, 2022</h4>
+<h4 class="date">12 janvier, 2022</h4>
 
 </div>
 
 
-<pre class="r"><code># knitr::opts_chunk$set(echo = TRUE)
+<pre class="r"><code>knitr::opts_chunk$set(echo = TRUE)
 #this is to check to see if package are installed and if not to install them or just load them if they are installed!
 if(!require(pacman)) {install.packages(&quot;pacman&quot;)}
 
@@ -270,11 +270,6 @@ pacman::p_load(here, ggplot2, ordinal, ggfortify, GGally, plyr, sjPlot, likert, 
 #get relative path
 path =here(&quot;DANIEL&quot;)
 
- 
-
-#data scanning 
-
-
 #load data 
 
 Raw_data &lt;- read.csv2(&quot;Raw_data.csv&quot;)</code></pre>
@@ -282,7 +277,7 @@ Raw_data &lt;- read.csv2(&quot;Raw_data.csv&quot;)</code></pre>
 <h2>Introduction</h2>
 <div id="context-of-the-project" class="section level3">
 <h3>Context of the project</h3>
-<p>According to the American Psychological Association (APA), emotion is defined as “a complex reaction pattern, involving experiential, behavioral and physiological elements.” <!-- use `<br>` to put brealine in your parapgraph so it is not suffocating --> <br></p>
+<p>According to the American Psychological Association (APA), emotion is defined as “a complex reaction pattern, involving experiential, behavioral and physiological elements.” <br></p>
 <p>Researchers have been studying the impact of emotions on cognitive functions, such as memory, and have shown that emotional activation, and specifically emotions of negative valence, favours the retrieval processes of associative memory for single items, but impairs it for associated items or contexts (Schmidt, Patnaik &amp; Kensinger, 2010). <br></p>
 <p>It’s believed that the neurobiological systems sustaining high emotional arousal and memory are linked, especially through the adrenal stress hormones, itself mediated by the amygdala activity (McGaugh, 2013). <br></p>
 <p>In the study the dataset came from, Riegel et al. (2020) used words to elicit emotions (disgust, fear or neutral). Each pair displayed the same emotion and when showed together they had to imagine an interaction between them, forcing the creation of a meaningful association. To be sure that the displayed words showed the correct emotion, affective ratings were asked as controls. Each participant had to rate each pair on a Likert scale (1 to 7) of disgust and fear. <br></p>
@@ -335,12 +330,12 @@ Data$disgust&lt;-as.factor(Data$disgust)</code></pre>
 <h3>Summary</h3>
 <pre class="r"><code># st(Data) # replacded by that so its nicer
 Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tbl_summary()  %&gt;% modify_caption(&quot;**Summary statistics**&quot;) %&gt;% bold_labels()</code></pre>
-<div id="ajyzakvxhn" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="dqnxeazfdq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#ajyzakvxhn .gt_table {
+#dqnxeazfdq .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -365,7 +360,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-left-color: #D3D3D3;
 }
 
-#ajyzakvxhn .gt_heading {
+#dqnxeazfdq .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -377,7 +372,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-right-color: #D3D3D3;
 }
 
-#ajyzakvxhn .gt_title {
+#dqnxeazfdq .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -387,7 +382,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-bottom-width: 0;
 }
 
-#ajyzakvxhn .gt_subtitle {
+#dqnxeazfdq .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -397,13 +392,13 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-top-width: 0;
 }
 
-#ajyzakvxhn .gt_bottom_border {
+#dqnxeazfdq .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#ajyzakvxhn .gt_col_headings {
+#dqnxeazfdq .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -418,7 +413,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-right-color: #D3D3D3;
 }
 
-#ajyzakvxhn .gt_col_heading {
+#dqnxeazfdq .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -438,7 +433,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   overflow-x: hidden;
 }
 
-#ajyzakvxhn .gt_column_spanner_outer {
+#dqnxeazfdq .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -450,15 +445,15 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   padding-right: 4px;
 }
 
-#ajyzakvxhn .gt_column_spanner_outer:first-child {
+#dqnxeazfdq .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#ajyzakvxhn .gt_column_spanner_outer:last-child {
+#dqnxeazfdq .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#ajyzakvxhn .gt_column_spanner {
+#dqnxeazfdq .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -470,7 +465,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   width: 100%;
 }
 
-#ajyzakvxhn .gt_group_heading {
+#dqnxeazfdq .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -492,7 +487,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   vertical-align: middle;
 }
 
-#ajyzakvxhn .gt_empty_group_heading {
+#dqnxeazfdq .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -507,15 +502,15 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   vertical-align: middle;
 }
 
-#ajyzakvxhn .gt_from_md > :first-child {
+#dqnxeazfdq .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#ajyzakvxhn .gt_from_md > :last-child {
+#dqnxeazfdq .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#ajyzakvxhn .gt_row {
+#dqnxeazfdq .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -534,7 +529,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   overflow-x: hidden;
 }
 
-#ajyzakvxhn .gt_stub {
+#dqnxeazfdq .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -546,7 +541,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   padding-left: 12px;
 }
 
-#ajyzakvxhn .gt_summary_row {
+#dqnxeazfdq .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -556,7 +551,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   padding-right: 5px;
 }
 
-#ajyzakvxhn .gt_first_summary_row {
+#dqnxeazfdq .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -566,7 +561,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-top-color: #D3D3D3;
 }
 
-#ajyzakvxhn .gt_grand_summary_row {
+#dqnxeazfdq .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -576,7 +571,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   padding-right: 5px;
 }
 
-#ajyzakvxhn .gt_first_grand_summary_row {
+#dqnxeazfdq .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -586,11 +581,11 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-top-color: #D3D3D3;
 }
 
-#ajyzakvxhn .gt_striped {
+#dqnxeazfdq .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#ajyzakvxhn .gt_table_body {
+#dqnxeazfdq .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -599,7 +594,7 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-bottom-color: #D3D3D3;
 }
 
-#ajyzakvxhn .gt_footnotes {
+#dqnxeazfdq .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -613,13 +608,13 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-right-color: #D3D3D3;
 }
 
-#ajyzakvxhn .gt_footnote {
+#dqnxeazfdq .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#ajyzakvxhn .gt_sourcenotes {
+#dqnxeazfdq .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -633,41 +628,41 @@ Data[c(&quot;emotion&quot;, &quot;gender&quot;, &quot;disgust&quot;)] %&gt;%  tb
   border-right-color: #D3D3D3;
 }
 
-#ajyzakvxhn .gt_sourcenote {
+#dqnxeazfdq .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#ajyzakvxhn .gt_left {
+#dqnxeazfdq .gt_left {
   text-align: left;
 }
 
-#ajyzakvxhn .gt_center {
+#dqnxeazfdq .gt_center {
   text-align: center;
 }
 
-#ajyzakvxhn .gt_right {
+#dqnxeazfdq .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#ajyzakvxhn .gt_font_normal {
+#dqnxeazfdq .gt_font_normal {
   font-weight: normal;
 }
 
-#ajyzakvxhn .gt_font_bold {
+#dqnxeazfdq .gt_font_bold {
   font-weight: bold;
 }
 
-#ajyzakvxhn .gt_font_italic {
+#dqnxeazfdq .gt_font_italic {
   font-style: italic;
 }
 
-#ajyzakvxhn .gt_super {
+#dqnxeazfdq .gt_super {
   font-size: 65%;
 }
 
-#ajyzakvxhn .gt_footnote_marks {
+#dqnxeazfdq .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 65%;
