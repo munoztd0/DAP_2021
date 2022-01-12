@@ -100,6 +100,8 @@ if(!require(pacman)) {
 }
 suppressPackageStartupMessages(pacman::p_load(tidyverse, gtsummary, ggpubr, moments, here, sjPlot, parameters, effectsize, pander, psych))
 
+knitr::opts_chunk$set( comment = NA)
+
 path =  here("JULIETTE") 
 #setwd(path)
 data <- read.table("marketing_campaign.csv", header=T, sep="\t")
