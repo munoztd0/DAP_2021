@@ -171,7 +171,7 @@ Since the dataset is very big, we can choose to delete these lines.
 data <- data[-c(193, 240, 340),]
 ```
 
-Here we observe peculiar outliers for "Income". One income is equal to 666'666.
+Here we observe peculiar outliers for "Income".
 
 ```{r, warning=F, message=F}
 ggplot(data, aes(NumStorePurchases, Income)) + geom_point(color="blue", alpha=0.3, position = position_jitter())
@@ -182,11 +182,14 @@ newdf = data %>%
   filter(!ID %in% c(9432, 5555, 4619, 5336, 1501, 1503, 8475, 4931, 11181) ) 
 ```
 
+```{r, warning=F, message=F}
+ggplot(newdf, aes(NumStorePurchases, Income)) + geom_point(color="blue", alpha=0.3, position = position_jitter())
+```
 
 We then plot all the variables again, and check again whether anything is abnormal.
 
 ```{r, warning=F, message=F}
-data %>% 
+newdf %>% 
   keep(is.numeric) %>%
   gather() %>%
   ggplot(aes(value)) +
@@ -203,7 +206,7 @@ The aim of this analysis is to be able to predict the number of store purchases
 ### **A.1. First model**
 <br>
 ```{r, out.width="50%", warning=F, message=F}
-m1 <- lm(data=data, NumStorePurchases ~ Kidhome*Income*Education*age) 
+m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age) 
 ```
 
 
@@ -224,13 +227,14 @@ finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age 
 
 ### **A.4. Statistical inference**
 
-We first use the eta_squared function to compute the effect sizes: everything that has 0.00 on the left of the 90% CI column has a "meaningless" effect size, but we still keep them on the model.
-<!-- what is effect size and why use it ? -->
+We use the eta_squared function to compute the effect sizes.
+Indeed we are not only interested in whether some variables are significant to explain the number of store purchases ; we also want to know their magnitude, their weight in the prediction of the number of store purchases.
+
 ```{r}
 parameters::model_parameters(anova(finalm1))
 effectsize::eta_squared(car::Anova(finalm1, type = 2), ci = 0.9, alternative = "two") 
 ```
-<!-- add comments -->
+We can conclude that the most important predictors are, in order, Income and Kidhome. The variables and interactions that include 0 in the confidence interval have a "meaningless" effect size, but we can still keep them in the model.
 
 ### **A.6. Plots and summary estimates** {.tabset}
 
