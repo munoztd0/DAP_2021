@@ -1,0 +1,1038 @@
+---
+title             : "DAP Project: Early Biomarkers of Parkinson's Disease Based on Natural Connected Speech"
+shorttitle        : "DAP Project"
+
+author: 
+  - name          : "Anja Probst"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "24 rue du Général-Dufour, 1211 Genève 4"
+    email         : "anja.probst@etu.unige.ch"
+    role:         # Contributorship roles (e.g., CRediT, https://casrai.org/credit/)
+      - Conceptualization
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+
+header-includes:
+   - \usepackage{dcolumn}
+
+affiliation:
+  - id            : "1"
+    institution   : "University of Geneva"
+
+authornote:
+
+abstract: |
+  Parkinson's Disease is a degenerative disorder of the nervous system that 
+  globally affects more than 6 million people.
+  While the most well-recognized symptoms of the disease are motor-related, such 
+  as shaking and instability, a further group of symptoms, which is only partially motor-related
+  and occurs in a majority of patients, are speech-altering symptoms. 
+  While the disease is well-recognizable at a later stage, it is exceptionally hard to diagnose 
+  and differentiate in its early stages and appropriate treatment is often delayed. 
+  In 2017, Hlavnička et al. have published a study suggesting that automated analysis of connected 
+  speech can reveal early biomarkers in subjects with REM sleep behaviour disorder, who are at 
+  high risk of developing Parkinson's disease. In this project I analyse the data set published by
+  the authors that contains experimental evaluation of healthy controls (HC, $n=50$), subjects with REM
+  sleep behaviour disorder (RBD, $n=50$), and subjects with Parkinson's Disease (PD, $n=30$). While the constraints
+  of this project limit the scope of analysis, I will show that interesting insights into the data can be
+  gained nontheless.
+
+bibliography      : 
+  - r-references.bib
+  - references.bib
+
+floatsintext      : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "doc"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+if (!require(pacman)) {
+    install.packages(
+        c("pacman", "remotes"),
+        repos = "http://cran.us.r-project.org"
+    )
+}
+if (!require(papaja)) {
+    remotes::install_github("crsh/papaja")
+}
+
+pacman::p_load(
+    tinylabels, apaTables, tidyverse, gtsummary, car, GGally, devtools,
+    ggfortify, MASS, rcompanion, utils, kableExtra, report, papaja, 
+    bookdown, vtable, captioner, reshape2, ggpubr, nnet, patchwork, 
+    stargazer, MuMIn, caret, tidymodels, pander
+)
+
+r_refs(file = "r-references.bib")
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed, comment = NA)
+```
+
+\clearpage
+
+# Introduction
+
+## Context of the Project
+
+Patients with the neurodegenerative disease Parkinson's have numerous symptoms ranging from cognitive 
+impairments to motor symptoms. Those symptoms may appear relatively late in the disease when the 
+neurodegeneration has already widely spread in different areas of the brain (mainly Basal Ganglia). 
+Main symptoms of PD are motor dysfunctions including abnormalities in the production and sound of 
+speech of such patients (up to 90%). These abnormalities in speech and voice are called hypokinetic 
+dysarthria which is characterized by a decreased quality of the speech, where the voice, sound formation 
+as well as the articulation is impaired. As I mentioned before, often motor impairments are detected 
+relatively late in the disease. To improve diagnostics and to detect the disease in a much earlier stage, 
+the detection of biomarkers related to neurodegeneration could lead to a better prognosis and therapy of PD.
+[@dashtipour2018speech; @vos2016global]
+
+Therefore, the investigation of prodromal speech changes could be an appropriate and suitable approach. 
+To investigate this approach, an automated speech monitoring system was developed, that uses a 
+segmentation method for the precise estimation of voiced and unvoiced segments of speech, respirations, 
+and pauses. Further proposed was a set of acoustic speech features based on the segmentation algorithm 
+applicable to connected speech, allowing the description of complex vocal disturbances due to neurodegeneration 
+including respiratory deficits, dysphonia, imprecise articulation, and dysrhythmia.
+
+In this data analysis project, the main focus is to explore, if there are any speech patterns that 
+support the usage of an automated speech monitoring system to detect prodromal parkinsonian 
+neurodegeneration based on natural connected speech.
+
+Therefore my main hypothesis is, that there are speech related variables, that can detect Parkinson's disease
+in individuals, and distinguish between individuals with Parkinson's disease and individuals with REM sleep
+behaviour disorder despite them exhibiting similar speech related symptoms.
+
+The data, which is the basis of this project, was gathered by @hlavnivcka2017automated, and has the following composition:
+130 subjects were tested. 30 subjects with early, untreated Parkinson's disease (PD) where the disease 
+is already manifested. 50 subjects with REM sleep behaviour disorder (RBD), which is a disease where 
+its relatively likely to develop PD in a later phase. As a control group, 50 healthy subjects (HD) were included.
+
+## Manual Variable Selection
+
+Due to the constraints of this project, I reduced the data set from originally 62 variables to the best fitting 7. 
+As I am looking specifically into the aspect of speech, and to evaluate if speech is a good predictor for PD, 
+I chose speech related variables that were assessed empirically and were reported to have the most significant differences
+between healthy controls and subjects with early stages of Parkinson's Disease.
+Note that patient group will be extracted from the variable Participant_code. 
+The resulting data set is summarized in Table \@ref(tab:summarize-data-frame)
+
+```{R, prepare-data-set, echo = TRUE, results = FALSE}
+cols.to.keep <- c(
+    "Participant_code", "Age", "Gender", "Rate_of_speech_timing",
+    "Rate_of_speech_timing.1", "Duration_of_pause_intervals",
+    "Duration_of_pause_intervals.1"
+)
+
+# Above columns will be renamed to
+rename.cols.to <- c(
+    "Participant_code", "Age", "Gender", "Reading.Timing",
+    "Monologue.Timing", "Reading.Duration",
+    "Monologue.Duration"
+)
+
+csv.path <- "BiomarkersPD.csv"
+df <- read.csv(csv.path, sep = ",", header = TRUE)
+
+# Only keep required columns and rename them
+df <- df[cols.to.keep]
+colnames(df) <- rename.cols.to
+
+# Replace "-" with NA
+df[df == "-"] <- NA
+
+# Get groups from participant codes by replacing numerical values
+df$Group <- gsub("[[:digit:]]+", "", df$Participant_code)
+
+# Participant codes no longer required, remove
+df <- subset(df, select = -c(Participant_code))
+
+# Convert columns to factors
+col.names <- c("Group", "Gender")
+df[col.names] <- lapply(df[col.names], as.factor)
+```
+
+## Data Description
+
+For each sample in this data set ($n=130$), there is the following information:
+
+- Demographic information:
+  - Age (years)
+  - Gender (M for male, F for female)
+
+- Speech examination - Speaking task of reading passage: speakers read a standardized, phonetically-balanced text of 80 words twice
+  - Duration_Of_Pause_Intervals_Reading: Duration of pause intervals (DPI) describes the quality of speech timing, as pauses can be heavily influenced by the ability to properly initiate speech, it is measured in miliseconds (ms)
+  - Rate_Of_Speech_Timing_Reading: Rate of speech time (RST) includes voiced, unvoiced and pause intervals, it is measured in intervals per minute (-/min)
+
+- Speech examination - Speaking task of monologue: participants were instructed to provide monologue about their interests, job, family or current activities for approximately 90 seconds
+  - Duration_Of_Pause_Intervals_Monologue: Duration of pause intervals (DPI) describes the quality of speech timing, as pauses can be heavily influenced by the ability to properly initiate speech, it is measured in milliseconds (ms)
+  - Rate_Of_Speech_Timing_Monologue: Rate of speech time (RST) includes voiced, unvoiced and pause intervals, it is measured in intervals per minute (-/min)
+
+- Group: based on Participant Code
+  - PD: subjects with Parkinson's disease
+  - RBD: subjects with REM sleep behaviour disorder
+  - HC: healthy controls
+
+```{R summarize-data-frame, results = "asis"}
+sumtable(df, out = "latex", anchor = "tab:summarize-data-frame", title = "Summary of the Data Set used in this Analysis")
+```
+
+```{R describe data frame variables, comment=NA}
+# Writing shorter example vector rather than cutting or wrapping, as this is more readable
+# However, R still needs a width and wrap defined
+str(df, vec.len = 2, width = 75, strict.width = "wrap")
+```
+
+\clearpage
+
+# Data Pre-Processing
+As an initial step, I created boxplots to check the distribution of the numerical data per group 
+in detail (Figure \ref{fig:boxplots-and-correlations}).
+At first glance, parts of the data show skewed distributions, as the mean (shown as a orange point)
+differs substantially in many cases. This might prompt data transformations such as the $log$-transform.
+Additionally, within each variable, the distributions between the groups were assessed for significant differences.
+Here, the data showed significant differences between healthy controls (HC) and Parkinson's (PD) and REM sleep
+behaviour disorder subjects (RBD), but no significant differences between PD and RBD. Based on this, I decided
+to split the data anlysis part into two sections: (1) Creating a logistic regression model using `glm` to
+discriminate between the two groups HC and PD and (2) creating a multinomial regression model which discriminates
+between all three groups (HC, PD, and RBD). There are imbalances in the factors Group and Gender, however, given that
+the researchers which created the data did not identify this as an issue, I will not subsample the data set to make
+it balanced.
+```{R boxplots-and-correlations, fig.align = 'center', fig.cap = 'Distributions of data within variables and between groups. Some of the data shows skewed distributions (mean is represented by orange point), especially within the variable Age. While there is significant difference (t-Test) between healthy controls (HC) and subjects with Parkinson\'s disease (PD) as well as REM sleep behaviour disorder (RBD), there are no significant differences between PD and RBD'}
+df.melted <- melt(
+    subset(df, select = -c(Gender)),
+    id = "Group"
+)
+
+comparisons <- list(c("HC", "PD"), c("PD", "RBD"), c("HC", "RBD"))
+
+labels <- c(
+    "Age" = "Age\n[years]",
+    "Reading.Timing" = "Reading Timing\n[interval/min]",
+    "Monologue.Timing" = "Monologue Timing\n[interval/min]",
+    "Reading.Duration" = "Reading Duration\n[ms]",
+    "Monologue.Duration" = "Monologue Duration\n[ms]"
+)
+
+ggplot(df.melted, aes(x = Group, y = value)) +
+    geom_boxplot() +
+    facet_wrap(
+        ~variable,
+        ncol = 5, scales = "free",
+        labeller = labeller(variable = labels)
+    ) +
+    labs(
+        x = "Group", y = "Value [see title]",
+        title = "Data distribution stratified by group"
+    ) +
+    stat_compare_means(
+        method = "t.test",
+        comparisons = comparisons,
+        label = "p.signif"
+    ) +
+    stat_summary(
+        fun = mean, geom = "point",
+        shape = 16, size = 2.5,
+        color = "orange", fill = "orange"
+    ) +
+    theme_light() +
+    theme(
+        strip.text.x = element_text(
+            size = 7
+        )
+    )
+```
+
+Based on visual inspection of the boxplots (Figure \ref{fig:boxplots-and-correlations}), 
+I chose to remove outliers as shown below. 
+
+```{r outlier-removal, echo=TRUE, results='hide'}
+df.len.before.outlier.removal <- nrow(df)
+df <- df[df$Monologue.Duration < 600, ]
+df <- df[df$Reading.Duration < 300, ]
+df <- df[(df$Group != "HC" | df$Monologue.Duration < 450), ]
+df <- df[(df$Age > 40), ]
+df.len.after.outlier.removal <- nrow(df)
+```
+
+The outlier removel process reduced the size of the data set by `r df.len.before.outlier.removal - df.len.after.outlier.removal`
+from `r df.len.before.outlier.removal` to `r df.len.after.outlier.removal`. To further assess the 
+distributions, which upon visual inspection of the median and mean values in 
+Figure \ref{fig:boxplots-and-correlations}, `ggpairs` was run to created by-group density 
+plots (Figure \ref{fig:correlate-ggpairs-plot}).
+
+```{r correlate-ggpairs-plot, echo=FALSE, warning=FALSE, results='hide', fig.align = 'center', fig.cap = 'Plot based on ggpairs, colored by the response variable Group. The empirically collected speech data shows strong correlations (both positive and negative). In addition the density plots show the skewed distributions that were already seen in the boxplots.'}
+labels <- c(
+    "Age\n[years]", "Gender",
+    "Reading Timing\n[interval/min]",
+    "Monologue Timing\n[interval/min]",
+    "Reading Duration\n[ms]",
+    "Monologue Duration\n[ms]",
+    "Group"
+)
+
+ggpairs(
+    df,
+    columnLabels = labels,
+    aes(color = Group, alpha = 0.5),
+    title = "Correlations between groups and variables",
+    lower = list(combo = GGally::wrap("facethist", binwidth = 10.0)),
+    upper = list(continuous = GGally::wrap("cor", size = 2))
+) + theme_light(base_size = 7)
+```
+
+Observing Figure \ref{fig:correlate-ggpairs-plot}, the skewness, especially that 
+of variables Age and Monologue Distribution, becomes apparent. To quantify the deviation from normality, 
+I tested each distribution for normality using the Shapiro-Wilk normality test. The results shown in
+Table \ref{tab:normality-tests} highlight violations of the assumption of normality for both per group
+and combinded distributions. For healthy controls (HC) and Parkionson's disease (PD) subjects, 
+a normal distribution can be assumed for all variables (Reading Time, Monologue Time, Reading Duration, 
+and Monologue Duration) except Age. For REM sleep behaviour disorder (RBD) subjects normality can 
+be assumed for variables Age, Reading Timing, and Monologue Timing. In the combined data (Comb.), 
+only the variables Reading Timing and Monologue Timing can be assumed to be distributed normally.
+The observed right and left skewed distributions could be transformed to normal distributions using, for
+example, a $log$-transform. However, this would lead to a change in distributions for all subgroups, 
+which do not necessary follow the same (skewed) distribution, as the transform would have to be applied
+to all observations of a variable. In addition, such non-linear transformations would greatly hinder the 
+interpretability of the model. Thus, I chose not to transform the data as part of the data pre-processing.
+In a next step, the data is standardized as it contains variables that correlate but have different scales.
+
+```{r standardize, echo=TRUE}
+df$Age <- c(scale(df$Age))
+df$Reading.Timing <- c(scale(df$Reading.Timing))
+df$Reading.Duration <- c(scale(df$Reading.Duration))
+df$Monologue.Timing <- c(scale(df$Monologue.Timing))
+df$Monologue.Duration <- c(scale(df$Monologue.Duration))
+```
+
+The data is scaled using the R-function `scale`, which substracts the variable mean from each observation 
+and divides the result by the standard deviation of the variable.
+
+```{r normality-tests, echo=FALSE}
+df.grouped <- group_by(df, Group)
+normality.check.list <- summarise(
+    df.grouped,
+    Age = paste(
+        round(shapiro.test(Age)$statistic, 3),
+        " (",
+        round(shapiro.test(Age)$p.value, 3),
+        ")",
+        sep = ""
+    ),
+    "Read. Timing" = paste(
+        round(shapiro.test(Reading.Timing)$statistic, 3),
+        " (",
+        round(shapiro.test(Reading.Timing)$p.value, 3),
+        ")",
+        sep = ""
+    ),
+    "Mono. Timing" = paste(
+        round(shapiro.test(Monologue.Timing)$statistic, 3),
+        " (",
+        round(shapiro.test(Monologue.Timing)$p.value, 3),
+        ")",
+        sep = ""
+    ),
+    "Read. Duration" = paste(
+        round(shapiro.test(Reading.Duration)$statistic, 3),
+        " (",
+        round(shapiro.test(Reading.Duration)$p.value, 3),
+        ")",
+        sep = ""
+    ),
+    "Mono. Duration" = paste(
+        round(shapiro.test(Monologue.Duration)$statistic, 3),
+        " (",
+        round(shapiro.test(Monologue.Duration)$p.value, 3),
+        ")",
+        sep = ""
+    )
+)
+
+normality.check.df <- data.frame(normality.check.list)
+normality.check.df$Group <- as.character(normality.check.df$Group)
+
+normality.check.df[nrow(normality.check.df) + 1, ] <- c(
+    "Comb.",
+    paste(
+        round(shapiro.test(df$Age)$statistic, 3),
+        " (",
+        round(shapiro.test(df$Age)$p.value, 3),
+        ")",
+        sep = ""
+    ),
+    paste(
+        round(shapiro.test(df$Reading.Timing)$statistic, 3),
+        " (",
+        round(shapiro.test(df$Reading.Timing)$p.value, 3),
+        ")",
+        sep = ""
+    ),
+    paste(
+        round(shapiro.test(df$Monologue.Timing)$statistic, 3),
+        " (",
+        round(shapiro.test(df$Monologue.Timing)$p.value, 3),
+        ")",
+        sep = ""
+    ),
+    paste(
+        round(shapiro.test(df$Reading.Duration)$statistic, 3),
+        " (",
+        round(shapiro.test(df$Reading.Duration)$p.value, 3),
+        ")",
+        sep = ""
+    ),
+    paste(
+        round(shapiro.test(df$Monologue.Duration)$statistic, 3),
+        " (",
+        round(shapiro.test(df$Monologue.Duration)$p.value, 6),
+        ")",
+        sep = ""
+    )
+)
+
+apa_table(
+    normality.check.df,
+    font_size = "small",
+    caption = "Results of the Shapiro-Wilk test. p-Values are shown in parentheses.
+    For healthy controls (HC) and Parkionson's disease (PD) subjects, a normal distribution
+    can be assumed for all variables except Age. For REM sleep behaviour disorder
+    (RBD) subjects can be assumed for variables Age, Reading Timing, and Monologue Timing.
+    In the ungrouped data (Comb.), only the variables Rading Timing and Monologue Timing
+    can be assumed to be distributed normally."
+)
+```
+
+\clearpage
+
+# Data Analysis
+
+## Logistic Regression
+
+As stated previously, I have seen that there are no significant differences between the groups PD and RBD.
+Based on this observation, I will limit my initial investigation to creating a logistic regression model predicting 
+between the groups HC and PD. Indeed, the paper from which the data was extracted explicitly
+discusses the hard problem of differentiating PD from RBD, which might very well be impossible with 
+generalised linear models. I will revisit this problem in the section Multinomial Regression.
+
+As a first step, a subset is created that does not contain any observations from the group RBD.
+```{r create subset without RBD, echo=TRUE, results='hide'}
+df.binom <- data.frame(df[df$Group != "RBD", ])
+df.binom$Group <- droplevels(df.binom$Group)
+df.binom$Group <- relevel(df.binom$Group, ref = "PD")
+```
+
+### Initial Model
+Based on this subset, I first create simple logistic regression models with one response variable 
+for each of the selected variables (Figure \ref{fig:simple-logistic-regression}). For simplicity
+they were created using the `ggplot2` function `stat_smooth`. As can be seen by visual inspection 
+of the data points (red), none of the predictors is sufficient to predict the response variable 
+(Group) on its own, given the respective overlap between the two groups. 
+
+```{r simple-logistic-regression, fig.align = 'center', fig.cap = 'Simple logistic regression models with one predictor each. The y-axis is the model probability to belong to the group Parkinson\'s disease (PD). Observations are shown as red points, the blue curve is based on model predictions. For variables a to d, there is a clear sigmoid curve, while variables e, and of course f, which is a factor, do not show such a curve.'}
+p1 <- ggplot(df.binom, aes(x = Monologue.Timing, y = as.integer(Group) - 1)) +
+    geom_point(colour = "red", alpha = 0.5) +
+    stat_smooth(method = "glm", se = TRUE, method.args = list(family = binomial)) +
+    labs(x = "Monologue Timing (-/min)", y = "PD Probability", tag = "a") +
+    theme_light() +
+    theme(
+        plot.tag = element_text(),
+        axis.title = element_text(size = 7, face = "bold")
+    )
+
+p2 <- ggplot(df.binom, aes(x = Reading.Timing, y = as.integer(Group) - 1)) +
+    geom_point(colour = "red", alpha = 0.5) +
+    stat_smooth(method = "glm", se = TRUE, method.args = list(family = binomial)) +
+    labs(x = "Reading Timing (-/min)", y = "PD Probability", tag = "b") +
+    theme_light() +
+    theme(
+        plot.tag = element_text(),
+        axis.title = element_text(size = 7, face = "bold")
+    )
+
+p3 <- ggplot(df.binom, aes(x = Reading.Duration, y = as.integer(Group) - 1)) +
+    xlab("Reading Duration (ms)") +
+    ylab("Group") +
+    geom_point(colour = "red", alpha = 0.5) +
+    stat_smooth(method = "glm", se = TRUE, method.args = list(family = binomial)) +
+    labs(x = "Reading Duration (ms)", y = "PD Probability", tag = "c") +
+    theme_light() +
+    theme(
+        plot.tag = element_text(),
+        axis.title = element_text(size = 7, face = "bold")
+    )
+
+p4 <- ggplot(df.binom, aes(x = Monologue.Duration, y = as.integer(Group) - 1)) +
+    xlab("Monologue Duration (ms)") +
+    ylab("Group") +
+    geom_point(colour = "red", alpha = 0.5) +
+    stat_smooth(method = "glm", se = TRUE, method.args = list(family = binomial)) +
+    labs(x = "Monologue Duration (ms)", y = "PD Probability", tag = "d") +
+    theme_light() +
+    theme(
+        plot.tag = element_text(),
+        axis.title = element_text(size = 7, face = "bold")
+    )
+
+p5 <- ggplot(df.binom, aes(x = Age, y = as.integer(Group) - 1)) +
+    xlab("Age") +
+    ylab("Group") +
+    geom_point(colour = "red", alpha = 0.5) +
+    stat_smooth(method = "glm", se = TRUE, method.args = list(family = binomial)) +
+    labs(x = "Age", y = "PD Probability", tag = "e") +
+    theme_light() +
+    theme(
+        plot.tag = element_text(),
+        axis.title = element_text(size = 7, face = "bold")
+    )
+
+p6 <- ggplot(df.binom, aes(x = as.integer(Gender), y = as.integer(Group) - 1)) +
+    xlab("Gender") +
+    ylab("Group") +
+    geom_point(colour = "red", alpha = 0.5) +
+    stat_smooth(method = "glm", se = TRUE, method.args = list(family = binomial)) +
+    labs(x = "Gender", y = "PD Probability", tag = "f") +
+    theme_light() +
+    theme(
+        plot.tag = element_text(),
+        axis.title = element_text(size = 7, face = "bold")
+    )
+
+p1 + p2 + p3 + p4 + p5 + p6
+```
+
+Given that a single predictor is clearly not sufficient, a series of multiple logistic regression models 
+have to be built and evaluated. As I would have to test 64 models (all possible combinations plus 
+intercept only) to be certain to have found the best one, I instead chose to use the automated model 
+selection function `dredge` from the R package `MuMIn`. Starting from the global binomial model 
+`Group ~ .` as an input, `dredge` enumerates all possible models and evaluates them based on their AIC.
+This is an alternative to manually checking a series of models by starting at the full model and then
+removing variables based on AIC and ANOVA comparisons. This manual approach is used in the selection of
+the model for the multinomial regression described in the section Multinomial Regression.
+
+```{R dredge-model-selection, echo = TRUE, results = FALSE}
+m.binom.full <- glm(
+    data = df.binom, Group ~ .,
+    family = binomial,
+    na.action = "na.fail"
+)
+
+nrow(df.binom[df.binom$Group == "PD", ])
+
+d <- dredge(m.binom.full, rank = "AIC")
+m.binom.no.interactions <- get.models(d, 1)[[1]]
+```
+
+The results of the model chosen as the best by `dredge` is `Group ~ Gender + Monologue.Duration + Reading.Duration`,
+The model output is shown in Table \ref{tab:model-comparison} (1). As the data was scaled, the constant, or intercept,
+coefficient estimate of -0.68 is the logarithmic odds (logits) of a subject having Parkinson's disease, when all other
+variables are the average. This is influenced by the number of samples for each of the groups ($n_{HC}=48$, $n_{PD}=25).
+Using the formula $p=\frac{exp(coeff)}{1+exp(coeff)}$, which converts the logit to a probability of a subject with all
+average measurements has a probability of $p=\frac{exp(-0.68)}{1+exp(-0.68)}=0.336$ of being predicted to have Parkinson's.
+Looking at the coefficients of the model variables Gender, Monolgue Duration, and 
+Reading Duration, they have effects of different strength in the model. Male gender has a relatively
+large, positive effect, meaning that, the probability to be predicted having Parkinson's increases to 
+$p=\frac{exp(-0.68 + 1.678)}{1+exp(-0.68 + 1.678)}=0.73$ for men while the other variables stay constant.
+At least according to this model, which shows that it is not a representative sample of the population, as men suffer
+more often from Parkinson's (https://pubmed.ncbi.nlm.nih.gov/15026515/). As for the two numerical variables Monolgue
+Duration and Reading Duration their coefficients of -0.926 and -0.576, respectively, represent 
+the change in logarithmic odds, as predicted by the model, if their respective value is increased by 1. Here it is
+important to remember that the data was scaled according to standard deviation. According to the assessment of the model,
+only the coefficients of Gender and Monologue Duration are significant, where the null-hypothesis is that there is no
+effect of the inclusion of the variable in the model. The model is evaluated against the following models in the section
+Model Comparison and Analysis.
+
+
+### Interactions
+Importantly, the automated model selection using `dredge` did not consider interactions between the predictors.
+Given the relatively strong correlation between the speech-related variables, it would be interesting to see 
+whether a model taking in account the interactions between variables would perform better. In the Appendix, the section
+Logistic Regression with Intereactions contains a series of model outputs, in which I tested the inclusion of different
+interaction terms. I started with the assumption, that all the measured variables would cause interaction effects
+within the model and started reducing the inclusion of interactions from there, finding the model
+`Group ~ Age * Gender + Reading.Timing * Monologue.Timing + Reading.Duration * Monologue.Duration` to have the lowest
+AIC and log likelihood (see Appendix Logistic Regression with Intereactions).
+
+```{r interaction-model, echo=TRUE}
+m.binom.interactions <- glm(
+    data = df.binom, Group ~ Age * Gender + Reading.Timing *
+        Monologue.Timing + Reading.Duration * Monologue.Duration,
+    family = binomial,
+    na.action = "na.fail"
+)
+```
+
+Coefficients and performance values of this model are found in Table \ref{tab:model-comparison} (2). The interaction
+terms are shown in the format variable1:variable2, for example, Reading.Timing:Monologue.Timing with a coefficient of
+0.869, which means that when Monologue.Timing increases by 1, 0.869 is added to the logarithmic odds of Reading.Timing
+and vice versa.
+
+### PCA
+
+As there has been significant correlation between the predictors in the ggpairs plot
+as well as some extreme changes in coefficients when adding additional variables,
+there exists the strong possbility of collinearity negatively affecting the models. Indeed,
+I observed high variance inflation factors on many predictors in the model with interactions, as
+shown in Table \ref{tab:vif}. This warrants and attempt at solving the potential collinearity issue.
+
+```{r vif}
+panderOptions("table.emphasize.rownames", FALSE)
+
+df.vif <- data.frame(vif(m.binom.interactions))
+df.vif <- cbind(Term = rownames(df.vif), df.vif)
+rownames(df.vif) <- NULL
+colnames(df.vif) <- c("Term", "VIF Value")
+
+pander(
+    df.vif,
+    justify = "left",
+    caption = "(\\#tab:vif) Variance inflation factors (vif) for the model containing
+    interaction terms (m.binom.interactions)."
+)
+```
+
+PCA (principal component analysis) is a dimensionality reduction method that is also useful to combine multiple 
+variables that might correlate into a number of variables, or principal components, that do not correlate. 
+In addition, a single principal component can explain a large fraction of the overall variance. In a first step,
+I ran a PCA on the numerical variables of my data (Age, Reading Timing, Monologue Timing, Reading Duration, and Monologue
+Duration). The principal components calculated by the PCA are shown in \ref{tab:pca}, where you can see, that
+the first three already account for close to 90% of the variance.
+
+
+```{r run-pca}
+# PCA
+df.binom.pca <- prcomp(df.binom[, c(1, 3, 4, 5, 6)], scale. = TRUE, center = TRUE)
+panderOptions("table.emphasize.rownames", FALSE)
+pander(
+    summary(df.binom.pca)$importance,
+    justify = "left",
+    caption = "(\\#tab:pca) Principal components of variables Age, Reading Timing, Monologue Timing, Reading
+    Duration, and Monologue Duration. The three first components explain more close to 90% of the variance.",
+)
+```
+
+The result of the PCA can also be seen graphically. Figure \ref{fig:pca-loadings} shows how much each
+variable contributes to PC1 and PC2. The varible age, contributes mainly to PC2, while the other
+four measured variables contribute to PC1. The arrow length represents the strength of the contribution.
+In this plot, it can be seen that the group HC (red) is more positioned to the bottom left, while the group 
+PD (blue) to the top right.
+
+```{R pca-loadings, fig.align = 'center', fig.cap="How much does each variable contribute to PC1 and PC2. The varible age, contributes mainly to PC2, while the other four measured variables contribute to PC1. The arrow length represents the strength of the contribution. The gender is shown by the point shape and the group by the color."}
+# what else does it shows?
+autoplot(
+    df.binom.pca,
+    data = df.binom,
+    loadings = TRUE,
+    loadings.label = TRUE,
+    loadings.label.repel = TRUE,
+    loadings.colour = "black",
+    loadings.label.colour = "black",
+    colour = "Group",
+    shape = "Gender"
+) +
+    labs(title = "PCA of Speech Analysis Measurements") +
+    theme_light()
+```
+
+After creating the principal components, I reran `ggpairs`. Appendix Figure \ref{fig:pca-ggpairs} shows, that the
+principal components do no longer correlate compared to the original variables (\ref{fig:correlate-ggpairs-plot}).
+After experimentation with different models, the model `Group ~ PC1 + Gender` reaches the performance
+of the initial model with only two terms (Table \ref{tab:model-comparison}) and keeping the 
+vif low (Table \ref{tab:vif-after-pca}).
+
+```{r, pca-based-model, echo=TRUE}
+df.binom.pca.joined <- cbind(df.binom, predict(df.binom.pca, df.binom))
+
+m.binom.pca <- glm(
+    data = df.binom.pca.joined[, -c(1, 3, 4, 5, 6)],
+    Group ~ PC1 + Gender,
+    family = "binomial"
+)
+```
+
+### Model Comparison and Analysis
+After creating the three models (1) multiple logistic regression without interactions 
+`Group ~ Gender + Monologue.Duration + Reading.Duration` (m.binom.no.intearactions),
+(2) multiple logistic regression with interactions `Group ~ Age * Gender + Reading.Timing * Monologue.Timing + Reading.Duration * Monologue.Duration` 
+(m.binom.interactions), and (3) multiple logistic regression without interactions after a PCA `Group ~ PC1 + Gender` (m.binom.pca), 
+they are compared in Tables \ref{tab:model-comparison} and \ref{tab:anova}. 
+Model (2) with multiple interactions has the best AIC (Akaike Information Criterion) compared
+to the other models, meaning that it has the lowest prediction error of the three models. In addition,
+model (2) has the highest log likelihood (goodness of fit), however, given the high number of terms
+compared to the other two models, this measure might be problematic. However, based on the interpretation
+of the ANOVA results, model (2) is clearly better than model (1) and (3) even with a high number of
+terms and the resulting lower residual degrees of freedom.
+
+```{r model-comparison, results='asis'}
+stargazer(
+    m.binom.no.interactions,
+    m.binom.interactions,
+    m.binom.pca,
+    title = "Comparison of logistic regression models on the data set .
+    (1) Model based on automated model selection using dredge without interactions.
+    (2) Model containing an interaction between Reading Duration and Monologue Duration.
+    (3) Model based on principal component 1 from a PCA on the data.",
+    align = TRUE,
+    float = TRUE,
+    type = "latex",
+    column.labels = c("No Interactions (dredge)", "Interactions", "PCA"),
+    intercept.bottom = FALSE,
+    no.space = TRUE,
+    font.size = "small",
+    header = FALSE,
+    label = "tab:model-comparison"
+)
+```
+
+Inspecting the diagnostic plots for the three models (see Appendix Diagnostic Plots for Models), the residual
+vs. fitted shows a relatively hard to interpret pattern that is caused by the binomial nature of the model. It even
+looks like the blue curve is close to a sigmoid curve. The normal Q-Q plots show again this binomial nature
+of the data that roughly follow a normal distribution, however, the data points are split in two parts, where
+one of the parts seems to follow a normal distribution while the other does not. 
+The scale-location plots show a similar pattern for all
+models. the line is far from horizontal, which would mean that the assumption of homoscedasticity is not
+satisfied. However, there is again a clear pattern that could be caused by diagnosing a logistic rather than
+a linear regression. The plots showing Cook's distance only show one outlier with a distance of more than 0.5
+in the model with many interactions.
+
+
+```{r binomial-eval-function}
+evaluate.binom.model <- function(formula, data) {
+    set.seed(123)
+
+    data.split <- initial_split(data, prop = 0.75, strata = Group)
+    df.train <- training(data.split)
+    df.test <- testing(data.split)
+
+    m <- glm(formula, data = df.train, family = binomial)
+
+    df.test$Group.Predicted <- relevel(
+        as.factor(ifelse(
+            predict(m, newdata = df.test, "response") >= 0.5, 
+            "HC", "PD"
+        )), ref="PD"
+    )
+    cm <- confusionMatrix(df.test$Group, df.test$Group.Predicted)
+
+    return(list(cm = cm, model = m))
+}
+
+l = evaluate.binom.model(
+    Group ~ PC1 + Gender, 
+    df.binom.pca.joined[, -c(1, 3, 4, 5, 6)]
+)
+```
+
+However, even if model (2) should be chosen according to it's AIC and ANOVA results, the high number of 
+terms combined with the collinearity based on the VIF analysis, made model (3) `Group ~ PC1 + Gender` my
+model of choice. I proceeded to evaluate the model based on a training testing split using the function 
+shown in Appendix Functions. The results show a overall accuracy of 68.4% with a sensitivity for detecting
+Parkinson's of `r round(l$cm$byClass[["Sensitivity"]] * 100, 1)`% and a specificity of 
+`r round(l$cm$byClass[["Specificity"]] * 100, 1)`%.
+
+```{r models general comparison table, results = 'asis', echo = FALSE}
+anova.binom <- anova(
+    m.binom.no.interactions,
+    m.binom.interactions,
+    m.binom.pca,
+    test = "Chisq"
+)
+
+stargazer(
+    anova.binom,
+    title = "Comparison of models using ANOVA",
+    summary = FALSE, header = FALSE,
+    label = "tab:anova"
+)
+```
+
+
+\clearpage
+## Multinomial Regression
+
+To predict over all three groups (HC, PD, RBD), I have to use a more complex
+multinomial model. However, as the 3 groups are unbalanced, I chose to subsample
+the groups HC ($n=48$ after outlier removal) and RBD ($n=48$ after outlier removal) to
+match the size of the group PD ($n = 25$ after outlier removal). While I did not do this for
+the binomial logistic regression, I choose to do it here to make the task hopefully easier.
+In order to evaluate the multinomial model, I created a train and test set. 
+The training set contains 75% of the observations, while the test set contains the
+remaining 25%. The split was done considering the groups to avoid over- or underrepresentation
+of one group in either the training or the testing set.
+The functions for training and testing as well as plotting are shown in the
+Appendix Functions.
+
+```{r multinomial-eval-function, warning=FALSE, results='hide'}
+evaluate.multinom.model <- function(formula, data, test) {
+    set.seed(123)
+
+    data.split <- initial_split(data, prop = 0.75, strata = Group)
+    df.train <- training(data.split)
+    df.test <- testing(data.split)
+
+    m <- multinom(formula, data = df.train, maxit = 200)
+
+    if (test == TRUE) {
+        df.test$Group.Predicted <- predict(m, newdata = df.test, "class")
+        cm <- confusionMatrix(df.test$Group, df.test$Group.Predicted)
+
+        return(list(cm = cm, model = m))
+    } else {
+        df.train$Group.Predicted <- predict(m, newdata = df.train, "class")
+        cm <- confusionMatrix(df.train$Group, df.train$Group.Predicted)
+
+        return(list(cm = cm, model = m))
+    }
+}
+```
+
+```{r multinomial-plot-function, warning=FALSE, results='hide'}
+plot_cm <- function(cm, tag, title) {
+    # Adapted from https://stackoverflow.com/questions
+    # /37897252/plot-confusion-matrix-in-r-using-ggplot
+
+    cm.df <- data.frame(prop.table(cm$table, margin = 1))
+    cm.df$Prediction <- factor(
+        cm.df$Prediction,
+        levels = rev(levels(cm.df$Prediction))
+    )
+
+    accuracy <- round(cm$overall[["Accuracy"]], 3) * 100
+
+    p <- ggplot(cm.df, aes(Prediction, Reference, fill = Freq)) +
+        geom_tile(show.legend = FALSE) +
+        geom_text(
+            aes(label = scales::percent(Freq, accuracy = 1)),
+            size = 3
+        ) +
+        scale_fill_gradient(low = "white", high = "#319ed1") +
+        labs(
+            title = paste(title, " (", accuracy, "%)", sep = ""),
+            x = "Reference", y = "Prediction", tag = tag
+        ) +
+        scale_x_discrete(labels = c("HC", "PD", "RBD")) +
+        scale_y_discrete(labels = c("RBD", "PD", "HC")) +
+        theme_light() +
+        theme(
+            plot.tag = element_text(),
+            title = element_text(size = 8, face = "bold"),
+            axis.title = element_text(size = 7, face = "bold")
+        )
+
+    return(p)
+}
+```
+
+```{r multinomial-regression, echo=FALSE, warning=FALSE, results='hide', fig.width=6, fig.height=4, fig.align = 'center', fig.cap='Confusion matrices of the training set evaluation (a-e, corresponding to models a-e) and the final test set evaluation based on model (c).'}
+df.balanced <- data.frame(df)
+
+# Set reference level explicitly
+df.balanced$Group <- relevel(df.balanced$Group, ref = "HC")
+
+diff.hc <- nrow(df.balanced[df.balanced$Group == "HC",]) - 
+    nrow(df.balanced[df.balanced$Group == "PD",])
+
+diff.rbd <- nrow(df.balanced[df.balanced$Group == "RBD",]) - 
+    nrow(df.balanced[df.balanced$Group == "PD",])
+
+set.seed(123)
+df.hc.removed <- df.balanced[sample(which(df.balanced$Group == "HC" ), diff.hc), ]
+set.seed(123)
+df.rbd.removed <- df.balanced[sample(which(df.balanced$Group == "RBD" ), diff.rbd), ]
+
+# anti_join removes one data set from the other
+df.balanced <- anti_join(df.balanced, df.hc.removed)
+df.balanced <- anti_join(df.balanced, df.rbd.removed)
+
+l.1 <- evaluate.multinom.model(Group ~ ., df.balanced, test = FALSE)
+l.2 <- evaluate.multinom.model(Group ~ . - Age, df.balanced, test = FALSE)
+l.3 <- evaluate.multinom.model(Group ~ . - Age - Reading.Timing, df.balanced, test = FALSE)
+l.4 <- evaluate.multinom.model(Group ~ . - Age - Reading.Timing - Monologue.Timing, df.balanced, test = FALSE)
+l.5 <- evaluate.multinom.model(Group ~ Monologue.Duration * Reading.Duration * Monologue.Timing * Reading.Timing, df.balanced, test = FALSE)
+
+print(l.4$model)
+anova(l.1$model, l.2$model, l.3$model, l.4$model, l.5$model)
+
+p1 <- plot_cm(l.1$cm, tag = "a", title = "Training")
+p2 <- plot_cm(l.2$cm, tag = "b", title = "Training")
+p3 <- plot_cm(l.3$cm, tag = "c", title = "Training")
+p4 <- plot_cm(l.4$cm, tag = "d", title = "Training")
+p5 <- plot_cm(l.5$cm, tag = "e", title = "Training")
+
+l.6 <- evaluate.multinom.model(Group ~ . - Age - Reading.Timing, df.balanced, test = TRUE)
+p6 <- plot_cm(l.6$cm, tag = "f", title = "Testing")
+l.6$cm
+l.6$cm$byClass[2, 1]
+p1 + p2 + p3 + p4 + p5 + p6
+```
+
+
+The performance and confusion matrices of the models considered during the model selection process are shown in Figure
+\ref{fig:multinomial-regression} and the ANOVA output in Table \ref{tab:multinom-anova} (models in same order of the figure). 
+The initial full model (a) `Group ~ .` ($AIC = 121.254$) reaches a training accuracy of 59.3%.
+Removing the variable Age from the model (b) `Group ~ . - Age`, decreases the AIC to $120.6$ while keeping the training accuracy at 59.3%.
+Removing any further variables does not lead to a decrease in AIC or an increase in training accuracy, this is examplified
+by the model (c) `Group ~ . - Age - Reading.Timing`, where the variable Reading Timing was removed based on effect size 
+and the AIC increased to $121.538$ and the training accuracy
+dropped to 57.4%. Until now, none of the ANOVA results show a significant change. Removing the variable Monologue Timing in model (d) `Group ~ . - Age - Reading.Timing - Monologue.Timing`
+reduced the AIC to 119.305 and doesn't effect the model significantly. However, the training accuracy drops by more than 10%
+to 46.3%. For this reason, I chose to stop removing variables from the model and end the model selection process.
+As an experiment I added a significant amount of interactions in model (e) `Group ~ Monologue.Duration * Reading.Duration * Monologue.Timing * Reading.Timing`,
+which increases the AIC to 123.742. This model is significantly better according to ANOVA and has an excellent
+training accuracy of 81.5%. However, given the number of terms in this model, I assume this to be a case of overfitting, as this
+doesn't seem like a realistic result compared to my experience with this data. Based on the training accuracy and the AIC as well
+as the ANOVA, I choose model (c) as the model to run the test on. The resulting confusion matrix of the test based on the model
+`Group ~ . - Age - Reading.Timing` can be seen in Figure \ref{fig:multinomial-regression} f. The model shows an overall accuracy of 52.4%.
+It seems to be especially good at identifying cases of REM sleep behaviour disorder, with 71% of correct predictions. On the other hand,
+the model misclassifies 57% of Parkinson's disease cases as RDB, which would of course be a substantial problem in a clinical setting.
+Specifically, the model detects Parkinson's with a sensitivity of `r round(l.6$cm$byClass[2, 1] * 100, 1)`% and a specificity of 
+`r l.6$cm$byClass[2, 2]`%.
+
+```{r multinomial-anova, results = 'asis', echo = FALSE}
+anova.multinom <- anova(
+    l.1$model,
+    l.2$model,
+    l.3$model,
+    l.4$model,
+    l.5$model,
+    test = "Chisq"
+)
+
+stargazer(
+    anova.multinom,
+    title = "Comparison of multinomial models using ANOVA",
+    summary = FALSE, header = FALSE,
+    label = "tab:multinom-anova",
+    omit = c("\\Model\\b")
+)
+```
+
+\clearpage
+# Conclusion
+
+Given the challenging nature of the data set, as well as the collinearity within it, the multinomial model
+yielded surprisingly good performance when diagnosing REM sleep behaviour disorder subjects but a very low 
+performance when diagnosing subjects with Parkinson's disease. A major issue in addition to the nature of 
+the data (the strong correlations among most of the predictors) was the low amount of data, especially the
+Parkinson's disease group ($n=25$ after outlier removal). This in turn lead to even smaller training and
+testing sets. However, as the authors of the original study have shown, the data is sufficient to conclude
+that they have found significant features that can be used to detect early patterns of neurodegeneration.
+To come back to my initial hypothesis, that there are speech related cues, which could help to detect 
+Parkinson`s disease in an earlier stage and also help to distinguish between Parkinson`s disease and 
+REM sleep behaviour disorder, the results show, that based on the available data, I was not able to
+create a robust predictive model with high accuracy.
+
+In addition, I have shown that reducing the problem to a binomial problem by only trying to distinguish
+between healthy controls and subjects with Parkinson's disease can be achieved with a sensitivity of 75%
+and a specificity of 57.1% using a binomial logistic regression model.
+
+Overall, the outcome of this project has been educatually valuable. However, the models that resulted from
+it are probably too simple to achive high enough accuracies to be of value.
+
+\clearpage
+# Appendix
+## Functions
+The following function was used to assess binomial models
+```{r, ref.label='binomial-eval-function', echo=TRUE, eval=FALSE}
+```
+
+The following two are functions were used to evaluate and visualize the multinomial models.
+```{r, ref.label='multinomial-eval-function', echo=TRUE, eval=FALSE}
+```
+
+
+```{r, ref.label='multinomial-plot-function', echo=TRUE, eval=FALSE}
+```
+
+## Logistic Regression with Intereactions
+```{r interaction-experiments}
+summary(glm(
+    data = df.binom, Group ~ Age * Gender + Monologue.Duration *
+        Monologue.Timing * Reading.Duration * Reading.Timing,
+    family = binomial
+))
+
+summary(glm(
+    data = df.binom, Group ~ Age * Gender * Monologue.Duration *
+        Monologue.Timing + Reading.Duration * Reading.Timing,
+    family = binomial
+))
+
+summary(glm(
+    data = df.binom, Group ~ Age * Gender + Monologue.Duration *
+        Monologue.Timing + Reading.Duration * Reading.Timing,
+    family = binomial
+))
+
+summary(glm(
+    data = df.binom, Group ~ Age * Gender + Reading.Timing *
+        Monologue.Timing + Reading.Duration * Monologue.Duration,
+    family = binomial
+))
+```
+
+## PCA Appendix
+
+```{R pca-ggpairs, fig.cap = 'ggpairs plot where the speech-related variables have been replaced by the principal components of a PCA.'}
+ggpairs(
+    df.binom.pca.joined[, -c(1, 3, 4, 5, 6)],
+    aes(color = Group, alpha = 0.5),
+    lower = list(combo = GGally::wrap("facethist", binwidth = 10.0)),
+    upper = list(continuous = GGally::wrap("cor", size = 2))
+) +
+    theme_light(base_size = 7)
+```
+
+```{r vif-after-pca}
+panderOptions("table.emphasize.rownames", FALSE)
+
+df.vif <- data.frame(vif(m.binom.pca))
+df.vif <- cbind(Term = rownames(df.vif), df.vif)
+rownames(df.vif) <- NULL
+colnames(df.vif) <- c("Term", "VIF Value")
+
+pander(
+    df.vif,
+    justify = "left",
+    caption = "(\\#tab:vif-after-pca) Variance inflation factors (vif) for the model based on
+    the PCA result (m.binom.pca)."
+)
+```
+
+\clearpage
+
+## Diagnostic Plots for Models
+
+Following are the diagnostic plots for the three logistic regression models described in the text.
+
+```{r diagnostic-m.binom.no.interactions, fig.height=4, fig.align = 'center', fig.cap='Diagnostic plots for multiple logistic regression model (1) without interactions.'}
+autoplot(m.binom.no.interactions, 1:4) + theme_light()
+```
+
+```{r diagnostic-m.binom.interactions, fig.height=4, fig.align = 'center', fig.cap='Diagnostic plots for multiple logistic regression model (2) with interactions.'}
+autoplot(m.binom.interactions, 1:4) + theme_light()
+```
+
+```{r diagnostic-m.binom.pca, fig.height=4, fig.align = 'center', fig.cap='Diagnostic plots for multiple logistic regression model (3) after PCA.'}
+autoplot(m.binom.pca, 1:4) + theme_light()
+```
+\clearpage
+# Used R Packages
+
+I used the following R packages during this project: 
+`r cite_r("r-references.bib")`
+
+\clearpage
+
+# References
