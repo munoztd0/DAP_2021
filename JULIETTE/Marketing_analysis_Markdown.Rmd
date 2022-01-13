@@ -2,13 +2,13 @@
 title: "Data Analysis Project :"
 author: "Juliette Faure"
 output:
-  # pdf_document: default
   html_document:
     includes:
     code_folding: "hide"
     toc: true
     toc_float: true
     number_sections: false
+  # pdf_document: default
 ---
 
 # Marketing analysis 
@@ -202,17 +202,18 @@ newdf %>%
 
 ## III - Modelling
 
-The aim of this analysis is to be able to predict the number of store purchases 
-### A. Linear model
+The aim of this analysis is to be able to predict the number of store purchases  
 
-### **A.1. First model**
+### **A. Linear model**
+
+### A.1. First model
 <br>
 ```{r, out.width="50%", warning=F, message=F}
 m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age) 
 ```
 
 
-### **A.2. Model selection**
+### A.2. Model selection
 
 Here, we use the stepAIC function to filter the variables to keep, by choosing the best AIC.
 ```{r}
@@ -227,7 +228,7 @@ The final model chosen here is:
 finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age + Kidhome:Income + Kidhome:Education + Income:Education + Kidhome:age + Income:age + Education:age + Kidhome:Income:Education + Income:Education:age)
 ```
 
-### **A.4. Statistical inference**
+### **A.3. Statistical inference**
 
 We use the eta_squared function to compute the effect sizes.
 Indeed we are not only interested in whether some variables are significant to explain the number of store purchases ; we also want to know their magnitude, their weight in the prediction of the number of store purchases.
@@ -238,7 +239,7 @@ effectsize::eta_squared(car::Anova(finalm1, type = 2), ci = 0.9, alternative = "
 ```
 We can conclude that the most important predictors are, in order, Income and Kidhome. The variables and interactions that include 0 in the confidence interval have a "meaningless" effect size, but we can still keep them in the model.
 
-### **A.6. Plots and summary estimates** {.tabset}
+### **A.4. Plots and summary estimates** {.tabset}
 
 #### Plot estimates
 <br>
@@ -284,7 +285,7 @@ sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q",
 <br>
 We see that R^2 and adjusted R^2 are of 0,51, which means this model explains 50% of the variance. In conclusion, the model is not satisfying enough. 
 
-### B. Principal component analysis
+### **B. Principal component analysis**
 
 
 ```{r}
@@ -296,9 +297,7 @@ summary(pm1)
 Looking at cumulative proportion, we need 8 principal components to reach 0,90 proportion of variance.
 <br>
 <br>
-We also see that PC6 is non-significant.
-<br>
-<br>
+We also see that PC6 is non-significant.  
 We delete PC6 from the model, and this new model m3 is not significantly different from m2. 
 <br>
 <br>
@@ -316,13 +315,22 @@ summary(m3)
 ```{r, warning=F, message=F}
 sjPlot::tab_pca(pm1, show.cronb = F, show.var = T, nmbr.fctr = 8)
 ```
-
+comments
 
 ### C. Regression
 
+<br>
 Another useful variable to explore is KidHome. Can we model consumers' behavior based on whether they have children or not ?  
+<br>
++ glm1 : AcceptedCmpTotal is not significant.  
+By performing an anova test, we see that glm1 and glm2 don't differ significantly, so we can keep the simplest which is glm2.  
+AIC of glm2 is also slightly better, which comforts us into keeping glm2.  
 
-```{r}
++ glm 2 : The number of fisher scoring iterations is acceptable (6)
+The residual deviance / degree of freedom ratio is 0,89 and dispersion parameter is 1. 
+
+
+```{r, warning=F, message=F}
 glm1 <- glm(Kidhome ~ Income + age + NumStorePurchases + MntSweetProducts + MntWines + AcceptedCmpTotal, family = binomial, data = newdf)
 summary(glm1)
 glm2 <-update(glm1, . ~ . - AcceptedCmpTotal)
@@ -330,14 +338,6 @@ summary(glm2)
 anova(glm2, glm1, test="Chisq")  
 
 sjPlot::plot_model(glm2, type = "pred", terms = c("age", "Income", "NumStorePurchases"), show.data  = T, jitter = 1) 
-```
-
-+ In glm1, AcceptedCmpTotal is not significant. By performing an anova test, we see that glm1 and glm2 don't different significantly, so we can keep the simplest which is glm2.  
-AIC of glm2 is also slightly better, which comforts us into keeping glm2.  
-
-+ glm 2 : The number of fisher scoring iterations is acceptable (6)
-The residual deviance / degree of freedom ratio is 0,89 and dispersion parameter is 1. 
-
 ```
 
 
@@ -367,7 +367,10 @@ plot(m1, c(1:2,4), ask=F)
 ```
 <br>
 + For the residuals VS fitted plot, the central line is close to 0 but is not very flat. There seems to be a pattern ?
+
 + Paying attention to the quantile-quantile plot, most of the points follow normality, although the upper extreme point tend to deviate from normality.
+
 + Looking at the Cook's distance graph, there is no value higher that 0,06 : we can conclude that there are no outliers influencing the model.
+
 + Conclusion : 
 
