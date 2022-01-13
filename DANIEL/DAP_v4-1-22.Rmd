@@ -296,18 +296,24 @@ However, we can test the model without the random effects and with only the emot
 brant(m1.3)
 ```
 The test tells us that the assumption is respected, which means that the assumptions for ordinal logistic regression are respected. 
-<!-- good! -->
 
 ## Conclusion
 
 The present data analysis was aimed to compare three statistical methods and to analyse how the emotion elicited in the word pairs and the gender impact the subjective ratings of disgust by the participants. As shown, the best method is the one that take in consideration the repetition of the subjects and the way each one of them express the emotion elicited. 
-<!-- check here terms -->
-For that, the mixed-effect model considering the subjects' repetition and the random effects not including the gender was the best model tested. 
-<!-- check here inference -->
-In other words, gender doesn't seem significative in the disgust evaluation, but it seems important to control for the way each subject do the evaluation. Further investigation can be made with the fear evaluation of this dataset to support or reject this proposition.
-<!-- details to gain some point -->
-<!-- add a general world or two about mixed models vs simple linear -->
- <!-- add a general world or two about  ordinal logistic regression, how is it interpretable, why it difers from comparing means and why it is suited for this kind of data..-->
+<br>
+
+For that, the mixed-effect model with random slopes allowing fixed effects to vary for each emotion and considering the subjects' repetition as a random effect, but not including the gender was the best model tested. 
+<br>
+
+In other words, gender doesn't seem significative in the disgust evaluation, but it seems important to control for the way each subject evaluate the emotion. 
+<br>
+
+Further investigation can be made with the fear evaluation of this dataset to support or reject this proposition. Fear is usually better recognized by the individuals, and the original dataset has a similar likert scale measuring the fear evaluation for each word pairs. If the same conclusion is found, it's a good indicator that this model is the best to fit this kind of data.  
+<br>
+
+Emotion isn't felt by everyone the same way, and every participant evaluated multiple pairs of words. Plus, the ordinal scale of the evaluation created an ensemble of constraints that made us use more sophisticated methods than simple linear methods. However, that mean that the interpretation of these results aren't very straight forward. The coefficients are scaled in terms of logs. Another way to interpret ordinal logistic regression models is to use odd ratios, which are more easy.
+
+
  
 ## Bibliography
 
@@ -323,7 +329,7 @@ Schmidt, J. (2012). Ordinal Response Mixed Models : A Case Study. 21. Retrieve
 
 Schmidt, K., Patnaik, P., & Kensinger, E. A. (2011). Emotion’s influence on memory for spatial and temporal context. Cognition and Emotion, 25(2), 229‑243. https://doi.org/10.1080/02699931.2010.483123
 
-
+Yoder, A. M., Widen, S. C., & Russell, J. A. (2016). The word disgust may refer to more than one emotion. Emotion, 16(3), 301‑308. https://doi.org/10.1037/emo0000118
 
 
 ## Appendix
@@ -340,12 +346,6 @@ ggplot(Data, aes(emotion,disgust,colour=gender))+geom_jitter(alpha=0.3)+
 autoplot(m0)
 ```
 
-
-
-<!-- 4. Hidden code Remove that and put the code inline but hiden on toggle -->
-<!-- ------------------ -->
-<!-- ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
-```dd -->
 
 ### 3. Package Info
 ```{r session info, echo = FALSE, comment = NA}
