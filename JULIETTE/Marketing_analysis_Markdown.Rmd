@@ -15,7 +15,7 @@ output:
 
 <br>
 
-## I - General introduction
+## **I - General introduction**
 <br>
 <br>
 **Origin**
@@ -107,7 +107,7 @@ path =  here("JULIETTE")
 data <- read.table("marketing_campaign.csv", header=T, sep="\t")
 ```
 
-## II - Data overview and cleaning {.tabset}
+## **II - Data overview and cleaning {.tabset}**
 
 ### Structure
 ```{r}
@@ -200,19 +200,21 @@ newdf %>%
 ```
 
 
-## III - Modelling
+## **III - Modelling**
 
-The aim of this analysis is to be able to predict the number of store purchases  
+The aim of this analysis is to be able to predict the number of store purchases as well as the number of kids at home, based on selected relevant attributes. 
+<br>
 
 ### **A. Linear model**
 
 ### A.1. First model
 <br>
+The first model is  
+m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age)
 ```{r, out.width="50%", warning=F, message=F}
 m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age) 
 ```
-
-
+<br>
 ### A.2. Model selection
 
 Here, we use the stepAIC function to filter the variables to keep, by choosing the best AIC.
@@ -222,7 +224,8 @@ ms$anova
 ```
 
 
-The final model chosen here is: 
+The final model chosen here is:  
+finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age + Kidhome:Income + Kidhome:Education + Income:Education + Kidhome:age + Income:age + Education:age + Kidhome:Income:Education + Income:Education:age)
 <br>
 ```{r}
 finalm1 <- lm(data=newdf,NumStorePurchases ~ Kidhome + Income + Education + age + Kidhome:Income + Kidhome:Education + Income:Education + Kidhome:age + Income:age + Education:age + Kidhome:Income:Education + Income:Education:age)
@@ -321,7 +324,8 @@ comments
 
 <br>
 Another useful variable to explore is KidHome. Can we model consumers' behavior based on whether they have children or not ?  
-<br>
+<br>  
+
 + glm1 : AcceptedCmpTotal is not significant.  
 By performing an anova test, we see that glm1 and glm2 don't differ significantly, so we can keep the simplest which is glm2.  
 AIC of glm2 is also slightly better, which comforts us into keeping glm2.  
@@ -341,15 +345,14 @@ sjPlot::plot_model(glm2, type = "pred", terms = c("age", "Income", "NumStorePurc
 ```
 
 
-Conclusions
+## **IV - Conclusions**
 
-Annex
+## **V - Annex**
 
-### Checking the assumptions of the linear model
+## Checking the assumptions of the linear model
 <br>
 In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. 
 <br>
-
 
 ```{r, fig.show="hold", out.width="50%", fig.align="center", warning=F, message=F}
 ggplot(data, aes(x = NumStorePurchases)) +
@@ -365,12 +368,13 @@ The data is intrinsically skewed because there are no negative values possible. 
 m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age)
 plot(m1, c(1:2,4), ask=F)
 ```
-<br>
+<br>  
+<br>  
+
 + For the residuals VS fitted plot, the central line is close to 0 but is not very flat. There seems to be a pattern ?
 
 + Paying attention to the quantile-quantile plot, most of the points follow normality, although the upper extreme point tend to deviate from normality.
 
 + Looking at the Cook's distance graph, there is no value higher that 0,06 : we can conclude that there are no outliers influencing the model.
 
-+ Conclusion : 
 
