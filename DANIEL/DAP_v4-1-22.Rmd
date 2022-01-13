@@ -4,11 +4,6 @@ author: "Daniel Granja"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
-    includes:
-    code_folding: "hide"
-    toc: true
-    toc_float: true
-    number_sections: false
     df_print: paged
 ---
 
