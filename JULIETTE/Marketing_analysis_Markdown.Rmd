@@ -303,7 +303,8 @@ We also see that PC6 is non-significant.
 We delete PC6 from the model, and this new model m3 is not significantly different from m2. 
 <br>
 <br>
-Therefore, we keep the simplest, which is m3. With summary(m3), we see that all PCs are significant. We keep the model m3.
+Therefore, we keep the simplest, which is m3. With summary(m3), we see that all PCs are significant. We keep the model m3. 
+#should I add comments ?
 ```{r}
 data2 <- cbind(clean_data, pm1$x)
 m2 <- lm(data=data2, NumStorePurchases ~ PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8)
@@ -318,14 +319,26 @@ sjPlot::tab_pca(pm1, show.cronb = F, show.var = T, nmbr.fctr = 8)
 ```
 
 
-Regression
+### C. Regression
+
+Another useful variable to explore is KidHome. Can we model consumers' behavior based on whether they have children or not ?  
+
 ```{r}
 glm1 <- glm(Kidhome ~ Income + age + NumStorePurchases + MntSweetProducts + MntWines + AcceptedCmpTotal, family = binomial, data = newdf)
 summary(glm1)
 glm2 <-update(glm1, . ~ . - AcceptedCmpTotal)
 summary(glm2)
 anova(glm2, glm1, test="Chisq")  
-# AIC of glm2 is slightly better, and both models are not significantly different, so we keep glm2
+
+sjPlot::plot_model(glm2, type = "pred", terms = c("age", "Income", "NumStorePurchases"), show.data  = T, jitter = 1) 
+```
+
++ In glm1, AcceptedCmpTotal is not significant. By performing an anova test, we see that glm1 and glm2 don't different significantly, so we can keep the simplest which is glm2.  
+AIC of glm2 is also slightly better, which comforts us into keeping glm2.  
+
++ glm 2 : The number of fisher scoring iterations is acceptable (6)
+The residual deviance / degree of freedom ratio is 0,89 and dispersion parameter is 1. 
+
 ```
 
 
