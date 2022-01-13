@@ -282,8 +282,7 @@ sjPlot enables us to summarize all the standardized estimates in a numeric form.
 sjPlot::tab_model(effectsize::standardize(finalm1), rm.terms = c("*Education.Q", "Education^4", "Income:Education.C", "Education.Q" , "Kidhomeyes:Education.Q", "Income:Education.Q", "Kidhomeyes:Income:Education.Q", "Education.C" ,              "Kidhomeyes:Education.C"  ,      "Income:Education.C"  ,"Kidhomeyes:Income:Education.C", "Education^4",  "Kidhomeyes:Education^4", "Income:Education^4" , "Kidhomeyes:Income:Education^4"), show.intercept = F)   #
 ```
 <br>
-We see that R^2 and adjusted R^2 have acceptable values. 
-<!-- comment: Why, what does it meant ? -->
+We see that R^2 and adjusted R^2 are of 0,51, which means this model explains 50% of the variance. In conclusion, the model is not satisfying enough. 
 
 ### B. Principal component analysis
 
