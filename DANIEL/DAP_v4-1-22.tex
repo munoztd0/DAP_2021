@@ -1,0 +1,990 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={DAP Project},
+  pdfauthor={Daniel Granja},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{DAP Project}
+\author{Daniel Granja}
+\date{13 janvier, 2022}
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#this is to check to see if package are installed and if not to install them or just load them if they are installed!}
+\ControlFlowTok{if}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{require}\NormalTok{(pacman)) \{}\FunctionTok{install.packages}\NormalTok{(}\StringTok{"pacman"}\NormalTok{)\}}
+
+\NormalTok{pacman}\SpecialCharTok{::}\FunctionTok{p\_load}\NormalTok{(here, ggplot2, ordinal, ggfortify, GGally, grid,gridExtra, plyr, sjPlot, likert, vtable, brant, Hmisc, MASS, kableExtra, gtsummary, PResiduals)}
+
+\CommentTok{\#get relative path}
+\NormalTok{path }\OtherTok{=}\FunctionTok{here}\NormalTok{(}\StringTok{"DANIEL"}\NormalTok{)}
+
+\CommentTok{\#load data }
+
+\NormalTok{Raw\_data }\OtherTok{\textless{}{-}} \FunctionTok{read.csv2}\NormalTok{(}\StringTok{"Raw\_data.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{introduction}{%
+\subsection{Introduction}\label{introduction}}
+
+\hypertarget{context-of-the-project}{%
+\subsubsection{Context of the project}\label{context-of-the-project}}
+
+According to the American Psychological Association (APA), emotion is
+defined as ``a complex reaction pattern, involving experiential,
+behavioral and physiological elements.''
+
+Researchers have been studying the impact of emotions on cognitive
+functions, such as memory, and have shown that emotional activation, and
+specifically emotions of negative valence, favours the retrieval
+processes of associative memory for single items, but impairs it for
+associated items or contexts (Schmidt, Patnaik \& Kensinger, 2010).
+
+It's believed that the neurobiological systems sustaining high emotional
+arousal and memory are linked, especially through the adrenal stress
+hormones, itself mediated by the amygdala activity (McGaugh, 2013).
+
+In the study the dataset came from, Riegel et al.~(2020) used words to
+elicit emotions (disgust, fear or neutral). Each pair displayed the same
+emotion and when showed together they had to imagine an interaction
+between them, forcing the creation of a meaningful association. To be
+sure that the displayed words showed the correct emotion, affective
+ratings were asked as controls. Each participant had to rate each pair
+on a Likert scale (1 to 7) of disgust and fear.
+
+In this project, we are going to use part of this dataset to analyse and
+compare three statistical methods. We will compare (a) a simple logistic
+ordinal regression, (b) a simple mixed-effect model only considering the
+subjects' repetition as a random effect, and (c) a more complete
+mixed-effect model with random slopes allowing fixed effects to vary for
+each emotion. We follow the `Keep it maximal' procedure from Barr et
+al.~(2013) to find a model that best fits our data, considering how the
+emotion elicited in the word pairs and the gender impact the subjective
+ratings of disgust by the participants.
+
+\hypertarget{data-description}{%
+\subsubsection{Data description}\label{data-description}}
+
+Here is a description of the different variables:
+
+\begin{itemize}
+\item
+  \textbf{Subjects}: the subject's number in the experiment.
+\item
+  \textbf{Wordpairs}: the word pairs presented.
+\item
+  \textbf{Emotion}: the emotion elicited by the word pairs (disgust,
+  fear or neutral).
+\item
+  \textbf{Gender}: the gender of the subjects (man or woman).
+\item
+  \textbf{Disgust}: a Likert scale (1 to 7) of the subjects' emotional
+  subjective feeling of disgust while judging the word pairs.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Creating a working dataset}
+\CommentTok{\#Giving nice names to variables}
+
+\NormalTok{subjects}\OtherTok{\textless{}{-}}\NormalTok{Raw\_data}\SpecialCharTok{$}\NormalTok{code}
+\NormalTok{wordpairs}\OtherTok{\textless{}{-}}\NormalTok{Raw\_data}\SpecialCharTok{$}\NormalTok{wordpair}
+\NormalTok{emotion}\OtherTok{\textless{}{-}}\NormalTok{Raw\_data}\SpecialCharTok{$}\NormalTok{emotion}
+\NormalTok{gender}\OtherTok{\textless{}{-}}\NormalTok{Raw\_data}\SpecialCharTok{$}\NormalTok{sex}
+\NormalTok{disgust}\OtherTok{\textless{}{-}}\NormalTok{Raw\_data}\SpecialCharTok{$}\NormalTok{disgust}
+\NormalTok{fear}\OtherTok{\textless{}{-}}\NormalTok{Raw\_data}\SpecialCharTok{$}\NormalTok{fear}
+
+\CommentTok{\#Creating a dataset}
+\NormalTok{Data}\OtherTok{\textless{}{-}}\FunctionTok{data.frame}\NormalTok{(subjects, wordpairs, emotion, gender, disgust)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Adapting the variables}
+\NormalTok{Data}\SpecialCharTok{$}\NormalTok{emotion}\OtherTok{\textless{}{-}}\FunctionTok{as.factor}\NormalTok{(Data}\SpecialCharTok{$}\NormalTok{emotion)}
+\FunctionTok{levels}\NormalTok{(Data}\SpecialCharTok{$}\NormalTok{emotion) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Disgust"}\NormalTok{, }\StringTok{"Fear"}\NormalTok{,}\StringTok{"Neutral"}\NormalTok{)}
+\NormalTok{Data}\SpecialCharTok{$}\NormalTok{gender}\OtherTok{\textless{}{-}}\FunctionTok{as.factor}\NormalTok{(Data}\SpecialCharTok{$}\NormalTok{gender)}
+\FunctionTok{levels}\NormalTok{(Data}\SpecialCharTok{$}\NormalTok{gender) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Women"}\NormalTok{, }\StringTok{"Men"}\NormalTok{)}
+\NormalTok{Data}\SpecialCharTok{$}\NormalTok{disgust}\OtherTok{\textless{}{-}}\FunctionTok{as.factor}\NormalTok{(Data}\SpecialCharTok{$}\NormalTok{disgust)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{data-overview}{%
+\subsection{Data overview}\label{data-overview}}
+
+\hypertarget{structure}{%
+\subsubsection{Structure}\label{structure}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{str}\NormalTok{(Data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+'data.frame':   9349 obs. of  5 variables:
+ $ subjects : chr  "sb0804" "sb0804" "sb0804" "sb0804" ...
+ $ wordpairs: chr  "awersja - tytoniowy" "Å›cieki - oczyszczaÄ‡" "cygaro - cuchnÄ…cy" "Å›winia - szczecina" ...
+ $ emotion  : Factor w/ 3 levels "Disgust","Fear",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ gender   : Factor w/ 2 levels "Women","Men": 2 2 2 2 2 2 2 2 2 2 ...
+ $ disgust  : Factor w/ 7 levels "1","2","3","4",..: 1 2 3 3 4 1 1 2 2 2 ...
+\end{verbatim}
+
+\hypertarget{summary}{%
+\subsubsection{Summary}\label{summary}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# st(Data) \# replacded by that so its nicer}
+\NormalTok{Data[}\FunctionTok{c}\NormalTok{(}\StringTok{"emotion"}\NormalTok{, }\StringTok{"gender"}\NormalTok{, }\StringTok{"disgust"}\NormalTok{)] }\SpecialCharTok{\%\textgreater{}\%}  \FunctionTok{tbl\_summary}\NormalTok{()  }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{modify\_caption}\NormalTok{(}\StringTok{"**Summary statistics**"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{bold\_labels}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Table printed with `knitr::kable()`, not {gt}. Learn why at
+http://www.danieldsjoberg.com/gtsummary/articles/rmarkdown.html
+To suppress this message, include `message = FALSE` in code chunk header.
+\end{verbatim}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-3}**Summary statistics**}
+\centering
+\begin{tabular}[t]{l|l}
+\hline
+**Characteristic** & **N = 9,349**\\
+\hline
+\_\_emotion\_\_ & \\
+\hline
+Disgust & 3,116 (33\%)\\
+\hline
+Fear & 3,116 (33\%)\\
+\hline
+Neutral & 3,117 (33\%)\\
+\hline
+\_\_gender\_\_ & \\
+\hline
+Women & 4,496 (48\%)\\
+\hline
+Men & 4,853 (52\%)\\
+\hline
+\_\_disgust\_\_ & \\
+\hline
+1 & 6,611 (71\%)\\
+\hline
+2 & 972 (10\%)\\
+\hline
+3 & 706 (7.6\%)\\
+\hline
+4 & 432 (4.6\%)\\
+\hline
+5 & 288 (3.1\%)\\
+\hline
+6 & 174 (1.9\%)\\
+\hline
+7 & 166 (1.8\%)\\
+\hline
+\end{tabular}
+\end{table}
+
+As one can see in this table, the distribution of emotion through the
+word pairs and the gender is equivalent. However, the distribution of
+the disgust response has a floor effect, more than 80\% of it being 1
+and 2.
+
+\hypertarget{visual-exploration}{%
+\subsection{Visual exploration}\label{visual-exploration}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# Prepare data for plot \textless{}{-} **need to specify emotion$disgust + the other ratings**}
+\NormalTok{Newdata}\OtherTok{\textless{}{-}}\FunctionTok{data.frame}\NormalTok{(Data}\SpecialCharTok{$}\NormalTok{emotion,Data}\SpecialCharTok{$}\NormalTok{disgust)}
+
+\NormalTok{df }\OtherTok{=} \FunctionTok{prop.table}\NormalTok{(}\FunctionTok{table}\NormalTok{(Newdata}\SpecialCharTok{$}\NormalTok{Data.emotion, Newdata}\SpecialCharTok{$}\NormalTok{Data.disgust), }\AttributeTok{margin =} \DecValTok{1}\NormalTok{)}\SpecialCharTok{*}\DecValTok{100}
+
+\CommentTok{\#this is just ot make it fit into Likert}
+\NormalTok{df }\OtherTok{=} \FunctionTok{as.data.frame.matrix}\NormalTok{(df)}
+\NormalTok{df}\SpecialCharTok{$}\NormalTok{Item }\OtherTok{\textless{}{-}} \FunctionTok{row.names}\NormalTok{(df)}
+\FunctionTok{rownames}\NormalTok{(df) }\OtherTok{=} \ConstantTok{NULL}
+\NormalTok{df }\OtherTok{=}\NormalTok{ df[,}\FunctionTok{c}\NormalTok{(}\DecValTok{8}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{6}\NormalTok{,}\DecValTok{7}\NormalTok{)]}
+\FunctionTok{colnames}\NormalTok{(df) }\OtherTok{=} \FunctionTok{c}\NormalTok{(}\StringTok{"Item"}\NormalTok{, }\StringTok{"1 (low)"}\NormalTok{,}\StringTok{"2"}\NormalTok{,}\StringTok{"3"}\NormalTok{,}\StringTok{"4"}\NormalTok{,}\StringTok{"5"}\NormalTok{,}\StringTok{"6"}\NormalTok{,}\StringTok{"7 (high)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Pretty Plot}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{likert}\NormalTok{(}\AttributeTok{summary =}\NormalTok{ df))}\SpecialCharTok{+} 
+  \FunctionTok{guides}\NormalTok{(}\AttributeTok{fill =} \FunctionTok{guide\_legend}\NormalTok{(}\AttributeTok{name=}\StringTok{"Subjective evaluation"}\NormalTok{))}\SpecialCharTok{+} 
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Subjective evaluation of disgust across all pairs of words"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Percentage of Likert answers"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\StringTok{"Word pairs\textquotesingle{} emotions"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \FunctionTok{rel}\NormalTok{(}\FloatTok{1.5}\NormalTok{))) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.box.background =} \FunctionTok{element\_rect}\NormalTok{(), }\AttributeTok{legend.box.margin =} \FunctionTok{margin}\NormalTok{(}\DecValTok{6}\NormalTok{, }\DecValTok{6}\NormalTok{, }\DecValTok{6}\NormalTok{, }\DecValTok{6}\NormalTok{), }\AttributeTok{legend.position =} \StringTok{"right"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{DAP_v4-1-22_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+This figure shows the distribution of the subjective evaluation of
+disgust across all pair of words, depending of the emotion elicited by
+the words. As one can see, there still is a floor effect, but it seems
+less strong for the disgust emotion, as one can expect since the emotion
+elicited corresponds to the emotion rated. However, this floor effect
+can be explained by the difficulty of identification of disgust (Yoder
+et al., 2016). Since it's difficult to specifically recognize disgust,
+mixed to the small arousal of some word pairs, there is a possible
+existence of a bias in the ratings. Another representation including the
+gender can be found in Appendix 1.
+
+\hypertarget{modeling}{%
+\subsection{Modeling}\label{modeling}}
+
+Even if we have seen in our exploration that there seems to be a floor
+effect, we are going to do a diagnostic of a linear model to certify the
+unfit of this model to analyse our data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sjPlot}\SpecialCharTok{::}\FunctionTok{plot\_model}\NormalTok{(m0,}\AttributeTok{type =} \StringTok{"diag"}\NormalTok{)[[}\DecValTok{3}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{DAP_v4-1-22_files/figure-latex/normal analysis of resids-1.pdf}
+
+As expected, the residuals distribution does not follow a normal curve.
+Therefore, we cannot do a classic linear regression to analyse this
+data. Alternative techniques have to be investigated. (Find more
+diagnostic graphs in the Appendix 2.)
+
+Three possible methods are being tested: (a) a simple logistic ordinal
+regression, (b) a simple mixed-effect model only considering the
+subjects' repetition as a random effect, and (c) a more complete
+mixed-effect model with random slopes allowing fixed effects to vary for
+each emotion.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m1}\FloatTok{.2} \OtherTok{=} \FunctionTok{clm}\NormalTok{(disgust }\SpecialCharTok{\textasciitilde{}}\NormalTok{ emotion }\SpecialCharTok{*}\NormalTok{ gender, }\AttributeTok{data =}\NormalTok{ Data) }\CommentTok{\#Model A}
+\NormalTok{m2}\FloatTok{.2} \OtherTok{=} \FunctionTok{clmm}\NormalTok{(disgust }\SpecialCharTok{\textasciitilde{}}\NormalTok{ emotion }\SpecialCharTok{*}\NormalTok{ gender }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1}\SpecialCharTok{|}\NormalTok{subjects), }\AttributeTok{data =}\NormalTok{ Data) }\CommentTok{\#Model B}
+\NormalTok{m3}\FloatTok{.2} \OtherTok{=} \FunctionTok{clmm}\NormalTok{(disgust }\SpecialCharTok{\textasciitilde{}}\NormalTok{ emotion }\SpecialCharTok{*}\NormalTok{ gender }\SpecialCharTok{+}\NormalTok{ (emotion }\SpecialCharTok{|}\NormalTok{ subjects), }\AttributeTok{data =}\NormalTok{ Data) }\CommentTok{\#Model C}
+\end{Highlighting}
+\end{Shaded}
+
+After computing the full model for each random structure, we can use the
+Akaike information criterion to estimate the prediction error of each
+model, and thereby their relative quality.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{a1}\OtherTok{\textless{}{-}} \FunctionTok{extractAIC}\NormalTok{(m1}\FloatTok{.2}\NormalTok{)}
+\NormalTok{a2}\OtherTok{\textless{}{-}} \FunctionTok{extractAIC}\NormalTok{(m2}\FloatTok{.2}\NormalTok{)}
+\NormalTok{a3}\OtherTok{\textless{}{-}} \FunctionTok{extractAIC}\NormalTok{(m3}\FloatTok{.2}\NormalTok{)}
+
+\NormalTok{c1}\OtherTok{\textless{}{-}}\FunctionTok{cbind}\NormalTok{(a1,a2,a3)}
+\NormalTok{r1}\OtherTok{\textless{}{-}}\NormalTok{c1[}\DecValTok{1}\NormalTok{,]}
+\NormalTok{r2}\OtherTok{\textless{}{-}}\NormalTok{c1[}\DecValTok{2}\NormalTok{,]}
+\NormalTok{c2}\OtherTok{\textless{}{-}}\FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{cbind}\NormalTok{(r1,r2))}
+\FunctionTok{rownames}\NormalTok{(c2) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"No random structure"}\NormalTok{, }\StringTok{"Simple random strucure"}\NormalTok{,}\StringTok{"Full random structure"}\NormalTok{)}
+\FunctionTok{colnames}\NormalTok{(c2) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Equivalent degrees of freedom"}\NormalTok{, }\StringTok{"Akaike Information Criterion"}\NormalTok{)}
+\NormalTok{c2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                        Equivalent degrees of freedom
+## No random structure                               11
+## Simple random strucure                            12
+## Full random structure                             17
+##                        Akaike Information Criterion
+## No random structure                        17242.03
+## Simple random strucure                     16204.65
+## Full random structure                      16075.78
+\end{verbatim}
+
+As shown in this table, we can conclude that the model that seems to fit
+the best our data is the full random structure model, a mixed-effect
+model with random slopes allowing fixed effects to vary for each
+emotion, as it has the smaller AIC, and more equivalent degrees of
+freedom.
+
+We can test explicitly the random slope for emotions' fixed effects to
+confirm the importance to have this complexity in the model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{anova}\NormalTok{(m2}\FloatTok{.2}\NormalTok{, m3}\FloatTok{.2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Likelihood ratio tests of cumulative link models:
+##  
+##      formula:                                          link: threshold:
+## m2.2 disgust ~ emotion * gender + (1 | subjects)       logit flexible  
+## m3.2 disgust ~ emotion * gender + (emotion | subjects) logit flexible  
+## 
+##      no.par   AIC  logLik LR.stat df Pr(>Chisq)    
+## m2.2     12 16205 -8090.3                          
+## m3.2     17 16076 -8020.9  138.87  5  < 2.2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+It is important to include the random slope for emotions' fixed effects
+(χ²(5)=138.5, p \textless{} 0.001).
+
+This being done, we must now look for the best model using this random
+structure. According to our initial hypothesis, we want to know if there
+is an impact of the word pairs' emotion and the gender on the subjective
+evaluation of disgust.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#best model}
+\CommentTok{\#m3.2 = clmm(disgust \textasciitilde{} emotion * gender + (emotion | subjects), data = Data) \#done above}
+\NormalTok{m3}\FloatTok{.1} \OtherTok{=} \FunctionTok{clmm}\NormalTok{(disgust }\SpecialCharTok{\textasciitilde{}}\NormalTok{ emotion }\SpecialCharTok{+}\NormalTok{ gender }\SpecialCharTok{+}\NormalTok{ (emotion }\SpecialCharTok{|}\NormalTok{ subjects), }\AttributeTok{data =}\NormalTok{ Data)}
+\NormalTok{m3}\FloatTok{.0} \OtherTok{=} \FunctionTok{clmm}\NormalTok{(disgust }\SpecialCharTok{\textasciitilde{}}\NormalTok{ emotion }\SpecialCharTok{+}\NormalTok{ (emotion }\SpecialCharTok{|}\NormalTok{ subjects), }\AttributeTok{data =}\NormalTok{ Data)}
+
+
+\FunctionTok{anova}\NormalTok{(m3}\FloatTok{.0}\NormalTok{, m3}\FloatTok{.1}\NormalTok{, m3}\FloatTok{.2}\NormalTok{, }\AttributeTok{test=}\StringTok{\textquotesingle{}Chisq\textquotesingle{}}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Likelihood ratio tests of cumulative link models:
+##  
+##      formula:                                          link: threshold:
+## m3.0 disgust ~ emotion + (emotion | subjects)          logit flexible  
+## m3.1 disgust ~ emotion + gender + (emotion | subjects) logit flexible  
+## m3.2 disgust ~ emotion * gender + (emotion | subjects) logit flexible  
+## 
+##      no.par   AIC  logLik LR.stat df Pr(>Chisq)  
+## m3.0     14 16075 -8023.4                        
+## m3.1     15 16077 -8023.4  0.0706  1    0.79040  
+## m3.2     17 16076 -8020.9  5.0360  2    0.08062 .
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+As shown in the test summary above, and also following the AIC estimate,
+the most parsimonious model is the model without gender effect.
+
+\hypertarget{statistical-inference}{%
+\subsubsection{Statistical Inference}\label{statistical-inference}}
+
+\hypertarget{model-summary}{%
+\paragraph{Model Summary}\label{model-summary}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(m3}\FloatTok{.0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Cumulative Link Mixed Model fitted with the Laplace approximation
+
+formula: disgust ~ emotion + (emotion | subjects)
+data:    Data
+
+ link  threshold nobs logLik   AIC      niter      max.grad cond.H 
+ logit flexible  9349 -8023.44 16074.89 1862(9330) 8.10e-03 4.9e+02
+
+Random effects:
+ Groups   Name           Variance Std.Dev. Corr          
+ subjects (Intercept)    0.9960   0.9980                 
+          emotionFear    0.6443   0.8027   -0.050        
+          emotionNeutral 0.3974   0.6304   -0.699  0.405 
+Number of groups:  subjects 52 
+
+Coefficients:
+               Estimate Std. Error z value Pr(>|z|)    
+emotionFear     -2.0596     0.1313  -15.68   <2e-16 ***
+emotionNeutral  -3.9909     0.1497  -26.66   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Threshold coefficients:
+    Estimate Std. Error z value
+1|2  -0.5346     0.1437  -3.721
+2|3   0.3387     0.1435   2.359
+3|4   1.1585     0.1445   8.018
+4|5   1.8831     0.1467  12.834
+5|6   2.6467     0.1515  17.466
+6|7   3.4641     0.1619  21.402
+\end{verbatim}
+
+Now that we have chosen our best model, we are going to take a deeper
+look at the estimates.
+
+The estimated model can be written as:
+\[Logit(P(Y\le 2))= (-0.5346) - (-2.0596)*emotionFear - (-3.9909)*emotionNeutral\]
+\[Logit(P(Y\le 3))= 0.3387 - (-2.0596)*emotionFear - (-3.9909)*emotionNeutral\]
+\[Logit(P(Y\le 4))= 1.1585 - (-2.0596)*emotionFear - (-3.9909)*emotionNeutral\]
+\[Logit(P(Y\le 5))= 1.8831 - (-2.0596)*emotionFear - (-3.9909)*emotionNeutral\]
+\[Logit(P(Y\le 6))= 2.6467 - (-2.0596)*emotionFear - (-3.9909)*emotionNeutral\]
+\[Logit(P(Y\le 7))= 3.4641 - (-2.0596)*emotionFear - (-3.9909)*emotionNeutral\]
+
+\hypertarget{regression-summary-table}{%
+\paragraph{Regression summary table}\label{regression-summary-table}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sjPlot}\SpecialCharTok{::}\FunctionTok{tab\_model}\NormalTok{(m3}\FloatTok{.0}\NormalTok{, }\AttributeTok{show.stat =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{show.aic =}\NormalTok{ T, }\AttributeTok{show.reflvl =}\NormalTok{ T, }\AttributeTok{show.est =}\NormalTok{ T, }\AttributeTok{p.style =} \StringTok{"stars"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+~
+
+disgust
+
+Predictors
+
+Odds Ratios
+
+CI
+
+Statistic
+
+1\textbar2
+
+0.59 ***
+
+0.44~--~0.78
+
+-3.72
+
+2\textbar3
+
+1.40 *
+
+1.06~--~1.86
+
+2.36
+
+3\textbar4
+
+3.19 ***
+
+2.40~--~4.23
+
+8.02
+
+4\textbar5
+
+6.57 ***
+
+4.93~--~8.76
+
+12.83
+
+5\textbar6
+
+14.11 ***
+
+10.48~--~18.99
+
+17.47
+
+6\textbar7
+
+31.95 ***
+
+23.26~--~43.88
+
+21.40
+
+Disgust
+
+Reference
+
+Fear
+
+0.13 ***
+
+0.10~--~0.16
+
+-15.68
+
+Neutral
+
+0.02 ***
+
+0.01~--~0.02
+
+-26.66
+
+Random Effects
+
+σ2
+
+3.29
+
+τ00 subjects
+
+1.00
+
+τ11 subjects.emotionFear
+
+0.64
+
+τ11 subjects.emotionNeutral
+
+0.40
+
+ρ01
+
+-0.05
+
+-0.70
+
+ICC
+
+0.24
+
+N subjects
+
+52
+
+Observations
+
+9349
+
+Marginal R2 / Conditional R2
+
+0.381 / 0.528
+
+AIC
+
+16074.887
+
+\begin{itemize}
+\tightlist
+\item
+  p\textless0.05~~~** p\textless0.01~~~*** p\textless0.001
+\end{itemize}
+
+The effect of the emotion predictors of fear (OR = 0.13, 95\% CI
+0.10-0.16, p \textless{} 0.001) and neutral (OR = 0.02, 95\% CI
+0.01-0.02, p \textless{} 0.001) are different from disgust. The random
+slope for emotions' fixed effects has been reported above.
+
+Being the model that best fits the data doesn't mean that it's a good
+model, that is why we must check for the explained variance. We can see
+that the Conditional R2 is 0.528, which means that 52.8\% of the
+variance is explained by both the fixed and random factors.
+
+\hypertarget{model-visualization}{%
+\subsubsection{Model visualization}\label{model-visualization}}
+
+\hypertarget{plot-estimates}{%
+\paragraph{Plot estimates}\label{plot-estimates}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot\_model}\NormalTok{(m3}\FloatTok{.0}\NormalTok{, }\AttributeTok{show.values =}\NormalTok{ T, }\AttributeTok{value.offset =}\NormalTok{ .}\DecValTok{4}\NormalTok{, }\AttributeTok{title =} \StringTok{"Disgust"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{DAP_v4-1-22_files/figure-latex/unnamed-chunk-8-1.pdf}
+The model represented above shows how more a disgust evaluation is high,
+more the odds of the wordpairs' eliciting disgust is high. It also shows
+that when the emotion elicited was not disgust, the odds of a high
+evaluation of disgust are low.
+
+\hypertarget{plot-marginal-effects}{%
+\paragraph{Plot marginal effects}\label{plot-marginal-effects}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot\_model}\NormalTok{(m3}\FloatTok{.0}\NormalTok{, }\AttributeTok{type =} \StringTok{"pred"}\NormalTok{, }\AttributeTok{terms =} \StringTok{"emotion"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{DAP_v4-1-22_files/figure-latex/unnamed-chunk-9-1.pdf}
+The model represented above shows how more a disgust evaluation is high,
+more the odds of the wordpairs' eliciting disgust is high. It also shows
+that when the emotion elicited was not disgust, the odds of a high
+evaluation of disgust are low.
+
+\hypertarget{diagnostic-of-the-model}{%
+\subsubsection{Diagnostic of the model}\label{diagnostic-of-the-model}}
+
+Ordinal logistic regressions have four assumptions that need to be
+controled for when aplied:
+
+\begin{itemize}
+\tightlist
+\item
+  The dependent variable are ordered.
+\item
+  One or more of the independent variables are either continuous,
+  categorical or ordinal.
+\item
+  No multi-collinearity.
+\item
+  Proportional odds.
+\end{itemize}
+
+The two firsts are respected by the structure of our data (see Visual
+exploration). We must check for the two others.
+
+\hypertarget{residual-representation}{%
+\paragraph{Residual representation}\label{residual-representation}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Residual{-}vs{-}covariate plot and Q{-}Q plot}
+\NormalTok{m1}\FloatTok{.3}\OtherTok{\textless{}{-}}\FunctionTok{polr}\NormalTok{(disgust }\SpecialCharTok{\textasciitilde{}}\NormalTok{ emotion, }\AttributeTok{data =}\NormalTok{ Data)}
+\NormalTok{pres }\OtherTok{\textless{}{-}} \FunctionTok{presid}\NormalTok{(m1}\FloatTok{.3}\NormalTok{)}
+
+\NormalTok{p1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Data}\SpecialCharTok{$}\NormalTok{disgust, }\AttributeTok{y =}\NormalTok{ pres), }\FunctionTok{aes}\NormalTok{(x, y)) }\SpecialCharTok{+}
+\FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{color =} \StringTok{"\#444444"}\NormalTok{, }\AttributeTok{shape =} \DecValTok{19}\NormalTok{, }\AttributeTok{size =} \DecValTok{2}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+\FunctionTok{ylab}\NormalTok{(}\StringTok{"Probability{-}scale residual"}\NormalTok{)}
+\NormalTok{p2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{y =}\NormalTok{ pres), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{sample =}\NormalTok{ y)) }\SpecialCharTok{+}
+\FunctionTok{stat\_qq}\NormalTok{(}\AttributeTok{distribution =}\NormalTok{ qunif, }\AttributeTok{dparams =} \FunctionTok{list}\NormalTok{(}\AttributeTok{min =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{, }\AttributeTok{max =} \DecValTok{1}\NormalTok{), }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+\FunctionTok{xlab}\NormalTok{(}\StringTok{"Sample quantile"}\NormalTok{) }\SpecialCharTok{+}
+\FunctionTok{ylab}\NormalTok{(}\StringTok{"Theoretical quantile"}\NormalTok{)}
+\FunctionTok{grid.arrange}\NormalTok{(p1, p2, }\AttributeTok{ncol =} \DecValTok{2}\NormalTok{) }\CommentTok{\# Figure 1}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{DAP_v4-1-22_files/figure-latex/residual plots-1.pdf}
+SBS residual plots for the ordinal logistic regression model. Left:
+Residual-vs-covariate plot. Right: Q-Q plot of the residuals.
+
+\hypertarget{no-multi-collinearity}{%
+\paragraph{No multi-collinearity}\label{no-multi-collinearity}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Data[}\FunctionTok{c}\NormalTok{(}\StringTok{"emotion"}\NormalTok{, }\StringTok{"gender"}\NormalTok{, }\StringTok{"disgust"}\NormalTok{)] }\SpecialCharTok{\%\textgreater{}\%}  \FunctionTok{tbl\_summary}\NormalTok{(}\AttributeTok{by=}\NormalTok{emotion)  }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{modify\_caption}\NormalTok{(}\StringTok{"**Summary statistics by emotion**"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{add\_p}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{bold\_labels}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Table printed with `knitr::kable()`, not {gt}. Learn why at
+## http://www.danieldsjoberg.com/gtsummary/articles/rmarkdown.html
+## To suppress this message, include `message = FALSE` in code chunk header.
+\end{verbatim}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-10}**Summary statistics by emotion**}
+\centering
+\begin{tabular}[t]{l|l|l|l|l}
+\hline
+**Characteristic** & **Disgust**, N = 3,116 & **Fear**, N = 3,116 & **Neutral**, N = 3,117 & **p-value**\\
+\hline
+\_\_gender\_\_ &  &  &  & >0.9\\
+\hline
+Women & 1,498 (48\%) & 1,499 (48\%) & 1,499 (48\%) & \\
+\hline
+Men & 1,618 (52\%) & 1,617 (52\%) & 1,618 (52\%) & \\
+\hline
+\_\_disgust\_\_ &  &  &  & <0.001\\
+\hline
+1 & 1,256 (40\%) & 2,357 (76\%) & 2,998 (96\%) & \\
+\hline
+2 & 543 (17\%) & 369 (12\%) & 60 (1.9\%) & \\
+\hline
+3 & 482 (15\%) & 192 (6.2\%) & 32 (1.0\%) & \\
+\hline
+4 & 326 (10\%) & 92 (3.0\%) & 14 (0.4\%) & \\
+\hline
+5 & 229 (7.3\%) & 52 (1.7\%) & 7 (0.2\%) & \\
+\hline
+6 & 148 (4.7\%) & 22 (0.7\%) & 4 (0.1\%) & \\
+\hline
+7 & 132 (4.2\%) & 32 (1.0\%) & 2 (<0.1\%) & \\
+\hline
+\end{tabular}
+\end{table}
+
+We must check for any collinearity between our predictors. Our final
+model only has the wordpairs' emotion as predictor, so there is no
+possible collinearity with other predictors. For the other models, we
+also included the gender. There is no multicollinearity between gender
+and emotion (χ²(2, N = 9349) = 0.0006, p \textgreater{} 0.05)
+
+\hypertarget{proportional-odds}{%
+\paragraph{Proportional odds}\label{proportional-odds}}
+
+To test for this assumption, we want to do a Brant Test. Unfortunately,
+we cannot do it directly to our mixed-effect model as the test is
+limited to ordinal logistic regression models. No alternative has been
+found during further investigations, even if the existence of a χ2 score
+test of the proportional odds assumptions has been noted, without
+further explanation (Schmidt, 2012).
+
+However, we can test the model without the random effects and with only
+the emotion predictor as we may expect that these random effects do not
+influence the relationship between each pair of outcome groups.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{brant}\NormalTok{(m1}\FloatTok{.3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+-------------------------------------------- 
+Test for    X2  df  probability 
+-------------------------------------------- 
+Omnibus     11.21   10  0.34
+emotionFear 10.06   5   0.07
+emotionNeutral  1.13    5   0.95
+-------------------------------------------- 
+
+H0: Parallel Regression Assumption holds
+\end{verbatim}
+
+The test tells us that the assumption is respected, which means that the
+assumptions for ordinal logistic regression are respected.
+
+\hypertarget{conclusion}{%
+\subsection{Conclusion}\label{conclusion}}
+
+The present data analysis was aimed to compare three statistical methods
+and to analyse how the emotion elicited in the word pairs and the gender
+impact the subjective ratings of disgust by the participants. As shown,
+the best method is the one that take in consideration the repetition of
+the subjects and the way each one of them express the emotion elicited.
+
+For that, the mixed-effect model with random slopes allowing fixed
+effects to vary for each emotion and considering the subjects'
+repetition as a random effect, but not including the gender was the best
+model tested.
+
+In other words, gender doesn't seem significative in the disgust
+evaluation, but it seems important to control for the way each subject
+evaluate the emotion.
+
+Further investigation can be made with the fear evaluation of this
+dataset to support or reject this proposition. Fear is usually better
+recognized by the individuals, and the original dataset has a similar
+likert scale measuring the fear evaluation for each word pairs. If the
+same conclusion is found, it's a good indicator that this model is the
+best to fit this kind of data.\\
+
+Emotion isn't felt by everyone the same way, and every participant
+evaluated multiple pairs of words. Plus, the ordinal scale of the
+evaluation created an ensemble of constraints that made us use more
+sophisticated methods than simple linear methods. However, that mean
+that the interpretation of these results aren't very straight forward.
+The coefficients are scaled in terms of logs. Another way to interpret
+ordinal logistic regression models is to use odd ratios, which are more
+easy.
+
+\hypertarget{bibliography}{%
+\subsection{Bibliography}\label{bibliography}}
+
+Barr, D. J., Levy, R., Scheepers, C., \& Tily, H. J. (2013). Random
+effects structure for confirmatory hypothesis testing\,: Keep it
+maximal. Journal of memory and language, 68(3),
+10.1016/j.jml.2012.11.001.
+\url{https://doi.org/10.1016/j.jml.2012.11.001}
+
+Emotion -- APA Dictionary of Psychology. (s. d.). Retrieved January 4,
+2022 from \url{https://dictionary.apa.org/emotion}
+
+McGaugh, J. L. (2013). Making lasting memories\,: Remembering the
+significant. Proceedings of the National Academy of Sciences, 110(2),
+10402‑10407. \url{https://doi.org/10.1073/pnas.1301209110}
+
+Riegel, M., Wierzba, M., Wypych, M., Ritchey, M., Jednoróg, K.,
+Grabowska, A., Vuilleumier, P., \& Marchewka, A. (2020). Distinct
+medial-temporal lobe mechanisms of encoding and amygdala-mediated memory
+reinstatement for disgust and fear (p.~825844).
+\url{https://doi.org/10.1101/825844}
+
+Schmidt, J. (2012). Ordinal Response Mixed Models\,: A Case Study. 21.
+Retrieved January 4, 2022 from
+\url{https://math.montana.edu/grad_students/writing-projects/2012/12schmidt.pdf}
+
+Schmidt, K., Patnaik, P., \& Kensinger, E. A. (2011). Emotion's
+influence on memory for spatial and temporal context. Cognition and
+Emotion, 25(2), 229‑243.
+\url{https://doi.org/10.1080/02699931.2010.483123}
+
+Yoder, A. M., Widen, S. C., \& Russell, J. A. (2016). The word disgust
+may refer to more than one emotion. Emotion, 16(3), 301‑308.
+\url{https://doi.org/10.1037/emo0000118}
+
+\hypertarget{appendix}{%
+\subsection{Appendix}\label{appendix}}
+
+\hypertarget{alternative-graph}{%
+\subsubsection{1. Alternative graph}\label{alternative-graph}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#Disgust depending on emotion presented}
+\FunctionTok{ggplot}\NormalTok{(Data, }\FunctionTok{aes}\NormalTok{(emotion,disgust,}\AttributeTok{colour=}\NormalTok{gender))}\SpecialCharTok{+}\FunctionTok{geom\_jitter}\NormalTok{(}\AttributeTok{alpha=}\FloatTok{0.3}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Distribution of disgust evaluation"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Wordpairs\textquotesingle{} emotions"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Likert scale of subjective disgust evaluation (1{-}7)"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme}\NormalTok{(}\AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{hjust =} \FloatTok{0.75}\NormalTok{)) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{colour =} \StringTok{"Gender"}\NormalTok{)}\SpecialCharTok{+} \FunctionTok{theme}\NormalTok{(}\AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \FunctionTok{rel}\NormalTok{(}\DecValTok{2}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{DAP_v4-1-22_files/figure-latex/alternate graph-1.pdf}
+
+\hypertarget{linear-model-diagnostics}{%
+\subsubsection{2. Linear model
+diagnostics}\label{linear-model-diagnostics}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{autoplot}\NormalTok{(m0)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{DAP_v4-1-22_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\hypertarget{package-info}{%
+\subsubsection{3. Package Info}\label{package-info}}
+
+\begin{verbatim}
+  - gridExtra (version 2.3; Baptiste Auguie, 2017)
+  - GGally (version 2.1.2; Barret Schloerke et al., 2021)
+  - brant (version 0.3.0; Benjamin Schlegel and Marco Steenbergen, 2020)
+  - ordinal (version 2019.12.10; Christensen, 2019)
+  - xtable (version 1.8.4; David Dahl et al., 2019)
+  - Hmisc (version 4.6.0; Frank E Harrell Jr, 2021)
+  - ggplot2 (version 3.3.5; Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.)
+  - plyr (version 1.8.6; Hadley Wickham, 2011)
+  - kableExtra (version 1.3.4; Hao Zhu, 2021)
+  - likert (version 1.3.5; Jason Bryer and Kimberly Speerschneider, 2016)
+  - here (version 1.0.1; Kirill Müller, 2020)
+  - PResiduals (version 1.0.1; Liu Q et al., 2020)
+  - sjPlot (version 2.8.10; Lüdecke D, 2021)
+  - vtable (version 1.3.3; Nick Huntington-Klein, 2021)
+  - R (version 4.1.2; R Core Team, 2021)
+  - pacman (version 0.5.1; Rinker et al., 2017)
+  - lattice (version 0.20.45; Sarkar, Deepayan, 2008)
+  - gtsummary (version 1.5.0; Sjoberg DD, Whiting K, Curry M, Lavery JA, Larmarange Reproducible summary tables with the gtsummary package. The R Journal 2021;13:570–80. https://doi.org/10.32614/RJ-2021-053.)
+  - survival (version 3.2.13; Therneau T, 2021)
+  - MASS (version 7.3.54; Venables et al., 2002)
+  - ggfortify (version 0.4.13; Yuan Tang et al., 2016)
+  - Formula (version 1.2.4; Zeileis A, Croissant Y, 2010)
+\end{verbatim}
+
+\end{document}

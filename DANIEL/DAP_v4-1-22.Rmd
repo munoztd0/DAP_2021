@@ -3,8 +3,7 @@ title: "DAP Project"
 author: "Daniel Granja"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  html_document:
-    df_print: paged
+  html_document: default
 ---
 
 
