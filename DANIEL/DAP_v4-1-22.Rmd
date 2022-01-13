@@ -17,7 +17,7 @@ output:
 #this is to check to see if package are installed and if not to install them or just load them if they are installed!
 if(!require(pacman)) {install.packages("pacman")}
 
-pacman::p_load(here, ggplot2, ordinal, ggfortify, GGally, plyr, sjPlot, likert, vtable, brant, Hmisc, MASS, kableExtra, gtsummary)
+pacman::p_load(here, ggplot2, ordinal, ggfortify, GGally, grid,gridExtra, plyr, sjPlot, likert, vtable, brant, Hmisc, MASS, kableExtra, gtsummary, PResiduals)
 
 #get relative path
 path =here("DANIEL")
@@ -257,27 +257,33 @@ Ordinal logistic regressions have four assumptions that need to be controled for
 
 The two firsts are respected by the structure of our data (see Visual exploration). We must check for the two others.
 
-<!-- add a plot of the residuals ? -->
+#### Residual representation
+
+```{r residual plots}
+# Residual-vs-covariate plot and Q-Q plot
+m1.3<-polr(disgust ~ emotion, data = Data)
+pres <- presid(m1.3)
+
+p1 <- ggplot(data.frame(x = Data$disgust, y = pres), aes(x, y)) +
+geom_point(color = "#444444", shape = 19, size = 2, alpha = 0.5) +
+ylab("Probability-scale residual")
+p2 <- ggplot(data.frame(y = pres), aes(sample = y)) +
+stat_qq(distribution = qunif, dparams = list(min = -1, max = 1), alpha = 0.5) +
+xlab("Sample quantile") +
+ylab("Theoretical quantile")
+grid.arrange(p1, p2, ncol = 2) # Figure 1
+```
+SBS residual plots for the ordinal logistic regression model. Left:
+Residual-vs-covariate plot. Right: Q-Q plot of the residuals.
+
 
 #### No multi-collinearity
 
 ```{r}
-# mult<-Data[,3:4]
-# counts <- ddply(mult, .(mult$emotion, mult$gender), nrow)
-# names(counts) <- c("emotion", "gender", "Freq")
-# counts
-# counts2<-reshape(counts, idvar = "emotion", timevar = "gender", direction = "wide")
-# counts2
-#x2<-chisq.test(counts2) #don't know why it doesn't work here
-
-
- # replacded by that so you have all the percents AND the CHI squared test!
 Data[c("emotion", "gender", "disgust")] %>%  tbl_summary(by=emotion)  %>% modify_caption("**Summary statistics by emotion**") %>%
   add_p() %>% bold_labels()
-
 ```
-<!-- check here what it means and chang accordingly -->
-We must check for any collinearity between our predictors. Our final model only has the wordpairs' emotion as predictor, so there is no possible collinearity with other predictors. For the other models, we also included the gender.
+We must check for any collinearity between our predictors. Our final model only has the wordpairs' emotion as predictor, so there is no possible collinearity with other predictors. For the other models, we also included the gender. There is no multicollinearity between gender and emotion (χ²(2, N = 9349) = 0.0006, p > 0.05)
 
 #### Proportional odds
 
@@ -287,7 +293,6 @@ To test for this assumption, we want to do a Brant Test. Unfortunately, we canno
 However, we can test the model without the random effects and with only the emotion predictor as we may expect that these random effects do not influence the relationship between each pair of outcome groups. 
 
 ```{r, cache=TRUE, comment=NA}
-m1.3<-polr(disgust ~ emotion, data = Data)
 brant(m1.3)
 ```
 The test tells us that the assumption is respected, which means that the assumptions for ordinal logistic regression are respected. 
