@@ -3,7 +3,13 @@ title: "DAP Project"
 author: "Daniel Granja"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  html_document: default
+  html_document:
+    includes: null
+    code_folding: hide
+    toc: yes
+    toc_float: yes
+    number_sections: no
+    df_print: paged
 ---
 
 
@@ -244,7 +250,7 @@ The model represented above shows how more a disgust evaluation is high, more th
 
 Ordinal logistic regressions have four assumptions that need to be controled for when aplied: 
 
-* The dependent variable are ordered.
+* The dependent variables are ordered.
 * One or more of the independent variables are either continuous, categorical or ordinal.
 * No multi-collinearity.
 * Proportional odds.
@@ -267,8 +273,8 @@ xlab("Sample quantile") +
 ylab("Theoretical quantile")
 grid.arrange(p1, p2, ncol = 2) # Figure 1
 ```
-SBS residual plots for the ordinal logistic regression model. Left:
-Residual-vs-covariate plot. Right: Q-Q plot of the residuals.
+<br>
+SBS residual plots for the ordinal logistic regression model. Left: Residual-vs-covariate plot. Right: Q-Q plot of the residuals.
 
 
 #### No multi-collinearity
