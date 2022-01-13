@@ -320,24 +320,24 @@ sjPlot::tab_pca(pm1, show.cronb = F, show.var = T, nmbr.fctr = 8)
 
 Regression
 ```{r}
-library(nnet)
-
-glm1 <- glm(Kidhome ~ Marital_Status + Income + age + NumStorePurchases + MntSweetProducts, family = binomial, data = newdf)
+glm1 <- glm(Kidhome ~ Income + age + NumStorePurchases + MntSweetProducts + MntWines + AcceptedCmpTotal, family = binomial, data = newdf)
 summary(glm1)
-glm2 <-update(glm1, . ~ . - Marital_Status)
+glm2 <-update(glm1, . ~ . - AcceptedCmpTotal)
 summary(glm2)
-anova(glm1, glm2)  
-
+anova(glm2, glm1, test="Chisq")  
+# AIC of glm2 is slightly better, and both models are not significantly different, so we keep glm2
 ```
 
 
 Conclusions
 
 Annex
+
+### Checking the assumptions of the linear model
 <br>
-The number of store purchases seems to be the most useful variable to analyze since we want to determine which profiles buy the most in the store. In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. 
+In order to consider NumStorePurchases as a response variables for a linear model, we first have to check normality. 
 <br>
-The data is intrinsically skewed because there are no negative values possible. Skewness is quite high (0.7) but remains tolerable regarding the nature of the data. It has to be kept in mind while performing the model assumption checks.
+
 
 ```{r, fig.show="hold", out.width="50%", fig.align="center", warning=F, message=F}
 ggplot(data, aes(x = NumStorePurchases)) +
@@ -347,27 +347,15 @@ ggplot(data, aes(x = NumStorePurchases)) +
  caption = paste("skewness =", round(moments::skewness(data$NumStorePurchases, na.rm = TRUE),2)))
 ```
 <br>
-Looking at the QQplot, we don't see any specific patterns appearing, which means the residuals are distributed normally. 
-
-Although we do observe smaller ends for the lowest theoritical quantiles.
+The data is intrinsically skewed because there are no negative values possible. Skewness is quite high (0.7) but remains tolerable regarding the nature of the data. It has to be kept in mind while performing the model assumption checks.
 <br>
-<br>
-For the Cook's distance, we clearly observe an outlier (observation 2234), while the vast majority of the values are under 1.
-<br>
-<br>
-For the comparison of residuals VS fitted values,
-
-
-
-### Reassessing without the outliers
-<br>
-
 ```{r, out.width="50%", warning=F, message=F}
 m1 <- lm(data=newdf, NumStorePurchases ~ Kidhome*Income*Education*age)
 plot(m1, c(1:2,4), ask=F)
 ```
 <br>
-<br>
-Paying attention to the QQplot, we see that extreme points are more normal. 
-<!-- comment: that's not that, lets talk about it or see this https://moodle.unige.ch/mod/page/view.php?id=504355  -->
-The Cook's distance graph also doesn't show values higher than 0,5.
++ For the residuals VS fitted plot, the central line is close to 0 but is not very flat. There seems to be a pattern ?
++ Paying attention to the quantile-quantile plot, most of the points follow normality, although the upper extreme point tend to deviate from normality.
++ Looking at the Cook's distance graph, there is no value higher that 0,06 : we can conclude that there are no outliers influencing the model.
++ Conclusion : 
+
