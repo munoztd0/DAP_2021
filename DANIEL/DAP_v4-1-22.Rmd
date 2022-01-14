@@ -1,7 +1,15 @@
 ---
-title: "DAP Project"
-author: "Daniel Granja"
+title: "Predicting emotion in words based on likert evaluation with repeated measures: a method comparison project"
+author: 
+    name          : "Daniel S. Granja"
+    corresponding : yes    # Define only one corresponding author
+    email         : "daniel.granja@etu.unige.ch"
+
 date: "`r format(Sys.time(), '%d %B, %Y')`"
+
+abstract: |
+    Many researches in affective sciences use words to elicit emotions to study their impact      on cognitive functions such as memory. It is important to control for the variability this     elicitation has. In this project, we search for the best statistical method to control the     emotional elicitation used in Riegel et al. (2020). It appears that the method that best      fits is an ordinal logistic mixed-effect, with the best model having random slopes            allowing fixed effects to vary for each emotion and considering the subjects' repetition      as a random effect. In conclusion, emotion isn't felt by everyone the same way, and every     participant evaluated multiple pairs of words. Plus, the ordinal scale of the evaluation      created an ensemble of constraints that made us use sophisticated methods.
+    
 output:
   html_document:
     includes: null
@@ -311,7 +319,7 @@ In other words, gender doesn't seem significative in the disgust evaluation, but
 Further investigation can be made with the fear evaluation of this dataset to support or reject this proposition. Fear is usually better recognized by the individuals, and the original dataset has a similar likert scale measuring the fear evaluation for each word pairs. If the same conclusion is found, it's a good indicator that this model is the best to fit this kind of data.  
 <br>
 
-Emotion isn't felt by everyone the same way, and every participant evaluated multiple pairs of words. Plus, the ordinal scale of the evaluation created an ensemble of constraints that made us use more sophisticated methods than simple linear methods. However, that mean that the interpretation of these results aren't very straight forward. The coefficients are scaled in terms of logs. Another way to interpret ordinal logistic regression models is to use odd ratios, which are more easy.
+Emotion isn't felt by everyone the same way, and every participant evaluated multiple pairs of words. Plus, the ordinal scale of the evaluation created an ensemble of constraints that made us use more sophisticated methods than simple linear methods. However, that mean that the interpretation of these results aren't very straight forward. The coefficients are scaled in terms of logs. Another way to interpret ordinal logistic regression models is to use odd ratios, which are more easy to understand. 
 
 
  
