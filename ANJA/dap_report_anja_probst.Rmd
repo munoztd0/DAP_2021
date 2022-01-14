@@ -31,12 +31,13 @@ abstract: |
   While the disease is well-recognizable at a later stage, it is exceptionally hard to diagnose 
   and differentiate in its early stages and appropriate treatment is often delayed. 
   In 2017, Hlavnička et al. have published a study suggesting that automated analysis of connected 
-  speech can reveal early biomarkers in subjects with REM sleep behaviour disorder, who are at 
+  speech can reveal early biomarkers even in subjects with REM sleep behaviour disorder, who are at 
   high risk of developing Parkinson's disease. In this project I analyse the data set published by
-  the authors that contains experimental evaluation of healthy controls (HC, $n=50$), subjects with REM
-  sleep behaviour disorder (RBD, $n=50$), and subjects with Parkinson's Disease (PD, $n=30$). While the constraints
-  of this project limit the scope of analysis, I will show that interesting insights into the data can be
-  gained nontheless.
+  the authors that contains experimental evaluation of healthy controls, subjects with REM
+  sleep behaviour disorder, and subjects with Parkinson's Disease. While the constraints
+  of this project limit the scope of analysis, I could show that it is possible to create binomial
+  and mutlinomial models that reach specificity in detecting Parkinson's of up to 75% in healthy
+  controls and 71% in a mix of healthy controls and REM sleep behaviour disorder subjects.
 
 bibliography      : 
   - r-references.bib
@@ -420,7 +421,7 @@ apa_table(
 
 ## Logistic Regression
 
-As stated previously, I have seen that there are no significant differences between the groups PD and RBD.
+As stated previously, I have seen that there are no significant differences between the groups PD and RBD (Figure \ref{fig:boxplots-and-correlations}).
 Based on this observation, I will limit my initial investigation to creating a logistic regression model predicting 
 between the groups HC and PD. Indeed, the paper from which the data was extracted explicitly
 discusses the hard problem of differentiating PD from RBD, which might very well be impossible with 
@@ -544,8 +545,8 @@ Looking at the coefficients of the model variables Gender, Monolgue Duration, an
 Reading Duration, they have effects of different strength in the model. Male gender has a relatively
 large, positive effect, meaning that, the probability to be predicted having Parkinson's increases to 
 $p=\frac{exp(-0.68 + 1.678)}{1+exp(-0.68 + 1.678)}=0.73$ for men while the other variables stay constant.
-At least according to this model, which shows that it is not a representative sample of the population, as men suffer
-more often from Parkinson's (https://pubmed.ncbi.nlm.nih.gov/15026515/). As for the two numerical variables Monolgue
+This is in line with research that shows that men suffer
+more often from Parkinson's [@wooten2004men]. As for the two numerical variables Monolgue
 Duration and Reading Duration their coefficients of -0.926 and -0.576, respectively, represent 
 the change in logarithmic odds, as predicted by the model, if their respective value is increased by 1. Here it is
 important to remember that the data was scaled according to standard deviation. According to the assessment of the model,
@@ -584,7 +585,7 @@ As there has been significant correlation between the predictors in the ggpairs 
 as well as some extreme changes in coefficients when adding additional variables,
 there exists the strong possbility of collinearity negatively affecting the models. Indeed,
 I observed high variance inflation factors on many predictors in the model with interactions, as
-shown in Table \ref{tab:vif}. This warrants and attempt at solving the potential collinearity issue.
+shown in Table \ref{tab:vif}. This warrants an attempt at solving the potential collinearity issue.
 
 ```{r vif}
 panderOptions("table.emphasize.rownames", FALSE)
@@ -606,7 +607,7 @@ PCA (principal component analysis) is a dimensionality reduction method that is 
 variables that might correlate into a number of variables, or principal components, that do not correlate. 
 In addition, a single principal component can explain a large fraction of the overall variance. In a first step,
 I ran a PCA on the numerical variables of my data (Age, Reading Timing, Monologue Timing, Reading Duration, and Monologue
-Duration). The principal components calculated by the PCA are shown in \ref{tab:pca}, where you can see, that
+Duration). The principal components calculated by the PCA are shown in Table \ref{tab:pca}, where you can see, that
 the first three already account for close to 90% of the variance.
 
 
@@ -737,7 +738,7 @@ l = evaluate.binom.model(
 However, even if model (2) should be chosen according to it's AIC and ANOVA results, the high number of 
 terms combined with the collinearity based on the VIF analysis, made model (3) `Group ~ PC1 + Gender` my
 model of choice. I proceeded to evaluate the model based on a training testing split using the function 
-shown in Appendix Functions. The results show a overall accuracy of 68.4% with a sensitivity for detecting
+shown in Appendix Functions. The results show an overall accuracy of 68.4% with a sensitivity for detecting
 Parkinson's of `r round(l$cm$byClass[["Sensitivity"]] * 100, 1)`% and a specificity of 
 `r round(l$cm$byClass[["Specificity"]] * 100, 1)`%.
 
@@ -765,7 +766,7 @@ To predict over all three groups (HC, PD, RBD), I have to use a more complex
 multinomial model. However, as the 3 groups are unbalanced, I chose to subsample
 the groups HC ($n=48$ after outlier removal) and RBD ($n=48$ after outlier removal) to
 match the size of the group PD ($n = 25$ after outlier removal). While I did not do this for
-the binomial logistic regression, I choose to do it here to make the task hopefully easier.
+the binomial logistic regression, I chose to do it here to make the task hopefully easier.
 In order to evaluate the multinomial model, I created a train and test set. 
 The training set contains 75% of the observations, while the test set contains the
 remaining 25%. The split was done considering the groups to avoid over- or underrepresentation
@@ -892,12 +893,12 @@ As an experiment I added a significant amount of interactions in model (e) `Grou
 which increases the AIC to 123.742. This model is significantly better according to ANOVA and has an excellent
 training accuracy of 81.5%. However, given the number of terms in this model, I assume this to be a case of overfitting, as this
 doesn't seem like a realistic result compared to my experience with this data. Based on the training accuracy and the AIC as well
-as the ANOVA, I choose model (c) as the model to run the test on. The resulting confusion matrix of the test based on the model
+as the ANOVA, I chose model (c) as the model to run the test on. The resulting confusion matrix of the test based on the model
 `Group ~ . - Age - Reading.Timing` can be seen in Figure \ref{fig:multinomial-regression} f. The model shows an overall accuracy of 52.4%.
 It seems to be especially good at identifying cases of REM sleep behaviour disorder, with 71% of correct predictions. On the other hand,
 the model misclassifies 57% of Parkinson's disease cases as RDB, which would of course be a substantial problem in a clinical setting.
 Specifically, the model detects Parkinson's with a sensitivity of `r round(l.6$cm$byClass[2, 1] * 100, 1)`% and a specificity of 
-`r l.6$cm$byClass[2, 2]`%.
+`r round(l.6$cm$byClass[2, 2] * 100, 1)`%.
 
 ```{r multinomial-anova, results = 'asis', echo = FALSE}
 anova.multinom <- anova(
